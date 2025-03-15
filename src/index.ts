@@ -197,9 +197,69 @@ class LettaServer {
                 type: 'number',
                 description: 'Number of blocks per page (1-100, default: 10)',
               },
+              label: {
+                type: 'string',
+                description: 'Optional filter for block label (e.g., "human", "persona")',
+              },
+              templates_only: {
+                type: 'boolean',
+                description: 'Whether to include only templates (default: false)',
+              },
+              name: {
+                type: 'string',
+                description: 'Optional filter for block name',
+              },
+              include_full_content: {
+                type: 'boolean',
+                description: 'Whether to include the full content of blocks (default: false)',
+              },
             },
             required: [],
           },
+        },
+        {
+          name: 'read_memory_block',
+          description: 'Get full details of a specific memory block by ID',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              block_id: {
+                type: 'string',
+                description: 'ID of the memory block to retrieve'
+              }
+            },
+            required: ['block_id']
+          }
+        },
+        {
+          name: 'update_memory_block',
+          description: 'Update the contents and metadata of a memory block',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              block_id: {
+                type: 'string',
+                description: 'ID of the memory block to update'
+              },
+              value: {
+                type: 'string',
+                description: 'New value for the memory block (optional)'
+              },
+              metadata: {
+                type: 'object',
+                description: 'New metadata for the memory block (optional)'
+              },
+              agent_id: {
+                type: 'string',
+                description: 'Optional agent ID for authorization'
+              }
+            },
+            required: ['block_id'],
+            anyOf: [
+              { required: ['value'] },
+              { required: ['metadata'] }
+            ]
+          }
         },
         {
           name: 'attach_memory_block',
@@ -253,6 +313,37 @@ class LettaServer {
             required: ['name', 'label', 'value'],
           },
         },
+        {
+          name: 'upload_tool',
+          description: 'Upload a new tool to the Letta system',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'Name of the tool',
+              },
+              description: {
+                type: 'string',
+                description: 'Description of what the tool does',
+              },
+              source_code: {
+                type: 'string',
+                description: 'Python source code for the tool',
+              },
+              category: {
+                type: 'string',
+                description: 'Category/tag for the tool (e.g., "plane_api", "utility")',
+                default: 'custom',
+              },
+              agent_id: {
+                type: 'string',
+                description: 'Optional agent ID to attach the tool to after creation',
+              }
+            },
+            required: ['name', 'description', 'source_code'],
+          },
+        },
       ],
     }));
 
@@ -275,6 +366,12 @@ class LettaServer {
         return this.handleAttachMemoryBlock(request.params.arguments);
       } else if (request.params.name === 'create_memory_block') {
         return this.handleCreateMemoryBlock(request.params.arguments);
+      } else if (request.params.name === 'read_memory_block') {
+        return this.handleReadMemoryBlock(request.params.arguments);
+      } else if (request.params.name === 'update_memory_block') {
+        return this.handleUpdateMemoryBlock(request.params.arguments);
+      } else if (request.params.name === 'upload_tool') {
+        return this.handleUploadTool(request.params.arguments);
       }
       throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
     });
@@ -339,11 +436,7 @@ class LettaServer {
           presence_penalty: 0.5,
           frequency_penalty: 0.5
         },
-        core_memory: {
-          persona: `I am ${args.name}.\nMy primary role is to ${args.description}.\nI prioritize clear communication and effective collaboration.\nI maintain professionalism while being approachable and helpful.`,
-          human: "This is my section of core memory devoted to information about humans I interact with.",
-          system: "I am initialized and ready to assist with tasks.",
-        }
+        core_memory: {}
       };
 
       // Headers for API requests
@@ -360,75 +453,18 @@ class LettaServer {
       // Update headers with agent ID
       headers['user_id'] = agentId;
 
-      // 2. Create and attach persona block
-      const personaBlock = {
-        label: "persona",
-        name: `${args.name.toLowerCase()}_persona`,
-        value: agentConfig.core_memory.persona,
-        metadata: {
-          type: "persona",
-          version: "1.0",
-          last_updated: new Date().toISOString()
-        }
-      };
+      // Note: Memory blocks should be created and attached separately using the create_memory_block
+      // and attach_memory_block tools after agent creation
 
-      const createBlockResponse = await this.api.post('/blocks', personaBlock, { headers });
-      const blockId = createBlockResponse.data.id;
+      // Note: Memory blocks should be attached explicitly via the attach_memory_block tool
+      // rather than automatically during agent creation
 
-      await this.api.patch(
-        `/agents/${agentId}/core-memory/blocks/attach/${blockId}`,
-        {},
-        { headers }
-      );
-
-      // 3. Attach shared memory blocks
-      const sharedBlocks = [
-        {id: "block-cf7f4221-06d5-4859-b340-91a69d6d6eea", name: "shared_human_memory", label: "human"},
-        {id: "block-611d08a9-2cb5-4bad-986d-16be5722bcd9", name: "shared_task_memory", label: "task_coordination"},
-        {id: "block-9e32f2b6-587b-4b9d-a5a7-c24c099fb781", name: "agent_address_book", label: "address_book"},
-        {id: "block-9199ea55-efa1-4b1b-938b-2f1781e96ec2", name: "shared_understanding", label: "understanding"},
-        {id: "block-7335f3aa-477e-4518-b063-1cd6053b2e06", name: "team_rules", label: "rules"}
-      ];
-
-      for (const block of sharedBlocks) {
-        await this.api.patch(
-          `/agents/${agentId}/core-memory/blocks/attach/${block.id}`,
-          {},
-          { headers }
-        );
-      }
-
-      // 4. Register in address book using Pansil
-      headers['user_id'] = this.existingAgentId;
-
-      // Get agent info
+      // Note: Agent registration in address book should be handled separately
+      // after agent creation using the appropriate memory block tools
+      
+      // Get agent info for the response
       const agentInfo = await this.api.get(`/agents/${agentId}`, { headers });
-
-      // Get current address book
-      const addressBookResponse = await this.api.get(`/blocks/${this.addressBookId}`, { headers });
-      const content = addressBookResponse.data.value;
-
-      // Add new agent entry
-      const timestamp = new Date().toISOString();
       const capabilities = agentInfo.data.tools?.map((t: any) => t.name) ?? [];
-      const newAgentEntry = `
-${content.split('Agent:').length}. Agent: ${agentInfo.data.name}
-   ID: ${agentInfo.data.id}
-   Type: ${agentInfo.data.agent_type}
-   Description: ${agentInfo.data.description || 'No description'}
-   Capabilities: ${capabilities.length ? capabilities.join(', ') : 'No specific capabilities'}
-   Last Active: ${timestamp}
-`;
-
-      // Insert before Communication Guidelines
-      const parts = content.split("Communication Guidelines:");
-      const updatedContent = parts[0] + newAgentEntry + "\nCommunication Guidelines:" + parts[1];
-
-      await this.api.patch(
-        `/blocks/${this.addressBookId}`,
-        { value: updatedContent },
-        { headers }
-      );
 
       return {
         content: [{
@@ -841,11 +877,37 @@ ${content.split('Agent:').length}. Agent: ${agentInfo.data.name}
         headers['user_id'] = args.agent_id;
       }
 
-      // Get all blocks from the Letta server
-      const blocksResponse = await this.api.get('/blocks', { headers });
+      // Prepare query parameters for the blocks endpoint
+      const queryParams: any = {};
+      
+      // Add label filter if provided
+      if (args && args.label) {
+        queryParams.label = args.label;
+      }
+      
+      // Add templates_only filter (default to false if not provided)
+      queryParams.templates_only = args && args.templates_only !== undefined ? args.templates_only : false;
+      
+      // Add name filter if provided
+      if (args && args.name) {
+        queryParams.name = args.name;
+      }
+
+      // Get blocks from the Letta server
+      let endpoint = '/blocks';
+      if (args && args.agent_id) {
+        // If agent_id is provided, use the agent-specific blocks endpoint
+        endpoint = `/agents/${args.agent_id}/core-memory/blocks`;
+      }
+      
+      const blocksResponse = await this.api.get(endpoint, {
+        headers,
+        params: queryParams
+      });
+      
       let blocks = blocksResponse.data;
       
-      // Apply filter if provided
+      // Apply text filter if provided (this is separate from the API's label/name filters)
       if (args && args.filter && typeof args.filter === 'string') {
         const filterLower = args.filter.toLowerCase();
         blocks = blocks.filter((block: any) =>
@@ -868,21 +930,38 @@ ${content.split('Agent:').length}. Agent: ${agentInfo.data.name}
 
       // Format blocks for output
       const formattedBlocks = paginatedBlocks.map((block: any) => {
-        // Truncate value if it's too long
-        let value = block.value;
-        if (typeof value === 'string' && value.length > 200) {
-          value = value.substring(0, 200) + '...';
-        }
-
-        return {
+        const result: any = {
           id: block.id,
           name: block.name || 'Unnamed Block',
           label: block.label || 'No Label',
-          value: value,
           metadata: block.metadata || {},
+          limit: block.limit || 5000,
           created_at: block.created_at,
           updated_at: block.updated_at
         };
+        
+        // Include full content or truncated preview based on args
+        if (args && args.include_full_content) {
+          result.value = block.value;
+        } else {
+          // Truncate value if it's too long
+          let value = block.value;
+          if (typeof value === 'string') {
+            result.value_preview = value.length > 200 ? value.substring(0, 200) + '...' : value;
+          } else {
+            result.value_preview = 'Non-string value';
+          }
+        }
+        
+        // Add agents using this block if available
+        if (block.agents && Array.isArray(block.agents)) {
+          result.agents = block.agents.map((agent: any) => ({
+            id: agent.id,
+            name: agent.name
+          }));
+        }
+        
+        return result;
       });
 
       // Format the response
@@ -901,7 +980,13 @@ ${content.split('Agent:').length}. Agent: ${agentInfo.data.name}
             },
             block_count: formattedBlocks.length,
             blocks: formattedBlocks,
-            agent_specific: args && args.agent_id ? true : false
+            agent_specific: args && args.agent_id ? true : false,
+            filters: {
+              label: args?.label,
+              name: args?.name,
+              templates_only: args?.templates_only,
+              text_filter: args?.filter
+            }
           }, null, 2),
         }],
       };
@@ -976,6 +1061,104 @@ ${content.split('Agent:').length}. Agent: ${agentInfo.data.name}
             label: label
           }, null, 2),
         }],
+      };
+    } catch (error: any) {
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: error.message,
+            details: error.response?.data || error,
+          }, null, 2),
+        }],
+        isError: true,
+      };
+    }
+  }
+
+  private async handleReadMemoryBlock(args: any): Promise<{ content: { type: string; text: string; }[]; isError?: boolean }> {
+    try {
+      if (!args?.block_id) {
+        throw new Error('Missing required argument: block_id');
+      }
+
+      const headers: HeadersConfig = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-BARE-PASSWORD': `password ${this.password}`
+      };
+
+      if (args.agent_id) {
+        headers['user_id'] = args.agent_id;
+      }
+
+      const response = await this.api.get(`/blocks/${args.block_id}`, {
+        headers,
+      });
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            block: response.data
+          }, null, 2),
+        }]
+      };
+    } catch (error: any) {
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: error.message,
+            details: error.response?.data || error,
+          }, null, 2),
+        }],
+        isError: true,
+      };
+    }
+  }
+
+  private async handleUpdateMemoryBlock(args: any): Promise<{ content: { type: string; text: string; }[]; isError?: boolean }> {
+    try {
+      if (!args?.block_id) {
+        throw new Error('Missing required argument: block_id');
+      }
+      
+      if (!args?.value && !args?.metadata) {
+        throw new Error('Either value or metadata must be provided');
+      }
+
+      const headers: HeadersConfig = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-BARE-PASSWORD': `password ${this.password}`
+      };
+
+      if (args.agent_id) {
+        headers['user_id'] = args.agent_id;
+      }
+
+      const updateData: any = {};
+      if (args.value !== undefined) {
+        updateData.value = args.value;
+      }
+      if (args.metadata !== undefined) {
+        updateData.metadata = args.metadata;
+      }
+
+      const response = await this.api.patch(`/blocks/${args.block_id}`, updateData, { headers });
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            block: response.data
+          }, null, 2),
+        }]
       };
     } catch (error: any) {
       return {
@@ -1071,6 +1254,123 @@ ${content.split('Agent:').length}. Agent: ${agentInfo.data.name}
               block_id: blockId,
               block_name: args.name,
               label: args.label
+            }, null, 2),
+          }],
+        };
+      }
+    } catch (error: any) {
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            success: false,
+            error: error.message,
+            details: error.response?.data || error,
+          }, null, 2),
+        }],
+        isError: true,
+      };
+    }
+  }
+
+  private async handleUploadTool(args: any): Promise<{ content: { type: string; text: string; }[]; isError?: boolean }> {
+    try {
+      // Validate arguments
+      if (!args.name || typeof args.name !== 'string') {
+        throw new Error('Missing required argument: name (must be a string)');
+      }
+      if (!args.description || typeof args.description !== 'string') {
+        throw new Error('Missing required argument: description (must be a string)');
+      }
+      if (!args.source_code || typeof args.source_code !== 'string') {
+        throw new Error('Missing required argument: source_code (must be a string)');
+      }
+
+      // Headers for API requests
+      const headers: HeadersConfig = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-BARE-PASSWORD': `password ${this.password}`
+      };
+
+      // If agent_id is provided, set the user_id header
+      if (args.agent_id) {
+        headers['user_id'] = args.agent_id;
+      }
+
+      // Prepare category/tag
+      const category = args.category || 'custom';
+
+      // Check if tool exists and delete if found
+      const toolsResponse = await this.api.get('/tools', { headers });
+      const existingTools = toolsResponse.data;
+      
+      let existingToolId = null;
+      for (const tool of existingTools) {
+        if (tool.name === args.name) {
+          existingToolId = tool.id;
+          console.log(`Found existing tool ${args.name} with ID ${existingToolId}, will delete it first...`);
+          break;
+        }
+      }
+      
+      if (existingToolId) {
+        try {
+          await this.api.delete(`/tools/${existingToolId}`, { headers });
+          console.log(`Successfully deleted existing tool ${args.name}`);
+        } catch (deleteError) {
+          console.warn(`Failed to delete existing tool: ${deleteError}. Will try to continue anyway.`);
+        }
+      }
+
+      // Prepare tool data
+      const toolData = {
+        source_code: args.source_code,
+        description: args.description,
+        tags: [category],
+        source_type: "python"
+      };
+
+      // Create the tool
+      console.log(`Creating tool "${args.name}"...`);
+      const createResponse = await this.api.post('/tools', toolData, { headers });
+      const toolId = createResponse.data.id;
+
+      // If agent_id is provided, attach the tool to the agent
+      if (args.agent_id) {
+        // Attach tool to agent
+        const attachUrl = `/agents/${args.agent_id}/tools/attach/${toolId}`;
+        await this.api.patch(attachUrl, {}, { headers });
+        
+        // Get agent info
+        const agentInfoResponse = await this.api.get(`/agents/${args.agent_id}`, { headers });
+        const agentName = agentInfoResponse.data.name || 'Unknown';
+        
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              message: `Tool "${args.name}" created and attached to agent ${agentName}.`,
+              tool_id: toolId,
+              tool_name: args.name,
+              agent_id: args.agent_id,
+              agent_name: agentName,
+              category: category
+            }, null, 2),
+          }],
+        };
+      } else {
+        // Just return the created tool info
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              message: `Tool "${args.name}" created successfully.`,
+              tool_id: toolId,
+              tool_name: args.name,
+              category: category
             }, null, 2),
           }],
         };
