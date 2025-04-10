@@ -1,156 +1,91 @@
-# Letta MCP Server with SSE Transport
+# Everything MCP Server 
 
-This repository contains a Model Context Protocol (MCP) server implementation for the Letta platform with Server-Sent Events (SSE) transport support.
+This MCP server attempts to exercise all the features of the MCP protocol. It is not intended to be a useful server, but rather a test server for builders of MCP clients. It implements prompts, tools, resources, sampling, and more to showcase MCP capabilities.
 
-## Features
+## Components
 
-- Supports both SSE and stdio transports
-- Provides access to Letta API functionality through MCP tools
-- Secure by default with non-root user in Docker
-- Environment variable configuration
-- Health check endpoint
+### Tools
 
-## Quick Start
+1. `echo`
+   - Simple tool to echo back input messages
+   - Input:
+     - `message` (string): Message to echo back
+   - Returns: Text content with echoed message
 
-### Environment Setup
+2. `add`
+   - Adds two numbers together
+   - Inputs:
+     - `a` (number): First number 
+     - `b` (number): Second number
+   - Returns: Text result of the addition
 
-1. Copy the example environment file:
-   ```bash
-   cp .env.example .env
-   ```
+3. `longRunningOperation`
+   - Demonstrates progress notifications for long operations
+   - Inputs:
+     - `duration` (number, default: 10): Duration in seconds
+     - `steps` (number, default: 5): Number of progress steps
+   - Returns: Completion message with duration and steps
+   - Sends progress notifications during execution
 
-2. Edit the `.env` file with your Letta API credentials:
-   ```
-   LETTA_BASE_URL=https://your-letta-api-url.com
-   LETTA_PASSWORD=your_password_here
-   PORT=3001
-   NODE_ENV=production
-   ```
+4. `sampleLLM` 
+   - Demonstrates LLM sampling capability using MCP sampling feature
+   - Inputs:
+     - `prompt` (string): The prompt to send to the LLM
+     - `maxTokens` (number, default: 100): Maximum tokens to generate
+   - Returns: Generated LLM response
 
-### Using Docker Compose
+5. `getTinyImage`
+   - Returns a small test image
+   - No inputs required
+   - Returns: Base64 encoded PNG image data
 
-The easiest way to run the server is with Docker Compose:
+### Resources
 
-```bash
-docker-compose up -d
+The server provides 100 test resources in two formats:
+- Even numbered resources: 
+  - Plaintext format
+  - URI pattern: `test://static/resource/{even_number}`
+  - Content: Simple text description
+
+- Odd numbered resources:
+  - Binary blob format
+  - URI pattern: `test://static/resource/{odd_number}`  
+  - Content: Base64 encoded binary data
+
+Resource features:
+- Supports pagination (10 items per page)
+- Allows subscribing to resource updates
+- Demonstrates resource templates
+- Auto-updates subscribed resources every 5 seconds
+
+### Prompts
+
+1. `simple_prompt`
+   - Basic prompt without arguments
+   - Returns: Single message exchange
+
+2. `complex_prompt`
+   - Advanced prompt demonstrating argument handling
+   - Required arguments:
+     - `temperature` (number): Temperature setting
+   - Optional arguments:
+     - `style` (string): Output style preference
+   - Returns: Multi-turn conversation with images
+
+## Usage with Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "everything": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything"
+      ]
+    }
+  }
+}
 ```
-
-This will build the image if needed and start the server in detached mode.
-
-### Using Docker Directly
-
-You can also build and run the Docker image directly:
-
-```bash
-# Build the image
-docker build -t oculair/letta-tools-mcp:v1.0.4 .
-
-# Run the container
-docker run -p 3001:3001 --env-file .env --rm -it oculair/letta-tools-mcp:v1.0.4
-```
-
-### Multi-Architecture Build
-
-To build for multiple architectures (amd64 and arm64):
-
-1. Enable Docker Buildx:
-   ```bash
-   docker buildx create --use --name multiarch-builder
-   docker buildx inspect --bootstrap
-   ```
-
-2. Build and push:
-   ```bash
-   docker buildx build --platform linux/amd64,linux/arm64 \
-     -t oculair/letta-tools-mcp:v1.0.4 \
-     --push .
-   ```
-
-3. Verify the multi-architecture image:
-   ```bash
-   docker manifest inspect oculair/letta-tools-mcp:v1.0.4
-   ```
-
-## Development
-
-### Project Structure
-
-```
-.
-├── everything/
-│   ├── src/
-│   │   ├── core/       # Core server implementation
-│   │   ├── tools/      # MCP tool implementations
-│   │   ├── transports/ # Transport implementations (SSE, stdio)
-│   │   └── index.js    # Main entry point
-│   └── package.json    # Node.js dependencies
-├── .env.example        # Example environment variables
-├── .gitignore          # Git ignore file
-├── compose.yaml        # Docker Compose configuration
-├── Dockerfile          # Docker build configuration
-└── README.md           # This file
-```
-
-### Debugging
-
-To debug the container, you can run it with an interactive shell:
-
-```bash
-docker run -p 3001:3001 --env-file .env --rm -it --entrypoint bash oculair/letta-tools-mcp:v1.0.4
-```
-
-## Available MCP Tools
-
-The Letta MCP Server provides the following tools for interacting with the Letta platform:
-
-### Agent Management Tools
-
-- `list_agents`: List all available agents in the Letta system
-  - Optional filter parameter to search for specific agents
-  - Returns agent IDs, names, and descriptions
-
-- `create_agent`: Create a new Letta agent with specified configuration
-  - Required parameters: name, description
-  - Optional parameters: model (default: openai/gpt-4), embedding (default: openai/text-embedding-ada-002)
-
-- `prompt_agent`: Send a message to an agent and get a response
-  - Required parameters: agent_id, message
-  - Returns the agent's response with reasoning if available
-
-- `list_agent_tools`: List all tools available for a specific agent
-  - Required parameter: agent_id
-
-### Memory Management Tools
-
-- `create_memory_block`: Create a new memory block in the Letta system
-  - Required parameters: name, label, value
-
-- `attach_memory_block`: Attach a memory block to an agent
-  - Required parameters: block_id, agent_id
-  - Optional parameter: label
-
-- `list_memory_blocks`: List all memory blocks available in the Letta system
-  - Supports filtering and pagination
-
-### Agent Operations Tools
-
-- `clone_agent`: Create a new agent by cloning an existing one
-  - Required parameters: source_agent_id, new_agent_name
-
-- `export_agent`: Export an agent's configuration to JSON
-  - Required parameter: agent_id
-  - Supports optional upload to external storage
-
-- `import_agent`: Import a serialized agent JSON file
-  - Required parameter: file_path
-
-### System Tools
-
-- `list_mcp_servers`: List all configured MCP servers on the Letta server
-
-- `list_llm_models`: List available LLM models configured on the server
-
-- `list_embedding_models`: List available embedding models configured on the server
-
-- `upload_tool`: Upload a new tool to the Letta system
-  - Required parameters: name, description, source_code
