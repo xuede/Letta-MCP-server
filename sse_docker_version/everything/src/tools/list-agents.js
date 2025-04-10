@@ -20,13 +20,20 @@ export async function handleListAgents(server, args) {
             );
         }
 
+        // Extract only essential details for the response
+        const summarizedAgents = filteredAgents.map(agent => ({
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+        }));
+
         return {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
                     success: true,
-                    count: filteredAgents.length,
-                    agents: filteredAgents
+                    count: summarizedAgents.length,
+                    agents: summarizedAgents // Use summarized list
                 }, null, 2),
             }],
         };
