@@ -59,30 +59,63 @@ Memory blocks serve different purposes based on their labels:
 - `custom`: User-defined memory blocks for specific use cases
 
 ### Agent Management
+Basic Operations:
 - `create_agent`: Create a new Letta agent with specified configuration
 - `list_agents`: List all available agents in the Letta system
 - `prompt_agent`: Send a message to an agent and get a response
-### Memory Block Management
-- `create_memory_block`: Create a new memory block with name, label, and content
-- `read_memory_block`: Get full details of a specific memory block
-- `update_memory_block`: Update contents and metadata of a memory block
-- `list_memory_blocks`: List memory blocks with filtering options:
-  * Filter by name, label, or content
-  * Filter by agent
-  * Filter templates only
-  * Pagination support
-  * Include full content or previews
-- `attach_memory_block`: Attach a memory block to an agent with custom labels
+- `retrieve_agent`: Get detailed state of a specific agent
+- `modify_agent`: Update existing agent configuration
+- `delete_agent`: Remove an agent from the system
+
+Advanced Operations:
+- `clone_agent`: Create a new agent by cloning an existing one
+- `export_agent`: Export agent configuration to JSON
+- `import_agent`: Import agent from a JSON configuration
+- `get_agent_summary`: Get concise summary of agent configuration
+- `bulk_attach_tool_to_agents`: Attach tools to multiple agents
+- `bulk_delete_agents`: Delete multiple agents based on filters
+
+### Memory Management
+Memory Blocks:
+- `create_memory_block`: Create a new memory block
+- `read_memory_block`: Get memory block details
+- `update_memory_block`: Update memory block content
+- `attach_memory_block`: Attach memory to agent
+- `list_memory_blocks`: List blocks with filtering
+
+Archival Memory:
+- `create_passage`: Add new memory to archival store
+- `modify_passage`: Update existing memory
+- `delete_passage`: Remove memory from store
+- `list_passages`: Query archival memories
 
 ### Tool Management
-- `list_tools`: List all available tools with filtering and pagination
-- `list_agent_tools`: List tools available for a specific agent
-- `attach_tool`: Attach a tool to an agent
-- `upload_tool`: Upload a new Python tool with:
-  * Custom name and description
-  * Source code implementation
-  * Category/tag support
-  * Optional automatic agent attachment
+Tool Operations:
+- `list_tools`: List all available tools
+- `list_agent_tools`: List tools for specific agent
+- `attach_tool`: Attach tool to agent
+- `upload_tool`: Add new Python tool
+- `list_mcp_tools_by_server`: List tools by MCP server
+- `list_mcp_servers`: List available MCP servers
+
+Model Management:
+- `list_llm_models`: List available language models
+- `list_embedding_models`: List available embedding models
+
+### Server Integration
+- `add_mcp_tool_to_letta`: Register MCP tool with Letta
+- Tool server configuration and management
+- OpenAPI specification support via `lettaopenapi.json`
+
+## SSE Docker Version
+
+A Docker version with SSE (Server-Sent Events) transport is available in the `sse_docker_version` directory. To use it:
+
+1. Copy `.env.example` to `.env` in the sse_docker_version directory
+2. Configure your environment variables
+3. Run `docker compose up --build`
+
+The SSE version includes all tools listed above and provides real-time updates via SSE.
 
 ## API Version
 
