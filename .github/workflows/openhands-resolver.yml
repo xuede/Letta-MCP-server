@@ -1,6 +1,6 @@
 name: Resolve Issue with OpenHands
 
-  workflow_dispatch:
+workflow_dispatch:
 on:
   issues:
     types: [labeled]
