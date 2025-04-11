@@ -27,8 +27,8 @@ export class LettaServer {
         // Validate environment variables
         this.apiBase = process.env.LETTA_BASE_URL ?? '';
         this.password = process.env.LETTA_PASSWORD ?? '';
-        if (!this.apiBase || !this.password) {
-            throw new Error('Missing required environment variables: LETTA_BASE_URL, LETTA_PASSWORD');
+        if (!this.apiBase) {
+            throw new Error('Missing required environment variable: LETTA_BASE_URL');
         }
 
         // Initialize axios instance
