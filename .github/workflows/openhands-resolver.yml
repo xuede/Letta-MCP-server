@@ -19,19 +19,16 @@ permissions:
   issues: write
 
 jobs:
-  resolve:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run OpenHands Resolver
-        uses: openhands/resolver@v1
-        with:
-          macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
-          max_iterations: ${{ fromJson(vars.OPENHANDS_MAX_ITER || 50) }}
-          base_container_image: ${{ vars.OPENHANDS_BASE_CONTAINER_IMAGE || '' }}
-          LLM_MODEL: ${{ vars.LLM_MODEL || 'anthropic/claude-3-5-sonnet-20241022' }}
-          target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          pat-username: ${{ secrets.PAT_USERNAME }}
-          llm-api-key: ${{ secrets.DEEPSEEK_API_KEY }}
-          llm-base-url: ${{ secrets.DEEPSEEK_API_URL }}
+  call-openhands-resolver:
+    uses: All-Hands-AI/OpenHands/.github/workflows/openhands-resolver.yml@main
+    with:
+      macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
+      max_iterations: ${{ fromJson(vars.OPENHANDS_MAX_ITER || 50) }}
+      base_container_image: ${{ vars.OPENHANDS_BASE_CONTAINER_IMAGE || '' }}
+      LLM_MODEL: ${{ vars.LLM_MODEL || 'anthropic/claude-3-5-sonnet-20241022' }}
+      target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
+    secrets:
+      PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
+      LLM_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      LLM_BASE_URL: ${{ secrets.DEEPSEEK_API_URL }}
