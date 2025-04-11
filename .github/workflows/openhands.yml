@@ -1,8 +1,8 @@
 name: OpenHands Resolver
-# Last test trigger - 2025-04-11 17:25 UTC
 on:
+  workflow_dispatch:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, labeled]
   issue_comment:
     types: [created, edited]
 
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: OpenHands Resolver
+      - name: Run OpenHands Resolver
         uses: openhands/resolver@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
