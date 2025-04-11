@@ -1,6 +1,6 @@
 name: Resolve Issue with OpenHands
 
-workflow_dispatch:
+  workflow_dispatch:
 on:
   issues:
     types: [labeled]
@@ -21,28 +21,15 @@ permissions:
 jobs:
   call-openhands-resolver:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: mkdir -p /tmp/output
-      - name: Run OpenHands Resolver
-        uses: All-Hands-AI/OpenHands/.github/workflows/openhands-resolver.yml@main
-        env:
-          ACTIONS_STEP_DEBUG: true
-        with:
-          macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
-          max_iterations: ${{ fromJson(vars.OPENHANDS_MAX_ITER || 50) }}
-          base_container_image: ${{ vars.OPENHANDS_BASE_CONTAINER_IMAGE || '' }}
-          LLM_MODEL: ${{ vars.LLM_MODEL || 'anthropic/claude-3-5-sonnet-20241022' }}
-          target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
-        secrets:
-          PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
-          LLM_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          LLM_BASE_URL: ${{ secrets.DEEPSEEK_API_URL }}
-      - name: Verify Output
-        if: always()
-        run: |
-          if [ ! -f /tmp/output/output.jsonl ]; then
-            echo "::warning::No output file generated"
-            exit 0
-          fi
+    uses: All-Hands-AI/OpenHands/.github/workflows/openhands-resolver.yml@main
+    with:
+      macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
+      max_iterations: ${{ fromJson(vars.OPENHANDS_MAX_ITER || 50) }}
+      base_container_image: ${{ vars.OPENHANDS_BASE_CONTAINER_IMAGE || '' }}
+      LLM_MODEL: ${{ vars.LLM_MODEL || 'anthropic/claude-3-5-sonnet-20241022' }}
+      target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
+    secrets:
+      PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
+      LLM_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      LLM_BASE_URL: ${{ secrets.DEEPSEEK_API_URL }}
