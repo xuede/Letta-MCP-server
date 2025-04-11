@@ -1,5 +1,5 @@
 name: OpenHands Resolver
-# Test trigger - adding comment
+# Last test trigger - 2025-04-11 17:25 UTC
 on:
   issues:
     types: [opened, edited]
