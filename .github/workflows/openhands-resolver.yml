@@ -1,7 +1,7 @@
 name: Resolve Issue with OpenHands
 
-  workflow_dispatch:
 on:
+  workflow_dispatch:
   issues:
     types: [labeled]
   pull_request:
