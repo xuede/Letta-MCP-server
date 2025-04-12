@@ -28,7 +28,7 @@ jobs:
       LLM_MODEL: ${{ vars.LLM_MODEL || 'deepseek/deepseek-chat' }}
       target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
