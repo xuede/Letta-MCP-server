@@ -25,7 +25,7 @@ jobs:
       macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
       max_iterations: ${{ fromJson(vars.OPENHANDS_MAX_ITER || 50) }}
       base_container_image: ${{ vars.OPENHANDS_BASE_CONTAINER_IMAGE || '' }}
-      LLM_MODEL: ${{ vars.LLM_MODEL || 'anthropic/claude-3-5-sonnet-20241022' }}
+      LLM_MODEL: ${{ vars.LLM_MODEL || 'deepseek/deepseek-coder-v2' }}
       target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
     secrets:
       PAT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
