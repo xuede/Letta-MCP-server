@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/mseep-audited.png)](https://mseep.ai/app/oculairmedia-letta-mcp-server)
+
 # Letta MCP Server
 
 A server that provides tools for agent management, memory operations, and integration with the Letta system.
