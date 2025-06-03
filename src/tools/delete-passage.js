@@ -3,10 +3,10 @@
  */
 export async function handleDeletePassage(server, args) {
     if (!args?.agent_id) {
-        return server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse("Missing required argument: agent_id");
     }
     if (!args?.memory_id) {
-        return server.createErrorResponse("Missing required argument: memory_id");
+        server.createErrorResponse("Missing required argument: memory_id");
     }
 
     try {
@@ -30,9 +30,9 @@ export async function handleDeletePassage(server, args) {
     } catch (error) {
         // Handle potential 404 if agent or passage not found, or other API errors
         if (error.response && error.response.status === 404) {
-             return server.createErrorResponse(`Agent or Passage not found: agent_id=${args.agent_id}, memory_id=${args.memory_id}`);
+             server.createErrorResponse(`Agent or Passage not found: agent_id=${args.agent_id}, memory_id=${args.memory_id}`);
         }
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

@@ -57,20 +57,44 @@ export class LettaServer {
 
     /**
      * Create a standard error response
-     * @param {Error} error - The error object
-     * @returns {Object} Formatted error response
+     * @param {Error|string} error - The error object or message
+     * @param {string} [context] - Additional context for the error
+     * @throws {McpError} Always throws an McpError for proper JSON-RPC handling
      */
-    createErrorResponse(error) {
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    success: false,
-                    error: error.message,
-                    details: error.response?.data || error,
-                }, null, 2),
-            }],
-            isError: true,
-        };
+    createErrorResponse(error, context) {
+        let errorMessage = '';
+        let errorCode = ErrorCode.InternalError;
+        
+        if (typeof error === 'string') {
+            errorMessage = error;
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+            
+            // Handle specific HTTP error codes
+            if (error.response?.status === 404) {
+                errorCode = ErrorCode.InvalidRequest;
+                errorMessage = `Resource not found: ${error.message}`;
+            } else if (error.response?.status === 422) {
+                errorCode = ErrorCode.InvalidParams;
+                errorMessage = `Validation error: ${error.message}`;
+            } else if (error.response?.status === 401 || error.response?.status === 403) {
+                errorCode = ErrorCode.InvalidRequest;
+                errorMessage = `Authentication/Authorization error: ${error.message}`;
+            }
+        } else {
+            errorMessage = 'Unknown error occurred';
+        }
+        
+        // Add context if provided
+        if (context) {
+            errorMessage = `${context}: ${errorMessage}`;
+        }
+        
+        // Add additional details if available
+        if (error?.response?.data) {
+            errorMessage += ` Details: ${JSON.stringify(error.response.data)}`;
+        }
+        
+        throw new McpError(errorCode, errorMessage);
     }
 }

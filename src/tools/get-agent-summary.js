@@ -5,7 +5,7 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
  */
 export async function handleGetAgentSummary(server, args) {
     if (!args?.agent_id) {
-        return server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse("Missing required argument: agent_id");
     }
 
     const agentId = args.agent_id;
@@ -29,9 +29,9 @@ export async function handleGetAgentSummary(server, args) {
             console.error(`[get_agent_summary] Failed to fetch agent state for ${agentId}:`, errorInfo);
             // If agent doesn't exist, return a specific error
             if (agentStateRes.reason?.response?.status === 404 || agentStateRes.value?.status === 404) {
-                 return server.createErrorResponse(`Agent not found: ${agentId}`);
+                 server.createErrorResponse(`Agent not found: ${agentId}`);
             }
-            return server.createErrorResponse(`Failed to fetch agent state: ${JSON.stringify(errorInfo)}`);
+            server.createErrorResponse(`Failed to fetch agent state: ${JSON.stringify(errorInfo)}`);
         }
         const agentState = agentStateRes.value.data;
 
@@ -85,7 +85,7 @@ export async function handleGetAgentSummary(server, args) {
     } catch (error) {
         // Catch any unexpected errors during processing
         console.error(`[get_agent_summary] Unexpected error for agent ${agentId}:`, error);
-        return server.createErrorResponse(`Failed to get agent summary: ${error.message}`);
+        server.createErrorResponse(`Failed to get agent summary: ${error.message}`);
     }
 }
 

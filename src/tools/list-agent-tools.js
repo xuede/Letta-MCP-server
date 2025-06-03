@@ -26,7 +26,7 @@ export async function handleListAgentTools(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

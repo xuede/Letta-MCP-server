@@ -20,7 +20,7 @@ export async function handleListEmbeddingModels(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

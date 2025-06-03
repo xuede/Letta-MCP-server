@@ -67,7 +67,7 @@ export async function handleCreateAgent(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

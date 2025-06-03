@@ -104,7 +104,7 @@ export async function handlePromptAgent(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

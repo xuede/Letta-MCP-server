@@ -3,7 +3,7 @@
  */
 export async function handleDeleteAgent(server, args) {
     if (!args?.agent_id) {
-        return server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse("Missing required argument: agent_id");
     }
 
     try {
@@ -27,9 +27,9 @@ export async function handleDeleteAgent(server, args) {
     } catch (error) {
         // Handle potential 404 if agent not found, or other API errors
         if (error.response && error.response.status === 404) {
-             return server.createErrorResponse(`Agent not found: ${args.agent_id}`);
+             server.createErrorResponse(`Agent not found: ${args.agent_id}`);
         }
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

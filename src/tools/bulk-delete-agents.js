@@ -6,7 +6,7 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 export async function handleBulkDeleteAgents(server, args) {
     // Require at least one filter criteria to prevent accidental mass deletion
     if (!args?.agent_name_filter && !args?.agent_tag_filter && !args?.agent_ids) {
-         return server.createErrorResponse("Missing required argument: Provide agent_ids, agent_name_filter, or agent_tag_filter.");
+         server.createErrorResponse("Missing required argument: Provide agent_ids, agent_name_filter, or agent_tag_filter.");
     }
 
     const nameFilter = args.agent_name_filter;
@@ -91,7 +91,7 @@ export async function handleBulkDeleteAgents(server, args) {
     } catch (error) {
         // Handle errors during the list_agents call or unexpected issues
         console.error(`[bulk_delete_agents] Error:`, error.response?.data || error.message);
-        return server.createErrorResponse(`Failed during bulk delete operation: ${error.message}`);
+        server.createErrorResponse(`Failed during bulk delete operation: ${error.message}`);
     }
 }
 

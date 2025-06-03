@@ -230,7 +230,7 @@ export async function handleAttachTool(server, args) {
 
     } catch (error) {
         console.error(`Unhandled error in handleAttachTool: ${error.message}`);
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

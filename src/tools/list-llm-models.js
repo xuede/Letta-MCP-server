@@ -20,7 +20,7 @@ export async function handleListLlmModels(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

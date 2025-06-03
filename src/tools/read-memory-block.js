@@ -32,7 +32,7 @@ export async function handleReadMemoryBlock(server, args) {
             }]
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

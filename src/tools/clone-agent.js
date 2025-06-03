@@ -10,10 +10,10 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
  */
 export async function handleCloneAgent(server, args) {
     if (!args?.source_agent_id) {
-        return server.createErrorResponse("Missing required argument: source_agent_id");
+        server.createErrorResponse("Missing required argument: source_agent_id");
     }
     if (!args?.new_agent_name) {
-        return server.createErrorResponse("Missing required argument: new_agent_name");
+        server.createErrorResponse("Missing required argument: new_agent_name");
     }
 
     const sourceAgentId = args.source_agent_id;
@@ -113,13 +113,13 @@ export async function handleCloneAgent(server, args) {
         // Handle specific API errors
         if (error.response) {
              if (error.response.status === 404 && error.config.url.includes('/export')) {
-                 return server.createErrorResponse(`Source agent not found: ${sourceAgentId}`);
+                 server.createErrorResponse(`Source agent not found: ${sourceAgentId}`);
             }
              if (error.response.status === 422 && error.config.url.includes('/import')) {
-                 return server.createErrorResponse(`Validation error importing cloned agent: ${JSON.stringify(error.response.data)}`);
+                 server.createErrorResponse(`Validation error importing cloned agent: ${JSON.stringify(error.response.data)}`);
             }
         }
-        return server.createErrorResponse(`Failed to clone agent ${sourceAgentId}: ${error.message}`);
+        server.createErrorResponse(`Failed to clone agent ${sourceAgentId}: ${error.message}`);
     }
 }
 

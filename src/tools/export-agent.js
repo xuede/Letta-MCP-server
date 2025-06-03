@@ -9,7 +9,7 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
  */
 export async function handleExportAgent(server, args) {
     if (!args?.agent_id) {
-        return server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse("Missing required argument: agent_id");
     }
 
     const agentId = args.agent_id;
@@ -39,7 +39,7 @@ export async function handleExportAgent(server, args) {
             fs.writeFileSync(absoluteOutputPath, agentJsonString);
         } catch (writeError) {
             console.error(`Error writing agent export to ${absoluteOutputPath}:`, writeError);
-            return server.createErrorResponse(`Failed to save agent export to ${absoluteOutputPath}: ${writeError.message}`);
+            server.createErrorResponse(`Failed to save agent export to ${absoluteOutputPath}: ${writeError.message}`);
         }
 
         // Step 3: Upload to XBackbone if requested
@@ -113,10 +113,10 @@ export async function handleExportAgent(server, args) {
     } catch (error) {
         // Handle potential 404 if agent not found, or other API errors
         if (error.response && error.response.status === 404) {
-             return server.createErrorResponse(`Agent not found: ${agentId}`);
+             server.createErrorResponse(`Agent not found: ${agentId}`);
         }
         console.error(`[export_agent] Error:`, error.response?.data || error.message);
-        return server.createErrorResponse(`Failed to export agent ${agentId}: ${error.message}`);
+        server.createErrorResponse(`Failed to export agent ${agentId}: ${error.message}`);
     }
 }
 

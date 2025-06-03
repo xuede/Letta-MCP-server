@@ -132,7 +132,7 @@ export async function handleAddMcpToolToLetta(server, args) {
     } catch (error) {
         console.error(`Error during MCP tool registration or attachment: ${error.message}`);
         // Ensure the error response includes context about which step failed if possible
-        return server.createErrorResponse(error, `Failed during registration/attachment of ${args.mcp_server_name || 'unknown_server'}/${args.mcp_tool_name || 'unknown_tool'}`);
+        server.createErrorResponse(error, `Failed during registration/attachment of ${args.mcp_server_name || 'unknown_server'}/${args.mcp_tool_name || 'unknown_tool'}`);
     }
 }
 

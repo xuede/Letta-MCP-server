@@ -53,7 +53,7 @@ export async function handleAttachMemoryBlock(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

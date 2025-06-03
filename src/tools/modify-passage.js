@@ -3,13 +3,13 @@
  */
 export async function handleModifyPassage(server, args) {
     if (!args?.agent_id) {
-        return server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse("Missing required argument: agent_id");
     }
     if (!args?.memory_id) {
-        return server.createErrorResponse("Missing required argument: memory_id");
+        server.createErrorResponse("Missing required argument: memory_id");
     }
     if (!args?.update_data || typeof args.update_data.text !== 'string') { // Ensure text is provided and is a string
-         return server.createErrorResponse("Missing or invalid required argument: update_data must contain a 'text' field (string).");
+         server.createErrorResponse("Missing or invalid required argument: update_data must contain a 'text' field (string).");
     }
 
     try {
@@ -39,10 +39,10 @@ export async function handleModifyPassage(server, args) {
             }
         } catch (fetchError) {
              if (fetchError.response && fetchError.response.status === 404) {
-                 return server.createErrorResponse(`Agent not found when listing passages: ${args.agent_id}`);
+                 server.createErrorResponse(`Agent not found when listing passages: ${args.agent_id}`);
              }
              console.error("Error fetching passages:", fetchError);
-             return server.createErrorResponse(`Failed to fetch passages for agent ${args.agent_id}: ${fetchError.message}`);
+             server.createErrorResponse(`Failed to fetch passages for agent ${args.agent_id}: ${fetchError.message}`);
         }
 
         // Step 2: Construct the full update payload based on the fetched passage, modifying only the text
@@ -89,13 +89,13 @@ export async function handleModifyPassage(server, args) {
         console.error(`[modify_passage] Error:`, error.response?.data || error.message);
         if (error.response) {
              if (error.response.status === 404) {
-                 return server.createErrorResponse(`Agent or Passage not found during update: agent_id=${args.agent_id}, memory_id=${args.memory_id}`);
+                 server.createErrorResponse(`Agent or Passage not found during update: agent_id=${args.agent_id}, memory_id=${args.memory_id}`);
             }
              if (error.response.status === 422) {
-                 return server.createErrorResponse(`Validation error modifying passage ${args.memory_id}: ${JSON.stringify(error.response.data)}`);
+                 server.createErrorResponse(`Validation error modifying passage ${args.memory_id}: ${JSON.stringify(error.response.data)}`);
             }
         }
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

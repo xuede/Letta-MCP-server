@@ -9,14 +9,14 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
  */
 export async function handleImportAgent(server, args) {
     if (!args?.file_path) {
-        return server.createErrorResponse("Missing required argument: file_path");
+        server.createErrorResponse("Missing required argument: file_path");
     }
 
     const filePath = path.resolve(args.file_path); // Resolve to absolute path
 
     // Check if file exists
     if (!fs.existsSync(filePath)) {
-        return server.createErrorResponse(`File not found at path: ${filePath}`);
+        server.createErrorResponse(`File not found at path: ${filePath}`);
     }
 
     try {
@@ -64,11 +64,11 @@ export async function handleImportAgent(server, args) {
         // Handle potential 422 for validation errors, or other API/file errors
         if (error.response) {
              if (error.response.status === 422) {
-                 return server.createErrorResponse(`Validation error importing agent from ${args.file_path}: ${JSON.stringify(error.response.data)}`);
+                 server.createErrorResponse(`Validation error importing agent from ${args.file_path}: ${JSON.stringify(error.response.data)}`);
             }
         }
         console.error(`[import_agent] Error:`, error.response?.data || error.message);
-        return server.createErrorResponse(`Failed to import agent from ${args.file_path}: ${error.message}`);
+        server.createErrorResponse(`Failed to import agent from ${args.file_path}: ${error.message}`);
     }
 }
 

@@ -3,7 +3,7 @@
  */
 export async function handleListMcpToolsByServer(server, args) {
     if (!args?.mcp_server_name) {
-        return server.createErrorResponse("Missing required argument: mcp_server_name");
+        server.createErrorResponse("Missing required argument: mcp_server_name");
     }
 
     try {
@@ -63,10 +63,10 @@ export async function handleListMcpToolsByServer(server, args) {
         console.error('Full error:', error); // Keep detailed logging
         // Handle potential 404 if server name not found, or other API errors
         if (error.response && error.response.status === 404) {
-             return server.createErrorResponse(`MCP Server not found: ${args.mcp_server_name}`);
+             server.createErrorResponse(`MCP Server not found: ${args.mcp_server_name}`);
         }
         // Provide more context in the error response
-        return server.createErrorResponse(`Error executing list_mcp_tools_by_server: ${error.message}\nResponse: ${JSON.stringify(error.response?.data || {})}`);
+        server.createErrorResponse(`Error executing list_mcp_tools_by_server: ${error.message}\nResponse: ${JSON.stringify(error.response?.data || {})}`);
     }
 }
 

@@ -1,7 +1,6 @@
 import { handleListAgents, listAgentsToolDefinition } from './list-agents.js';
 import { handlePromptAgent, promptAgentToolDefinition } from './prompt-agent.js';
 import { handleListAgentTools, listAgentToolsDefinition } from './list-agent-tools.js';
-import { handleListTools, listToolsDefinition } from './list-tools.js';
 import { handleCreateAgent, createAgentToolDefinition } from './create-agent.js';
 import { handleAttachTool, attachToolToolDefinition } from './attach-tool.js'; // Enhanced version
 import { handleListMemoryBlocks, listMemoryBlocksToolDefinition } from './list-memory-blocks.js';
@@ -42,7 +41,6 @@ export function registerToolHandlers(server) {
             listAgentsToolDefinition,
             promptAgentToolDefinition,
             listAgentToolsDefinition,
-            listToolsDefinition,
             createAgentToolDefinition,
             attachToolToolDefinition, // Enhanced version
             listMemoryBlocksToolDefinition,
@@ -83,8 +81,6 @@ export function registerToolHandlers(server) {
                 return handlePromptAgent(server, request.params.arguments);
             case 'list_agent_tools':
                 return handleListAgentTools(server, request.params.arguments);
-            case 'list_tools':
-                return handleListTools(server, request.params.arguments);
             case 'create_agent':
                 return handleCreateAgent(server, request.params.arguments);
             case 'attach_tool': // Enhanced version
@@ -151,7 +147,6 @@ export const toolDefinitions = [
     listAgentsToolDefinition,
     promptAgentToolDefinition,
     listAgentToolsDefinition,
-    listToolsDefinition,
     createAgentToolDefinition,
     attachToolToolDefinition, // Enhanced version
     listMemoryBlocksToolDefinition,
@@ -185,7 +180,6 @@ export const toolHandlers = {
     handleListAgents,
     handlePromptAgent,
     handleListAgentTools,
-    handleListTools,
     handleCreateAgent,
     handleAttachTool, // Enhanced version
     handleListMemoryBlocks,

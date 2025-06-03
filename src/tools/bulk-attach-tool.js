@@ -7,11 +7,11 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
  */
 export async function handleBulkAttachToolToAgents(server, args) {
     if (!args?.tool_id) {
-        return server.createErrorResponse("Missing required argument: tool_id");
+        server.createErrorResponse("Missing required argument: tool_id");
     }
     // Require at least one filter criteria
     if (!args?.agent_name_filter && !args?.agent_tag_filter) {
-         return server.createErrorResponse("Missing required argument: Provide either agent_name_filter or agent_tag_filter.");
+         server.createErrorResponse("Missing required argument: Provide either agent_name_filter or agent_tag_filter.");
     }
 
     const toolId = args.tool_id;
@@ -86,7 +86,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
     } catch (error) {
         // Handle errors during the list_agents call or unexpected issues
         console.error(`[bulk_attach_tool] Error:`, error.response?.data || error.message);
-        return server.createErrorResponse(`Failed during bulk attach operation: ${error.message}`);
+        server.createErrorResponse(`Failed during bulk attach operation: ${error.message}`);
     }
 }
 

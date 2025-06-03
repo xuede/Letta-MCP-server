@@ -123,7 +123,7 @@ export async function handleListMemoryBlocks(server, args) {
             }],
         };
     } catch (error) {
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 

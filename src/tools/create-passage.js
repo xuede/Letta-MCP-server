@@ -3,10 +3,10 @@
  */
 export async function handleCreatePassage(server, args) {
     if (!args?.agent_id) {
-        return server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse("Missing required argument: agent_id");
     }
     if (!args?.text) {
-        return server.createErrorResponse("Missing required argument: text");
+        server.createErrorResponse("Missing required argument: text");
     }
 
     try {
@@ -42,13 +42,13 @@ export async function handleCreatePassage(server, args) {
         // Handle potential 404 if agent not found, 422 for validation, or other API errors
         if (error.response) {
             if (error.response.status === 404) {
-                return server.createErrorResponse(`Agent not found: ${args.agent_id}`);
+                server.createErrorResponse(`Agent not found: ${args.agent_id}`);
             }
              if (error.response.status === 422) {
-                 return server.createErrorResponse(`Validation error creating passage for agent ${args.agent_id}: ${JSON.stringify(error.response.data)}`);
+                 server.createErrorResponse(`Validation error creating passage for agent ${args.agent_id}: ${JSON.stringify(error.response.data)}`);
             }
         }
-        return server.createErrorResponse(error);
+        server.createErrorResponse(error);
     }
 }
 
