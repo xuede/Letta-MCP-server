@@ -5,8 +5,8 @@ WORKDIR /app
 
 # Add metadata labels
 LABEL maintainer="Letta Team"
-LABEL description="Letta MCP Server with SSE transport"
-LABEL version="1.0.4"
+LABEL description="Letta MCP Server with multiple transport support (SSE, HTTP, stdio)"
+LABEL version="1.1.0"
 
 # Copy package files and install dependencies
 COPY package*.json ./
@@ -28,12 +28,14 @@ EXPOSE 3001
 # Default environment variables (can be overridden at build or runtime)
 ARG PORT=3001
 ARG NODE_ENV=production
+ARG TRANSPORT=http
 ENV PORT=${PORT}
 ENV NODE_ENV=${NODE_ENV}
+ENV TRANSPORT=${TRANSPORT}
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run the server
-CMD ["node", "./src/index.js", "--sse"]
+# Run the server with configurable transport
+CMD ["sh", "-c", "node ./src/index.js --${TRANSPORT}"]

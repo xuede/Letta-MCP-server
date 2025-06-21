@@ -45,7 +45,7 @@ export async function handleCreateAgent(server, args) {
         const headers = server.getApiHeaders();
 
         // Create agent
-        const createAgentResponse = await server.api.post('/agents', agentConfig, { headers });
+        const createAgentResponse = await server.api.post('/agents/', agentConfig, { headers });
         const agentId = createAgentResponse.data.id;
 
         // Update headers with agent ID

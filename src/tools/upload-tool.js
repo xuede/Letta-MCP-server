@@ -26,7 +26,7 @@ export async function handleUploadTool(server, args) {
         const category = args.category || 'custom';
         
         // Check if tool exists and delete if found
-        const toolsResponse = await server.api.get('/tools', { headers });
+        const toolsResponse = await server.api.get('/tools/', { headers });
         const existingTools = toolsResponse.data;
         let existingToolId = null;
         
@@ -57,7 +57,7 @@ export async function handleUploadTool(server, args) {
         
         // Create the tool
         console.log(`Creating tool "${args.name}"...`);
-        const createResponse = await server.api.post('/tools', toolData, { headers });
+        const createResponse = await server.api.post('/tools/', toolData, { headers });
         const toolId = createResponse.data.id;
         
         // If agent_id is provided, attach the tool to the agent

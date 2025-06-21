@@ -7,7 +7,7 @@ export async function handleListAgents(server, args) {
         const headers = server.getApiHeaders();
 
         // Get the list of agents
-        const response = await server.api.get('/agents', { headers });
+        const response = await server.api.get('/agents/', { headers });
         const agents = response.data;
 
         // Apply filter if provided
@@ -38,6 +38,9 @@ export async function handleListAgents(server, args) {
             }],
         };
     } catch (error) {
+        console.error('Error in list_agents:', error.message);
+        console.error('API Base URL:', server.apiBase);
+        console.error('Full error:', error.response?.data || error);
         server.createErrorResponse(error);
     }
 }
