@@ -38,10 +38,9 @@ export async function handleBulkAttachToolToAgents(server, args) {
                 content: [{
                     type: 'text',
                     text: JSON.stringify({
-                        success: true, // Technically successful, just no agents matched
                         message: "No agents found matching the specified filter.",
                         results: []
-                    }, null, 2),
+                    }),
                 }],
             };
         }
@@ -76,10 +75,13 @@ export async function handleBulkAttachToolToAgents(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true, // Overall tool execution was successful, even if some attachments failed
-                    message: `Attempted to attach tool ${toolId} to ${agentsToProcess.length} agents. Success: ${successCount}, Failed: ${errorCount}.`,
+                    summary: {
+                        total_agents: agentsToProcess.length,
+                        success_count: successCount,
+                        error_count: errorCount
+                    },
                     results: results
-                }, null, 2),
+                }),
             }],
         };
 
@@ -95,7 +97,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
  */
 export const bulkAttachToolDefinition = {
     name: 'bulk_attach_tool_to_agents',
-    description: 'Attaches a specified tool to multiple agents based on filter criteria (name or tags).',
+    description: 'Attaches a specified tool to multiple agents based on filter criteria (name or tags). Use list_agents to find agents and list_mcp_tools_by_server or upload_tool to get tool IDs.',
     inputSchema: {
         type: 'object',
         properties: {

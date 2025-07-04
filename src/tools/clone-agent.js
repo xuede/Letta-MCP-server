@@ -91,10 +91,8 @@ export async function handleCloneAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Agent ${sourceAgentId} cloned successfully to new agent '${newAgentName}' (ID: ${importedAgentState.id}).`,
                     new_agent: importedAgentState
-                }, null, 2),
+                }),
             }],
         };
 
@@ -128,7 +126,7 @@ export async function handleCloneAgent(server, args) {
  */
 export const cloneAgentDefinition = {
     name: 'clone_agent',
-    description: 'Creates a new agent by cloning the configuration of an existing agent.',
+    description: 'Creates a new agent by cloning the configuration of an existing agent. Use list_agents to find source agent ID. Alternative to export_agent + import_agent workflow. Modify the clone with modify_agent afterwards.',
     inputSchema: {
         type: 'object',
         properties: {

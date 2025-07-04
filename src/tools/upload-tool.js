@@ -74,14 +74,12 @@ export async function handleUploadTool(server, args) {
                 content: [{
                     type: 'text',
                     text: JSON.stringify({
-                        success: true,
-                        message: `Tool "${args.name}" created and attached to agent ${agentName}.`,
                         tool_id: toolId,
                         tool_name: args.name,
                         agent_id: args.agent_id,
                         agent_name: agentName,
                         category: category
-                    }, null, 2),
+                    }),
                 }],
             };
         } else {
@@ -90,12 +88,10 @@ export async function handleUploadTool(server, args) {
                 content: [{
                     type: 'text',
                     text: JSON.stringify({
-                        success: true,
-                        message: `Tool "${args.name}" created successfully.`,
                         tool_id: toolId,
                         tool_name: args.name,
                         category: category
-                    }, null, 2),
+                    }),
                 }],
             };
         }
@@ -109,7 +105,7 @@ export async function handleUploadTool(server, args) {
  */
 export const uploadToolToolDefinition = {
     name: 'upload_tool',
-    description: 'Upload a new tool to the Letta system',
+    description: 'Upload a new tool to the Letta system. Use with attach_tool to add it to agents, or list_agent_tools to verify attachment.',
     inputSchema: {
         type: 'object',
         properties: {

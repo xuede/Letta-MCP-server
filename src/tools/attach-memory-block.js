@@ -42,14 +42,12 @@ export async function handleAttachMemoryBlock(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Memory block ${blockName} successfully attached to agent ${agentName} with label ${label}.`,
                     agent_id: args.agent_id,
                     agent_name: agentName,
                     block_id: args.block_id,
                     block_name: blockName,
                     label: label
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -62,7 +60,7 @@ export async function handleAttachMemoryBlock(server, args) {
  */
 export const attachMemoryBlockToolDefinition = {
     name: 'attach_memory_block',
-    description: 'Attach a memory block to an agent',
+    description: 'Attach a memory block to an agent. Use list_memory_blocks to find blocks, create_memory_block to make new ones. Common labels: "persona", "human", "system".',
     inputSchema: {
         type: 'object',
         properties: {

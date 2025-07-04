@@ -36,10 +36,7 @@ export async function handleUpdateMemoryBlock(server, args) {
         return {
             content: [{
                 type: 'text',
-                text: JSON.stringify({
-                    success: true,
-                    block: response.data
-                }, null, 2),
+                text: JSON.stringify(response.data),
             }]
         };
     } catch (error) {
@@ -52,7 +49,7 @@ export async function handleUpdateMemoryBlock(server, args) {
  */
 export const updateMemoryBlockToolDefinition = {
     name: 'update_memory_block',
-    description: 'Update the contents and metadata of a memory block',
+    description: 'Update the contents and metadata of a memory block. Use list_memory_blocks to find block IDs, or read_memory_block to see current content before updating.',
     inputSchema: {
         type: 'object',
         properties: {

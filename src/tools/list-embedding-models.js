@@ -13,10 +13,9 @@ export async function handleListEmbeddingModels(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     model_count: models.length,
                     models: models
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -29,7 +28,7 @@ export async function handleListEmbeddingModels(server, args) {
  */
 export const listEmbeddingModelsDefinition = {
     name: 'list_embedding_models',
-    description: 'List available embedding models configured on the Letta server',
+    description: 'List available embedding models configured on the Letta server. Use with create_agent or modify_agent to set agent embedding preferences.',
     inputSchema: {
         type: 'object',
         properties: {}, // No input arguments needed

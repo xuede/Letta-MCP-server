@@ -44,7 +44,6 @@ export async function handleListMcpToolsByServer(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     mcp_server_name: args.mcp_server_name,
                     pagination: {
                         page,
@@ -55,8 +54,8 @@ export async function handleListMcpToolsByServer(server, args) {
                         hasPreviousPage: page > 1
                     },
                     tool_count: paginatedTools.length,
-                    tools: paginatedTools // These are MCPTool definitions
-                }, null, 2),
+                    tools: paginatedTools
+                }),
             }],
         };
     } catch (error) {
@@ -75,7 +74,7 @@ export async function handleListMcpToolsByServer(server, args) {
  */
 export const listMcpToolsByServerDefinition = {
     name: 'list_mcp_tools_by_server',
-    description: 'List all available tools for a specific MCP server',
+    description: 'List all available tools for a specific MCP server. Use list_mcp_servers first to see available servers, then add_mcp_tool_to_letta to import tools into Letta.',
     inputSchema: {
         type: 'object',
         properties: {

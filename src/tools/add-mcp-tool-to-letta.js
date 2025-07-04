@@ -109,22 +109,14 @@ export async function handleAddMcpToolToLetta(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    overall_success: attachSuccess, // Overall success depends on attachment
-                    registration: {
-                        success: true,
-                        message: `Successfully registered MCP tool '${mcp_server_name}/${mcp_tool_name}' as Letta tool '${lettaToolName}'.`,
-                        letta_tool_id: lettaToolId,
-                        letta_tool_name: lettaToolName,
-                    },
-                    attachment: {
-                        success: attachSuccess,
-                        message: attachMessage,
-                        agent_id: agent_id,
-                        error: attachError,
-                    },
+                    letta_tool_id: lettaToolId,
+                    letta_tool_name: lettaToolName,
+                    agent_id: agent_id,
+                    attached: attachSuccess,
                     mcp_server_name: mcp_server_name,
                     mcp_tool_name: mcp_tool_name,
-                }, null, 2),
+                    ...(attachError ? { error: attachError } : {})
+                }),
             }],
             isError: !attachSuccess // Consider it an error if attachment failed
         };
@@ -141,7 +133,7 @@ export async function handleAddMcpToolToLetta(server, args) {
  */
 export const addMcpToolToLettaDefinition = {
     name: 'add_mcp_tool_to_letta',
-    description: 'Registers a tool from a connected MCP server as a native Letta tool AND attaches it to a specified agent.',
+    description: 'Registers a tool from a connected MCP server as a native Letta tool AND attaches it to a specified agent. Use list_mcp_tools_by_server to find available tools, and list_agents to get agent IDs.',
     inputSchema: {
         type: 'object',
         properties: {

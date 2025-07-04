@@ -55,14 +55,12 @@ export async function handleCreateMemoryBlock(server, args) {
                 content: [{
                     type: 'text',
                     text: JSON.stringify({
-                        success: true,
-                        message: `Memory block "${args.name}" created and attached to agent ${agentName}.`,
                         block_id: blockId,
-                        block_name: args.name,
+                        name: args.name,
+                        label: args.label,
                         agent_id: args.agent_id,
-                        agent_name: agentName,
-                        label: args.label
-                    }, null, 2),
+                        agent_name: agentName
+                    }),
                 }],
             };
         } else {
@@ -71,12 +69,10 @@ export async function handleCreateMemoryBlock(server, args) {
                 content: [{
                     type: 'text',
                     text: JSON.stringify({
-                        success: true,
-                        message: `Memory block "${args.name}" created successfully.`,
                         block_id: blockId,
-                        block_name: args.name,
+                        name: args.name,
                         label: args.label
-                    }, null, 2),
+                    }),
                 }],
             };
         }
@@ -90,7 +86,7 @@ export async function handleCreateMemoryBlock(server, args) {
  */
 export const createMemoryBlockToolDefinition = {
     name: 'create_memory_block',
-    description: 'Create a new memory block in the Letta system',
+    description: 'Create a new memory block in the Letta system. Common labels: "persona", "human", "system". Use attach_memory_block to link to agents, or update_memory_block to modify later.',
     inputSchema: {
         type: 'object',
         properties: {

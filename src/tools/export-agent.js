@@ -84,29 +84,22 @@ export async function handleExportAgent(server, args) {
 
         // Step 4: Prepare and return result
         const resultPayload = {
-            success: true,
-            message: `Agent ${agentId} exported successfully to ${absoluteOutputPath}.`,
+            agent_id: agentId,
             file_path: absoluteOutputPath,
         };
 
-        if (xbackboneResult) {
-            resultPayload.xbackbone = xbackboneResult;
-            if (!xbackboneResult.error) {
-                 resultPayload.message += ` Uploaded to XBackbone: ${xbackboneResult.url}`;
-            } else {
-                 resultPayload.message += ` XBackbone upload failed: ${xbackboneResult.error}`;
-            }
+        if (xbackboneResult && !xbackboneResult.error) {
+            resultPayload.xbackbone_url = xbackboneResult.url;
         }
 
         if (returnBase64) {
             resultPayload.base64_data = Buffer.from(agentJsonString).toString('base64');
-            resultPayload.mime_type = 'application/json';
         }
 
         return {
             content: [{
                 type: 'text',
-                text: JSON.stringify(resultPayload, null, 2),
+                text: JSON.stringify(resultPayload),
             }],
         };
 
@@ -125,7 +118,7 @@ export async function handleExportAgent(server, args) {
  */
 export const exportAgentDefinition = {
     name: 'export_agent',
-    description: "Export an agent's configuration to a JSON file and optionally upload it.",
+    description: "Export an agent's configuration to a JSON file and optionally upload it. Use import_agent to recreate the agent later, or clone_agent for a quick copy. Use list_agents to find agent IDs.",
     inputSchema: {
         type: 'object',
         properties: {

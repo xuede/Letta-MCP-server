@@ -54,10 +54,9 @@ export async function handleImportAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Agent imported successfully from ${args.file_path}. New agent ID: ${importedAgentState.id}`,
+                    agent_id: importedAgentState.id,
                     agent: importedAgentState
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -77,7 +76,7 @@ export async function handleImportAgent(server, args) {
  */
 export const importAgentDefinition = {
     name: 'import_agent',
-    description: 'Import a serialized agent JSON file and recreate the agent in the system.',
+    description: 'Import a serialized agent JSON file and recreate the agent in the system. Use export_agent to create the JSON file, then modify_agent or attach_tool to customize the imported agent.',
     inputSchema: {
         type: 'object',
         properties: {

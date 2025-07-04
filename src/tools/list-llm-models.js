@@ -13,10 +13,9 @@ export async function handleListLlmModels(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     model_count: models.length,
                     models: models
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -29,7 +28,7 @@ export async function handleListLlmModels(server, args) {
  */
 export const listLlmModelsDefinition = {
     name: 'list_llm_models',
-    description: 'List available LLM models configured on the Letta server',
+    description: 'List available LLM models configured on the Letta server. Use with create_agent or modify_agent to set agent model preferences.',
     inputSchema: {
         type: 'object',
         properties: {}, // No input arguments needed

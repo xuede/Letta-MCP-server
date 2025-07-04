@@ -25,10 +25,7 @@ export async function handleReadMemoryBlock(server, args) {
         return {
             content: [{
                 type: 'text',
-                text: JSON.stringify({
-                    success: true,
-                    block: response.data
-                }, null, 2),
+                text: JSON.stringify(response.data),
             }]
         };
     } catch (error) {
@@ -41,7 +38,7 @@ export async function handleReadMemoryBlock(server, args) {
  */
 export const readMemoryBlockToolDefinition = {
     name: 'read_memory_block',
-    description: 'Get full details of a specific memory block by ID',
+    description: 'Get full details of a specific memory block by ID. Use list_memory_blocks to find block IDs. After reading, use update_memory_block to modify content.',
     inputSchema: {
         type: 'object',
         properties: {

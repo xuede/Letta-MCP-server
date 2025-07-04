@@ -22,9 +22,9 @@ export async function handleDeletePassage(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Passage ${args.memory_id} for agent ${args.agent_id} deleted successfully.`
-                }, null, 2),
+                    memory_id: args.memory_id,
+                    agent_id: args.agent_id
+                }),
             }],
         };
     } catch (error) {
@@ -41,7 +41,7 @@ export async function handleDeletePassage(server, args) {
  */
 export const deletePassageDefinition = {
     name: 'delete_passage',
-    description: "Delete a memory from an agent's archival memory store.",
+    description: "Delete a memory from an agent's archival memory store. Use list_passages to find memory IDs. WARNING: This action is permanent.",
     inputSchema: {
         type: 'object',
         properties: {

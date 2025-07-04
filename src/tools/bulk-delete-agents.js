@@ -42,10 +42,9 @@ export async function handleBulkDeleteAgents(server, args) {
                     content: [{
                         type: 'text',
                         text: JSON.stringify({
-                            success: true,
                             message: "No agents found matching the specified filter.",
                             results: []
-                        }, null, 2),
+                        }),
                     }],
                 };
             }
@@ -81,10 +80,13 @@ export async function handleBulkDeleteAgents(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true, // Overall tool execution was successful
-                    message: `Attempted to delete ${agentsToDelete.length} agents. Success: ${successCount}, Failed: ${errorCount}.`,
+                    summary: {
+                        total_agents: agentsToDelete.length,
+                        success_count: successCount,
+                        error_count: errorCount
+                    },
                     results: results
-                }, null, 2),
+                }),
             }],
         };
 
@@ -100,7 +102,7 @@ export async function handleBulkDeleteAgents(server, args) {
  */
 export const bulkDeleteAgentsDefinition = {
     name: 'bulk_delete_agents',
-    description: 'Deletes multiple agents based on filter criteria (name or tags) or a specific list of IDs.',
+    description: 'Deletes multiple agents based on filter criteria (name or tags) or a specific list of IDs. Use list_agents first to identify agents to delete. WARNING: This action is permanent.',
     inputSchema: {
         type: 'object',
         properties: {

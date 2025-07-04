@@ -31,10 +31,9 @@ export async function handleListAgents(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     count: summarizedAgents.length,
                     agents: summarizedAgents // Use summarized list
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -50,7 +49,7 @@ export async function handleListAgents(server, args) {
  */
 export const listAgentsToolDefinition = {
     name: 'list_agents',
-    description: 'List all available agents in the Letta system',
+    description: 'List all available agents in the Letta system. Use with create_agent to add new ones, get_agent_summary for details, or prompt_agent to interact with them.',
     inputSchema: {
         type: 'object',
         properties: {

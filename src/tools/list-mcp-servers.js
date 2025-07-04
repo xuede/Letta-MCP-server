@@ -13,10 +13,9 @@ export async function handleListMcpServers(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     server_count: Object.keys(servers).length,
-                    servers: servers // Returns an object like { "server_name": { config... } }
-                }, null, 2),
+                    servers: servers
+                }),
             }],
         };
     } catch (error) {
@@ -29,7 +28,7 @@ export async function handleListMcpServers(server, args) {
  */
 export const listMcpServersDefinition = {
     name: 'list_mcp_servers',
-    description: 'List all configured MCP servers on the Letta server',
+    description: 'List all configured MCP servers on the Letta server. Use with list_mcp_tools_by_server to explore available tools from each server.',
     inputSchema: {
         type: 'object',
         properties: {}, // No input arguments needed

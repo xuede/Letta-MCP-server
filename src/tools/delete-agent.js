@@ -19,9 +19,8 @@ export async function handleDeleteAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Agent ${args.agent_id} deleted successfully.`
-                }, null, 2),
+                    agent_id: args.agent_id
+                }),
             }],
         };
     } catch (error) {
@@ -38,7 +37,7 @@ export async function handleDeleteAgent(server, args) {
  */
 export const deleteAgentDefinition = {
     name: 'delete_agent',
-    description: 'Delete a specific agent by ID',
+    description: 'Delete a specific agent by ID. Use list_agents to find agent IDs. For bulk deletion, use bulk_delete_agents. WARNING: This action is permanent.',
     inputSchema: {
         type: 'object',
         properties: {

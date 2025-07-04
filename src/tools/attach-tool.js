@@ -217,13 +217,11 @@ export async function handleAttachTool(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: overallSuccess,
-                    message: finalMessage,
                     agent_id: agent_id,
                     agent_name: agentName,
                     processing_summary: processingResults,
                     attachment_summary: attachmentResults
-                }, null, 2),
+                }),
             }],
             isError: !overallSuccess
         };
@@ -239,7 +237,7 @@ export async function handleAttachTool(server, args) {
  */
 export const attachToolToolDefinition = {
     name: 'attach_tool',
-    description: 'Attach one or more tools (by ID or name) to an agent. If a name corresponds to an MCP tool not yet in Letta, it will be registered first.',
+    description: 'Attach one or more tools (by ID or name) to an agent. If a name corresponds to an MCP tool not yet in Letta, it will be registered first. Find tools with list_mcp_tools_by_server or create custom ones with upload_tool. Use list_agent_tools to verify attachment.',
     inputSchema: {
         type: 'object',
         properties: {

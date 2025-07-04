@@ -17,12 +17,11 @@ export async function handleListAgentTools(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     agent_id: args.agent_id,
                     agent_name: agentName,
                     tool_count: tools.length,
                     tools: tools
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -35,7 +34,7 @@ export async function handleListAgentTools(server, args) {
  */
 export const listAgentToolsDefinition = {
     name: 'list_agent_tools',
-    description: 'List all tools available for a specific agent',
+    description: 'List all tools available for a specific agent. Use attach_tool to add more tools or list_mcp_tools_by_server to discover available tools.',
     inputSchema: {
         type: 'object',
         properties: {

@@ -61,7 +61,6 @@ export async function handleGetAgentSummary(server, args) {
 
         // Construct the summary
         const summary = {
-            success: true,
             agent_id: agentState.id,
             name: agentState.name,
             description: agentState.description,
@@ -78,7 +77,7 @@ export async function handleGetAgentSummary(server, args) {
         return {
             content: [{
                 type: 'text',
-                text: JSON.stringify(summary, null, 2),
+                text: JSON.stringify(summary),
             }],
         };
 
@@ -94,7 +93,7 @@ export async function handleGetAgentSummary(server, args) {
  */
 export const getAgentSummaryDefinition = {
     name: 'get_agent_summary',
-    description: "Provides a concise summary of an agent's configuration, including core memory snippets and attached tool/source names.",
+    description: "Provides a concise summary of an agent's configuration, including core memory snippets and attached tool/source names. Use list_agents to find agent IDs. Follow up with modify_agent to change settings or attach_tool to add capabilities.",
     inputSchema: {
         type: 'object',
         properties: {

@@ -78,11 +78,8 @@ export async function handleModifyPassage(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Passage ${args.memory_id} for agent ${args.agent_id} modified successfully.`,
-                    passages: modifiedPassages,
-                    embeddings_included: includeEmbeddings
-                }, null, 2),
+                    passages: modifiedPassages
+                }),
             }],
         };
     } catch (error) {
@@ -104,7 +101,7 @@ export async function handleModifyPassage(server, args) {
  */
 export const modifyPassageDefinition = {
     name: 'modify_passage',
-    description: "Modify a memory in the agent's archival memory store.",
+    description: "Modify a memory in the agent's archival memory store. Use list_passages to find memory IDs. Currently only supports updating the text content.",
     inputSchema: {
         type: 'object',
         properties: {

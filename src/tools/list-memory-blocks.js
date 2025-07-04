@@ -97,29 +97,24 @@ export async function handleListMemoryBlocks(server, args) {
         });
         
         // Format the response
+        const response = {
+            blocks: formattedBlocks
+        };
+        
+        // Only include pagination if there are more blocks than pageSize
+        if (totalBlocks > pageSize) {
+            response.pagination = {
+                page: page,
+                pageSize: pageSize,
+                totalBlocks: totalBlocks,
+                totalPages: totalPages
+            };
+        }
+        
         return {
             content: [{
                 type: 'text',
-                text: JSON.stringify({
-                    success: true,
-                    pagination: {
-                        page: page,
-                        pageSize: pageSize,
-                        totalBlocks: totalBlocks,
-                        totalPages: totalPages,
-                        hasNextPage: page < totalPages,
-                        hasPreviousPage: page > 1
-                    },
-                    block_count: formattedBlocks.length,
-                    blocks: formattedBlocks,
-                    agent_specific: args && args.agent_id ? true : false,
-                    filters: {
-                        label: args?.label,
-                        name: args?.name,
-                        templates_only: args?.templates_only,
-                        text_filter: args?.filter
-                    }
-                }, null, 2),
+                text: JSON.stringify(response),
             }],
         };
     } catch (error) {
@@ -132,7 +127,7 @@ export async function handleListMemoryBlocks(server, args) {
  */
 export const listMemoryBlocksToolDefinition = {
     name: 'list_memory_blocks',
-    description: 'List all memory blocks available in the Letta system',
+    description: 'List all memory blocks available in the Letta system. Use create_memory_block to add new ones, update_memory_block to modify, or attach_memory_block to link them to agents.',
     inputSchema: {
         type: 'object',
         properties: {

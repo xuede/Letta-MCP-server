@@ -59,11 +59,9 @@ export async function handleCreateAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Agent ${args.name} created successfully with ID: ${agentId}`,
                     agent_id: agentId,
                     capabilities,
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -76,7 +74,7 @@ export async function handleCreateAgent(server, args) {
  */
 export const createAgentToolDefinition = {
     name: 'create_agent',
-    description: 'Create a new Letta agent with specified configuration',
+    description: 'Create a new Letta agent with specified configuration. After creation, use attach_tool to add capabilities, attach_memory_block to configure memory, or prompt_agent to start conversations.',
     inputSchema: {
         type: 'object',
         properties: {

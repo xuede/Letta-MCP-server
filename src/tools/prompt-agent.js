@@ -94,13 +94,11 @@ export async function handlePromptAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     agent_id: args.agent_id,
                     agent_name: agentName,
                     message: args.message,
-                    response: responseText,
-                    raw_response_length: typeof response.data === 'string' ? response.data.length : JSON.stringify(response.data).length
-                }, null, 2),
+                    response: responseText
+                }),
             }],
         };
     } catch (error) {
@@ -113,7 +111,7 @@ export async function handlePromptAgent(server, args) {
  */
 export const promptAgentToolDefinition = {
     name: 'prompt_agent',
-    description: 'Send a message to an agent and get a response',
+    description: 'Send a message to an agent and get a response. Ensure the agent has necessary tools attached (see attach_tool) first. Use list_agents to find agent IDs.',
     inputSchema: {
         type: 'object',
         properties: {

@@ -31,11 +31,8 @@ export async function handleCreatePassage(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Passage created successfully for agent ${args.agent_id}.`,
-                    passages: createdPassages, // API returns an array, usually with one element
-                    embeddings_included: includeEmbeddings
-                }, null, 2),
+                    passages: createdPassages
+                }),
             }],
         };
     } catch (error) {
@@ -57,7 +54,7 @@ export async function handleCreatePassage(server, args) {
  */
 export const createPassageDefinition = {
     name: 'create_passage',
-    description: "Insert a memory into an agent's archival memory store.",
+    description: "Insert a memory into an agent's archival memory store. Use list_passages to view existing memories, modify_passage to edit, or delete_passage to remove.",
     inputSchema: {
         type: 'object',
         properties: {

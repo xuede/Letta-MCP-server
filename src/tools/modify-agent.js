@@ -22,10 +22,8 @@ export async function handleModifyAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    message: `Agent ${args.agent_id} updated successfully.`,
                     agent: updatedAgentState
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -51,7 +49,7 @@ export async function handleModifyAgent(server, args) {
  */
 export const modifyAgentDefinition = {
     name: 'modify_agent',
-    description: 'Update an existing agent by ID with provided data',
+    description: 'Update an existing agent by ID with provided data. Use get_agent_summary to see current config, list_llm_models/list_embedding_models for model options. For tools, use attach_tool instead.',
     inputSchema: {
         type: 'object',
         properties: {

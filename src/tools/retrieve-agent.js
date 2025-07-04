@@ -18,9 +18,8 @@ export async function handleRetrieveAgent(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
                     agent: agentState
-                }, null, 2),
+                }),
             }],
         };
     } catch (error) {
@@ -37,7 +36,7 @@ export async function handleRetrieveAgent(server, args) {
  */
 export const retrieveAgentDefinition = {
     name: 'retrieve_agent',
-    description: 'Get the state of a specific agent by ID',
+    description: 'Get the full state of a specific agent by ID. Similar to get_agent_summary but returns complete details. Use list_agents to find agent IDs.',
     inputSchema: {
         type: 'object',
         properties: {

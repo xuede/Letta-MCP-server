@@ -35,13 +35,8 @@ export async function handleListPassages(server, args) {
             content: [{
                 type: 'text',
                 text: JSON.stringify({
-                    success: true,
-                    agent_id: args.agent_id,
-                    passage_count: passages.length,
-                    passages: passages,
-                    embeddings_included: includeEmbeddings
-                    // Note: The API doesn't seem to return pagination info like next/prev cursors directly in this response
-                }, null, 2),
+                    passages: passages
+                }),
             }],
         };
     } catch (error) {
@@ -58,7 +53,7 @@ export async function handleListPassages(server, args) {
  */
 export const listPassagesDefinition = {
     name: 'list_passages',
-    description: "Retrieve the memories in an agent's archival memory store (paginated query).",
+    description: "Retrieve the memories in an agent's archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.",
     inputSchema: {
         type: 'object',
         properties: {
