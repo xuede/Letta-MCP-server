@@ -12,10 +12,10 @@ This repository contains a server that provides tools for agent management, memo
 
 ## Repository Structure
 
-- `index.js` - Main entry point
-- `core/` - Core server functionality
-- `tools/` - Individual tool implementations
-- `transports/` - Server transport implementations (stdio and SSE)
+- `src/index.js` - Main entry point
+- `src/core/` - Core server functionality
+- `src/tools/` - Individual tool implementations
+- `src/transports/` - Server transport implementations (stdio, SSE, HTTP)
 
 ## Development Guidelines
 
@@ -23,3 +23,4 @@ This repository contains a server that provides tools for agent management, memo
 - Follow the existing error handling patterns
 - Maintain backward compatibility when possible
 - Add appropriate logging for new functionality
+- HTTP transport is the default production transport

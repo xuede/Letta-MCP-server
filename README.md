@@ -30,10 +30,16 @@ docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp 
 
 ## Directory Structure
 
-- index.js - Main entry point
-- `core/` - Core server functionality
-- `tools/` - Individual tool implementations
-- `transports/` - Server transport implementations (stdio and SSE)
+- `src/index.js` - Main entry point
+- `src/core/` - Core server functionality
+- `src/tools/` - Tool implementations organized by category:
+  - `agents/` - Agent management tools
+  - `memory/` - Memory block tools
+  - `passages/` - Passage management tools
+  - `tools/` - Tool attachment and management
+  - `mcp/` - MCP server integration tools
+  - `models/` - Model listing tools
+- `src/transports/` - Server transport implementations (stdio, SSE, HTTP)
 
 ## Available Tools
 
