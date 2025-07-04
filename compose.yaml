@@ -1,5 +1,5 @@
 services:
-  mcp-everything:
+  letta-mcp:
     image: ghcr.io/oculairmedia/letta-mcp-server:da9ac4d68a21b7f79586b63fbf95dfe4245f4424
     ports:
       - "${PORT:-3001}:3001"
