@@ -18,7 +18,6 @@ RUN npm install dotenv
 
 # Copy source code
 COPY src ./src
-COPY index.js ./
 
 # Create a non-root user and switch to it
 RUN groupadd -r letta && useradd -r -g letta letta
