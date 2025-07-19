@@ -15,8 +15,8 @@ export async function handleAddMcpToolToLetta(server, args) {
             throw new Error('Missing required argument: agent_id');
         }
 
-        const { tool_name, agent_id } = args; // Use new arguments
-        const mcp_tool_name = tool_name; // Alias for clarity later
+        const { tool_name, agent_id } = args;
+        const mcp_tool_name = tool_name;
 
         // Headers for API requests
         const headers = server.getApiHeaders();
@@ -67,7 +67,6 @@ export async function handleAddMcpToolToLetta(server, args) {
         // Headers for API requests
         // Note: The API spec didn't explicitly require user_id for this endpoint,
         // but adding it might be necessary depending on Letta's auth setup.
-        // If issues arise, consider adding: headers['user_id'] = args.user_id; (and add user_id to schema)
 
         logger.info(
             `Attempting to register MCP tool ${mcp_server_name}/${mcp_tool_name} with Letta...`,
@@ -75,7 +74,7 @@ export async function handleAddMcpToolToLetta(server, args) {
         const registerUrl = `/tools/mcp/servers/${mcp_server_name}/${mcp_tool_name}`;
 
         // Make the POST request to register the tool
-        logger.info(`DEBUG: Calling registration URL: POST ${registerUrl}`); // Added for debugging
+        logger.info(`DEBUG: Calling registration URL: POST ${registerUrl}`);
         const registerResponse = await server.api.post(registerUrl, {}, { headers });
 
         // Check registration response data for success and the new tool ID
@@ -86,7 +85,7 @@ export async function handleAddMcpToolToLetta(server, args) {
         }
 
         const lettaToolId = registerResponse.data.id;
-        const lettaToolName = registerResponse.data.name || mcp_tool_name; // Use returned name if available
+        const lettaToolName = registerResponse.data.name || mcp_tool_name;
         logger.info(`Successfully registered tool. Letta Tool ID: ${lettaToolId}`);
 
         // Now, attempt to attach the newly registered tool to the agent
@@ -99,10 +98,8 @@ export async function handleAddMcpToolToLetta(server, args) {
         try {
             // Use specific headers for the agent context if needed, otherwise reuse
             const attachHeaders = { ...headers };
-            // If user_id needs to be agent_id for this call, uncomment below
-            // attachHeaders['user_id'] = agent_id;
 
-            logger.info(`DEBUG: Calling attachment URL: PATCH ${attachUrl}`); // Added for debugging
+            logger.info(`DEBUG: Calling attachment URL: PATCH ${attachUrl}`);
             const attachResponse = await server.api.patch(
                 attachUrl,
                 {},
@@ -166,7 +163,6 @@ export const addMcpToolToLettaDefinition = {
         type: 'object',
         properties: {
             tool_name: {
-                // Changed from mcp_tool_name
                 type: 'string',
                 description: 'The name of the MCP tool to find, register, and attach.',
             },
@@ -174,11 +170,6 @@ export const addMcpToolToLettaDefinition = {
                 type: 'string',
                 description: 'The ID of the agent to attach the newly registered tool to.',
             },
-            // Optional: Add user_id if needed for authentication/authorization
-            // user_id: {
-            //     type: 'string',
-            //     description: 'Optional user ID if required by the Letta API.',
-            // },
         },
         required: ['tool_name', 'agent_id'], // Updated required fields
     },

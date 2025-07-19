@@ -65,7 +65,6 @@ import {
     handleListEmbeddingModels,
     listEmbeddingModelsDefinition,
 } from './models/list-embedding-models.js';
-// Removed import for add-mcp-tool-to-letta.js
 import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
@@ -81,19 +80,17 @@ export function registerToolHandlers(server) {
     // Register tool definitions
     server.server.setRequestHandler(ListToolsRequestSchema, async () => ({
         tools: [
-            // Original Tools
             listAgentsToolDefinition,
             promptAgentToolDefinition,
             listAgentToolsDefinition,
             createAgentToolDefinition,
-            attachToolToolDefinition, // Enhanced version
+            attachToolToolDefinition,
             listMemoryBlocksToolDefinition,
             readMemoryBlockToolDefinition,
             updateMemoryBlockToolDefinition,
             attachMemoryBlockToolDefinition,
             createMemoryBlockToolDefinition,
             uploadToolToolDefinition,
-            // Added Tools
             listMcpToolsByServerDefinition,
             listMcpServersDefinition,
             retrieveAgentDefinition,
@@ -118,7 +115,6 @@ export function registerToolHandlers(server) {
     // Register tool call handler
     server.server.setRequestHandler(CallToolRequestSchema, async (request) => {
         switch (request.params.name) {
-        // Original Tools
         case 'list_agents':
             return handleListAgents(server, request.params.arguments);
         case 'prompt_agent':
@@ -127,7 +123,7 @@ export function registerToolHandlers(server) {
             return handleListAgentTools(server, request.params.arguments);
         case 'create_agent':
             return handleCreateAgent(server, request.params.arguments);
-        case 'attach_tool': // Enhanced version
+        case 'attach_tool':
             return handleAttachTool(server, request.params.arguments);
         case 'list_memory_blocks':
             return handleListMemoryBlocks(server, request.params.arguments);
@@ -141,7 +137,6 @@ export function registerToolHandlers(server) {
             return handleCreateMemoryBlock(server, request.params.arguments);
         case 'upload_tool':
             return handleUploadTool(server, request.params.arguments);
-            // Added Tools
         case 'list_mcp_tools_by_server':
             return handleListMcpToolsByServer(server, request.params.arguments);
         case 'list_mcp_servers':
@@ -193,7 +188,7 @@ export const toolDefinitions = [
     promptAgentToolDefinition,
     listAgentToolsDefinition,
     createAgentToolDefinition,
-    attachToolToolDefinition, // Enhanced version
+    attachToolToolDefinition,
     listMemoryBlocksToolDefinition,
     readMemoryBlockToolDefinition,
     updateMemoryBlockToolDefinition,
@@ -226,7 +221,7 @@ export const toolHandlers = {
     handlePromptAgent,
     handleListAgentTools,
     handleCreateAgent,
-    handleAttachTool, // Enhanced version
+    handleAttachTool,
     handleListMemoryBlocks,
     handleReadMemoryBlock,
     handleUpdateMemoryBlock,

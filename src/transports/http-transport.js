@@ -348,7 +348,7 @@ export async function runHTTP(server) {
 
         process.on('SIGINT', shutdownHandler);
         process.on('SIGTERM', shutdownHandler);
-        
+
         // Return the server instance for testing
         return httpServer;
     } catch (error) {

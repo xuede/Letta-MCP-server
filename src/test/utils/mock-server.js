@@ -71,8 +71,8 @@ export function createMockMCPServer() {
                 capabilities: {},
                 serverInfo: {
                     name: 'letta-mcp-server',
-                    version: '1.0.0'
-                }
+                    version: '1.0.0',
+                },
             };
         }
         return { result: {} };

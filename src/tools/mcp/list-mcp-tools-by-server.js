@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('list-mcp-tools-by-server');
+
 /**
  * Tool handler for listing all available tools for a specific MCP server
  */
@@ -62,7 +66,7 @@ export async function handleListMcpToolsByServer(server, args) {
             ],
         };
     } catch (error) {
-        console.error('Full error:', error); // Keep detailed logging
+        logger.error('Full error:', error); // Keep detailed logging
         // Handle potential 404 if server name not found, or other API errors
         if (error.response && error.response.status === 404) {
             server.createErrorResponse(`MCP Server not found: ${args.mcp_server_name}`);
