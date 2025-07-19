@@ -83,7 +83,11 @@ describe('SSE Transport Integration', () => {
     
     describe('Server Initialization', () => {
         it('should start SSE server on specified port', async () => {
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
+            const response = await request(`http://localhost:${port}`)
                 .get('/health')
                 .expect(200);
             
@@ -91,7 +95,11 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should handle initial SSE connection', async () => {
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
+            const response = await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream')
                 .expect(200);
@@ -103,8 +111,12 @@ describe('SSE Transport Integration', () => {
     });
     
     describe('SSE Connection Management', () => {
-        it('should establish SSE connection with unique client ID', (done) => {
-            const eventSource = new EventSource(`http://localhost:${TEST_PORT}/`);
+        it('should establish SSE connection with unique client ID', async (done) => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
+            const eventSource = new EventSource(`http://localhost:${port}/`);
             let clientId;
             
             eventSource.onopen = () => {
@@ -120,12 +132,16 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should handle multiple concurrent SSE connections', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             const connections = [];
             const clientIds = new Set();
             
             // Create 3 concurrent connections
             for (let i = 0; i < 3; i++) {
-                const response = await request(`http://localhost:${TEST_PORT}`)
+                const response = await request(`http://localhost:${port}`)
                     .get('/')
                     .set('Accept', 'text/event-stream')
                     .expect(200);
@@ -138,8 +154,12 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should track active connections', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Establish connection
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const response = await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream')
                 .set('X-Forwarded-For', '192.168.1.100')
@@ -152,8 +172,12 @@ describe('SSE Transport Integration', () => {
     
     describe('Message Handling', () => {
         it('should handle POST messages to /message endpoint', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // First establish SSE connection
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
@@ -164,7 +188,7 @@ describe('SSE Transport Integration', () => {
                 id: 1
             };
             
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const response = await request(`http://localhost:${port}`)
                 .post('/message')
                 .send(message)
                 .expect(200);
@@ -173,10 +197,14 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should broadcast messages to all connected clients', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Establish multiple connections
             const clients = [];
             for (let i = 0; i < 2; i++) {
-                await request(`http://localhost:${TEST_PORT}`)
+                await request(`http://localhost:${port}`)
                     .get('/')
                     .set('Accept', 'text/event-stream');
                 clients.push(i);
@@ -190,7 +218,7 @@ describe('SSE Transport Integration', () => {
                 id: 1
             };
             
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .post('/message')
                 .send(message)
                 .expect(200);
@@ -202,13 +230,17 @@ describe('SSE Transport Integration', () => {
     
     describe('Reconnection Logic', () => {
         it('should attempt reconnection on connection failure', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Mock connection failure then success
             mockServer.server.connect
                 .mockRejectedValueOnce(new Error('Connection failed'))
                 .mockResolvedValueOnce();
             
             // Attempt connection
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const response = await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
@@ -220,6 +252,10 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should implement exponential backoff for reconnections', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Mock multiple connection failures
             mockServer.server.connect
                 .mockRejectedValueOnce(new Error('Failed 1'))
@@ -229,7 +265,7 @@ describe('SSE Transport Integration', () => {
             const startTime = Date.now();
             
             // Attempt connection
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
@@ -244,11 +280,15 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should respect maximum reconnection attempts', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Mock all connection attempts to fail
             mockServer.server.connect.mockRejectedValue(new Error('Persistent failure'));
             
             // Attempt connection
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
@@ -262,10 +302,14 @@ describe('SSE Transport Integration', () => {
     
     describe('Connection Cleanup', () => {
         it('should clean up connections on client disconnect', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             const controller = new AbortController();
             
             // Establish connection
-            const responsePromise = request(`http://localhost:${TEST_PORT}`)
+            const responsePromise = request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream')
                 .timeout({ response: 100 }) // Short timeout to trigger disconnect
@@ -281,6 +325,10 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should handle connection errors gracefully', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Mock transport creation to fail
             const originalSSEServerTransport = (await import('@modelcontextprotocol/sdk/server/sse.js')).SSEServerTransport;
             vi.doMock('@modelcontextprotocol/sdk/server/sse.js', () => ({
@@ -292,12 +340,12 @@ describe('SSE Transport Integration', () => {
             }));
             
             // Attempt connection should not crash server
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
             // Server should still be running
-            const healthResponse = await request(`http://localhost:${TEST_PORT}`)
+            const healthResponse = await request(`http://localhost:${port}`)
                 .get('/health')
                 .expect(200);
             
@@ -307,13 +355,17 @@ describe('SSE Transport Integration', () => {
     
     describe('Error Handling', () => {
         it('should handle malformed messages gracefully', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Establish connection first
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
             // Send malformed JSON
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const response = await request(`http://localhost:${port}`)
                 .post('/message')
                 .set('Content-Type', 'application/json')
                 .send('{"invalid json}')
@@ -323,13 +375,17 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should handle transport errors', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Mock transport to throw error
             mockServer.server.connect.mockImplementation(() => {
                 throw new Error('Transport error');
             });
             
             // Connection should fail but not crash
-            const response = await request(`http://localhost:${TEST_PORT}`)
+            const response = await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream');
             
@@ -340,9 +396,13 @@ describe('SSE Transport Integration', () => {
     
     describe('Client Information Tracking', () => {
         it('should track client IP addresses', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             const testIp = '10.0.0.1';
             
-            await request(`http://localhost:${TEST_PORT}`)
+            await request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream')
                 .set('X-Forwarded-For', testIp);
@@ -352,11 +412,15 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should generate unique client IDs', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             const clientIds = new Set();
             
             // Create multiple connections and track client IDs
             for (let i = 0; i < 5; i++) {
-                await request(`http://localhost:${TEST_PORT}`)
+                await request(`http://localhost:${port}`)
                     .get('/')
                     .set('Accept', 'text/event-stream');
             }
@@ -368,8 +432,12 @@ describe('SSE Transport Integration', () => {
     
     describe('Performance and Scalability', () => {
         it('should handle rapid connection/disconnection cycles', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             for (let i = 0; i < 10; i++) {
-                const response = await request(`http://localhost:${TEST_PORT}`)
+                const response = await request(`http://localhost:${port}`)
                     .get('/')
                     .set('Accept', 'text/event-stream')
                     .timeout({ response: 50 });
@@ -379,7 +447,7 @@ describe('SSE Transport Integration', () => {
             }
             
             // Server should still be responsive
-            const healthCheck = await request(`http://localhost:${TEST_PORT}`)
+            const healthCheck = await request(`http://localhost:${port}`)
                 .get('/health')
                 .expect(200);
             
@@ -387,10 +455,14 @@ describe('SSE Transport Integration', () => {
         });
         
         it('should maintain connection stability over time', async () => {
+            const port = getNextPort();
+            const result = await startServer(port);
+            server = result.server;
+            
             // Establish long-lived connection
             const startTime = Date.now();
             
-            const connectionPromise = request(`http://localhost:${TEST_PORT}`)
+            const connectionPromise = request(`http://localhost:${port}`)
                 .get('/')
                 .set('Accept', 'text/event-stream')
                 .timeout({ response: 5000 });
