@@ -41,6 +41,7 @@ export const fixtures = {
         minimal: {
             id: 'agent-456',
             name: 'Minimal Agent',
+            description: undefined,
             created_at: '2024-01-01T00:00:00Z',
         },
     },

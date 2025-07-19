@@ -41,14 +41,13 @@ export async function handleModifyPassage(server, args) {
             }
             // Basic check for required fields based on the schema provided by the user
             if (
-                !existingPassage.embedding ||
                 !existingPassage.embedding_config ||
                 !existingPassage.id ||
-                !existingPassage.text
+                existingPassage.text === undefined
             ) {
                 logger.error('Fetched passage object is missing required fields:', existingPassage);
                 throw new Error(
-                    `Fetched passage ${memoryId} is missing required fields (embedding, embedding_config, id, text).`,
+                    `Fetched passage ${memoryId} is missing required fields (embedding_config, id, text).`,
                 );
             }
         } catch (fetchError) {

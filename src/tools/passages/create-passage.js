@@ -5,7 +5,7 @@ export async function handleCreatePassage(server, args) {
     if (!args?.agent_id) {
         server.createErrorResponse('Missing required argument: agent_id');
     }
-    if (!args?.text) {
+    if (args?.text === undefined || args?.text === null) {
         server.createErrorResponse('Missing required argument: text');
     }
 
