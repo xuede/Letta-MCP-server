@@ -29,7 +29,7 @@ describe('Get Agent Summary', () => {
         it('should have correct tool definition', () => {
             expect(getAgentSummaryDefinition).toMatchObject({
                 name: 'get_agent_summary',
-                description: expect.stringContaining('summary of an agent\'s configuration'),
+                description: expect.stringContaining("summary of an agent's configuration"),
                 inputSchema: {
                     type: 'object',
                     properties: {

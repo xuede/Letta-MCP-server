@@ -60,7 +60,7 @@ export async function handleListPassages(server, args) {
 export const listPassagesDefinition = {
     name: 'list_passages',
     description:
-        'Retrieve the memories in an agent\'s archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.',
+        "Retrieve the memories in an agent's archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.",
     inputSchema: {
         type: 'object',
         properties: {

@@ -21,7 +21,7 @@ describe('List Passages', () => {
         it('should have correct tool definition', () => {
             expect(listPassagesDefinition.name).toBe('list_passages');
             expect(listPassagesDefinition.description).toContain(
-                'Retrieve the memories in an agent\'s archival memory',
+                "Retrieve the memories in an agent's archival memory",
             );
             expect(listPassagesDefinition.inputSchema.required).toEqual(['agent_id']);
             expect(listPassagesDefinition.inputSchema.properties).toHaveProperty('agent_id');
