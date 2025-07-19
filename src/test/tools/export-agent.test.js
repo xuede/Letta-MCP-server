@@ -15,16 +15,16 @@ const mockFormDataInstance = {
 
 // Mock axios globally
 const mockAxios = {
-    post: vi.fn()
+    post: vi.fn(),
 };
 
 // Mock dependencies
 vi.mock('axios', () => ({
-    default: mockAxios
+    default: mockAxios,
 }));
 
 vi.mock('form-data', () => ({
-    default: vi.fn(() => mockFormDataInstance)
+    default: vi.fn(() => mockFormDataInstance),
 }));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -239,9 +239,9 @@ describe('Export Agent', () => {
         it('should handle empty agent data', async () => {
             mockServer.api.get.mockResolvedValue({ data: null });
 
-            await expect(
-                handleExportAgent(mockServer, { agent_id: 'agent-123' }),
-            ).rejects.toThrow('Received empty data from agent export endpoint');
+            await expect(handleExportAgent(mockServer, { agent_id: 'agent-123' })).rejects.toThrow(
+                'Received empty data from agent export endpoint',
+            );
         });
 
         it('should handle API errors', async () => {
@@ -249,9 +249,9 @@ describe('Export Agent', () => {
             error.response = { status: 500, data: { detail: 'Internal server error' } };
             mockServer.api.get.mockRejectedValue(error);
 
-            await expect(
-                handleExportAgent(mockServer, { agent_id: 'agent-123' }),
-            ).rejects.toThrow(/Failed to export agent/);
+            await expect(handleExportAgent(mockServer, { agent_id: 'agent-123' })).rejects.toThrow(
+                /Failed to export agent/,
+            );
         });
 
         it('should handle missing agent_id', async () => {

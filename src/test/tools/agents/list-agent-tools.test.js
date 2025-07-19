@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleListAgentTools, listAgentToolsDefinition } from '../../../tools/agents/list-agent-tools.js';
+import {
+    handleListAgentTools,
+    listAgentToolsDefinition,
+} from '../../../tools/agents/list-agent-tools.js';
 import { z } from 'zod';
 
 describe('List Agent Tools (LMP-95)', () => {
@@ -7,7 +10,7 @@ describe('List Agent Tools (LMP-95)', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        
+
         mockServer = {
             api: {
                 get: vi.fn(),
@@ -58,14 +61,11 @@ describe('List Agent Tools (LMP-95)', () => {
             });
 
             // Verify API call
-            expect(mockServer.api.get).toHaveBeenCalledWith(
-                '/agents/agent-123',
-                {
-                    headers: {
-                        Authorization: 'Bearer test-password',
-                    },
-                }
-            );
+            expect(mockServer.api.get).toHaveBeenCalledWith('/agents/agent-123', {
+                headers: {
+                    Authorization: 'Bearer test-password',
+                },
+            });
 
             // Verify result format
             expect(result).toEqual({
@@ -84,12 +84,12 @@ describe('List Agent Tools (LMP-95)', () => {
         });
 
         it('should handle empty tool list', async () => {
-            mockServer.api.get.mockResolvedValueOnce({ 
+            mockServer.api.get.mockResolvedValueOnce({
                 data: {
                     id: 'agent-empty',
                     name: 'Empty Agent',
                     tools: [],
-                }
+                },
             });
 
             const result = await handleListAgentTools(mockServer, {
@@ -103,12 +103,12 @@ describe('List Agent Tools (LMP-95)', () => {
         });
 
         it('should handle agent without tools field', async () => {
-            mockServer.api.get.mockResolvedValueOnce({ 
+            mockServer.api.get.mockResolvedValueOnce({
                 data: {
                     id: 'agent-no-tools',
                     name: 'No Tools Agent',
                     // No tools field
-                }
+                },
             });
 
             const result = await handleListAgentTools(mockServer, {
@@ -131,16 +131,16 @@ describe('List Agent Tools (LMP-95)', () => {
             await expect(
                 handleListAgentTools(mockServer, {
                     agent_id: 'nonexistent-agent',
-                })
+                }),
             ).rejects.toThrow('Failed to fetch agent');
 
             expect(mockServer.createErrorResponse).toHaveBeenCalledWith(mockError);
         });
 
         it('should handle missing agent_id', async () => {
-            await expect(
-                handleListAgentTools(mockServer, {})
-            ).rejects.toThrow('Missing required argument: agent_id');
+            await expect(handleListAgentTools(mockServer, {})).rejects.toThrow(
+                'Missing required argument: agent_id',
+            );
         });
 
         it('should handle network errors', async () => {
@@ -151,7 +151,7 @@ describe('List Agent Tools (LMP-95)', () => {
             await expect(
                 handleListAgentTools(mockServer, {
                     agent_id: 'agent-123',
-                })
+                }),
             ).rejects.toThrow('Network error');
         });
 
@@ -166,7 +166,7 @@ describe('List Agent Tools (LMP-95)', () => {
             await expect(
                 handleListAgentTools(mockServer, {
                     agent_id: 'agent-123',
-                })
+                }),
             ).rejects.toThrow('Internal server error');
         });
 
@@ -181,18 +181,18 @@ describe('List Agent Tools (LMP-95)', () => {
             await expect(
                 handleListAgentTools(mockServer, {
                     agent_id: 'agent-123',
-                })
+                }),
             ).rejects.toThrow('Unauthorized');
         });
 
         it('should handle agent with many tools', async () => {
             const manyTools = Array.from({ length: 50 }, (_, i) => `tool-${i + 1}`);
-            mockServer.api.get.mockResolvedValueOnce({ 
+            mockServer.api.get.mockResolvedValueOnce({
                 data: {
                     id: 'agent-many-tools',
                     name: 'Many Tools Agent',
                     tools: manyTools,
-                }
+                },
             });
 
             const result = await handleListAgentTools(mockServer, {
@@ -210,12 +210,12 @@ describe('List Agent Tools (LMP-95)', () => {
     describe('Input Validation', () => {
         it('should validate required parameters', () => {
             const inputSchema = listAgentToolsDefinition.inputSchema;
-            
+
             // Check schema structure
             expect(inputSchema.type).toBe('object');
             expect(inputSchema.required).toContain('agent_id');
             expect(inputSchema.properties.agent_id.type).toBe('string');
-            
+
             // The actual validation happens in the handler
             // These tests verify the schema definition is correct
         });

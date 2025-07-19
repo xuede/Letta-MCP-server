@@ -46,7 +46,7 @@ export async function handleDeletePassage(server, args) {
 export const deletePassageDefinition = {
     name: 'delete_passage',
     description:
-        'Delete a memory from an agent\'s archival memory store. Use list_passages to find memory IDs. WARNING: This action is permanent.',
+        "Delete a memory from an agent's archival memory store. Use list_passages to find memory IDs. WARNING: This action is permanent.",
     inputSchema: {
         type: 'object',
         properties: {

@@ -15,16 +15,16 @@ const mockReadStream = {
 
 // Mock dependencies
 vi.mock('form-data', () => ({
-    default: vi.fn(() => mockFormDataInstance)
+    default: vi.fn(() => mockFormDataInstance),
 }));
 
 vi.mock('fs', () => ({
     default: {
         createReadStream: vi.fn(() => mockReadStream),
-        existsSync: vi.fn(() => true)
+        existsSync: vi.fn(() => true),
     },
     createReadStream: vi.fn(() => mockReadStream),
-    existsSync: vi.fn(() => true)
+    existsSync: vi.fn(() => true),
 }));
 
 describe('Import Agent Tool (LMP-94)', () => {
@@ -32,7 +32,7 @@ describe('Import Agent Tool (LMP-94)', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        
+
         // Reset mock behavior
         vi.mocked(fs.existsSync).mockReturnValue(true);
         vi.mocked(fs.createReadStream).mockReturnValue(mockReadStream);
@@ -103,21 +103,21 @@ describe('Import Agent Tool (LMP-94)', () => {
                         Authorization: 'Bearer test-password',
                     }),
                     params: {},
-                })
+                }),
             );
 
             // Verify FormData
             expect(mockFormDataInstance.append).toHaveBeenCalledWith(
                 'file',
                 mockReadStream,
-                'agent.json'
+                'agent.json',
             );
 
             // Verify result format
             expect(result).toHaveProperty('content');
             expect(result.content).toHaveLength(1);
             expect(result.content[0].type).toBe('text');
-            
+
             // Parse the JSON response
             const responseData = JSON.parse(result.content[0].text);
             expect(responseData.agent_id).toBe('agent-123');
@@ -135,14 +135,14 @@ describe('Import Agent Tool (LMP-94)', () => {
             await expect(
                 handleImportAgent(mockServer, {
                     file_path: '/path/to/invalid.json',
-                })
+                }),
             ).rejects.toThrow('Failed to import agent');
         });
 
         it('should handle missing file_path', async () => {
-            await expect(
-                handleImportAgent(mockServer, {})
-            ).rejects.toThrow('Missing required argument: file_path');
+            await expect(handleImportAgent(mockServer, {})).rejects.toThrow(
+                'Missing required argument: file_path',
+            );
         });
 
         it('should handle non-existent file', async () => {
@@ -151,7 +151,7 @@ describe('Import Agent Tool (LMP-94)', () => {
             await expect(
                 handleImportAgent(mockServer, {
                     file_path: '/nonexistent/agent.json',
-                })
+                }),
             ).rejects.toThrow('File not found at path');
         });
 
@@ -178,7 +178,7 @@ describe('Import Agent Tool (LMP-94)', () => {
                         override_existing_tools: true,
                         project_id: 'project-456',
                     },
-                })
+                }),
             );
         });
 
@@ -210,7 +210,7 @@ describe('Import Agent Tool (LMP-94)', () => {
             await expect(
                 handleImportAgent(mockServer, {
                     file_path: '/path/to/agent.json',
-                })
+                }),
             ).rejects.toThrow('Failed to import agent');
         });
     });
