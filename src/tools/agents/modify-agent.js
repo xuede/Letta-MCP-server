@@ -3,10 +3,10 @@
  */
 export async function handleModifyAgent(server, args) {
     if (!args?.agent_id) {
-        server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse('Missing required argument: agent_id');
     }
     if (!args?.update_data) {
-        server.createErrorResponse("Missing required argument: update_data");
+        server.createErrorResponse('Missing required argument: update_data');
     }
 
     try {
@@ -19,12 +19,14 @@ export async function handleModifyAgent(server, args) {
         const updatedAgentState = response.data; // Assuming response.data is the updated AgentState object
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent: updatedAgentState
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent: updatedAgentState,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         // Handle potential 404 if agent not found, 422 for validation errors, or other API errors
@@ -33,7 +35,9 @@ export async function handleModifyAgent(server, args) {
                 server.createErrorResponse(`Agent not found: ${args.agent_id}`);
             }
             if (error.response.status === 422) {
-                 server.createErrorResponse(`Validation error updating agent ${args.agent_id}: ${JSON.stringify(error.response.data)}`);
+                server.createErrorResponse(
+                    `Validation error updating agent ${args.agent_id}: ${JSON.stringify(error.response.data)}`,
+                );
             }
         }
         server.createErrorResponse(error);
@@ -49,7 +53,8 @@ export async function handleModifyAgent(server, args) {
  */
 export const modifyAgentDefinition = {
     name: 'modify_agent',
-    description: 'Update an existing agent by ID with provided data. Use get_agent_summary to see current config, list_llm_models/list_embedding_models for model options. For tools, use attach_tool instead.',
+    description:
+        'Update an existing agent by ID with provided data. Use get_agent_summary to see current config, list_llm_models/list_embedding_models for model options. For tools, use attach_tool instead.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -59,17 +64,18 @@ export const modifyAgentDefinition = {
             },
             update_data: {
                 type: 'object',
-                description: 'An object containing the fields to update (e.g., name, system, description, tool_ids, etc.)',
+                description:
+                    'An object containing the fields to update (e.g., name, system, description, tool_ids, etc.)',
                 // Ideally, this would mirror the UpdateAgent schema from the API spec
                 // Example properties (add more as needed based on UpdateAgent schema):
                 properties: {
-                   name: { type: 'string', description: 'New name for the agent' },
-                   system: { type: 'string', description: 'New system prompt' },
-                   description: { type: 'string', description: 'New description' },
-                   // Add other updatable fields like tool_ids, source_ids, block_ids, tags, etc.
+                    name: { type: 'string', description: 'New name for the agent' },
+                    system: { type: 'string', description: 'New system prompt' },
+                    description: { type: 'string', description: 'New description' },
+                    // Add other updatable fields like tool_ids, source_ids, block_ids, tags, etc.
                 },
-                additionalProperties: true // Allow other properties from UpdateAgent schema
-            }
+                additionalProperties: true, // Allow other properties from UpdateAgent schema
+            },
         },
         required: ['agent_id', 'update_data'],
     },

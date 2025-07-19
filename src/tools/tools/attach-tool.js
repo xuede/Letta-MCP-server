@@ -27,7 +27,9 @@ export async function handleAttachTool(server, args) {
             throw new Error('Invalid argument: tool_names must be an array.');
         }
         if (toolIdsInput.length === 0 && toolNamesInput.length === 0) {
-            throw new Error('Missing required argument: either tool_id(s) or tool_names must be provided.');
+            throw new Error(
+                'Missing required argument: either tool_id(s) or tool_names must be provided.',
+            );
         }
 
         // --- 2. Prepare Headers and Get Agent Info ---
@@ -53,17 +55,29 @@ export async function handleAttachTool(server, args) {
                 const toolResponse = await server.api.get(`/tools/${toolId}`, { headers });
                 const toolInfo = {
                     id: toolId,
-                    name: toolResponse.data?.name || `Unknown (${toolId})`
+                    name: toolResponse.data?.name || `Unknown (${toolId})`,
                 };
                 if (!toolIdsToAttach.has(toolId)) {
                     resolvedToolInfos.push(toolInfo);
                     toolIdsToAttach.add(toolId);
                 }
-                processingResults.push({ input: toolId, type: 'id', success: true, status: 'found', details: toolInfo });
+                processingResults.push({
+                    input: toolId,
+                    type: 'id',
+                    success: true,
+                    status: 'found',
+                    details: toolInfo,
+                });
             } catch (error) {
                 const message = `Provided tool ID ${toolId} not found or error fetching: ${error.message}`;
                 console.error(message);
-                processingResults.push({ input: toolId, type: 'id', success: false, status: 'error', error: message });
+                processingResults.push({
+                    input: toolId,
+                    type: 'id',
+                    success: false,
+                    status: 'error',
+                    error: message,
+                });
             }
         }
 
@@ -81,7 +95,9 @@ export async function handleAttachTool(server, args) {
                     lettaTools = [];
                 }
             } catch (listError) {
-                console.warn(`Could not list existing Letta tools: ${listError.message}. Proceeding without Letta tool check.`);
+                console.warn(
+                    `Could not list existing Letta tools: ${listError.message}. Proceeding without Letta tool check.`,
+                );
             }
 
             // 4b. Fetch all MCP servers and their tools for efficient lookup
@@ -91,52 +107,77 @@ export async function handleAttachTool(server, args) {
                 const serversResponse = await server.api.get('/tools/mcp/servers', { headers });
                 mcpServersData = serversResponse.data || {};
                 if (typeof mcpServersData !== 'object') {
-                     console.warn('Unexpected format for /tools/mcp/servers response, expected object.');
-                     mcpServersData = {};
+                    console.warn(
+                        'Unexpected format for /tools/mcp/servers response, expected object.',
+                    );
+                    mcpServersData = {};
                 }
                 const serverNames = Object.keys(mcpServersData);
                 for (const serverName of serverNames) {
                     try {
-                        const mcpToolsResponse = await server.api.get(`/tools/mcp/servers/${serverName}/tools`, { headers });
+                        const mcpToolsResponse = await server.api.get(
+                            `/tools/mcp/servers/${serverName}/tools`,
+                            { headers },
+                        );
                         if (mcpToolsResponse.data && Array.isArray(mcpToolsResponse.data)) {
-                            mcpToolsResponse.data.forEach(tool => {
-                                if (!mcpToolMap.has(tool.name)) { // Avoid overwriting if names clash, take first found
+                            mcpToolsResponse.data.forEach((tool) => {
+                                if (!mcpToolMap.has(tool.name)) {
+                                    // Avoid overwriting if names clash, take first found
                                     mcpToolMap.set(tool.name, { server: serverName, tool: tool });
                                 } else {
-                                     console.warn(`Duplicate MCP tool name found: '${tool.name}' exists on multiple servers. Using first found on server '${mcpToolMap.get(tool.name).server}'.`);
+                                    console.warn(
+                                        `Duplicate MCP tool name found: '${tool.name}' exists on multiple servers. Using first found on server '${mcpToolMap.get(tool.name).server}'.`,
+                                    );
                                 }
                             });
                         }
                     } catch (mcpListError) {
-                        console.warn(`Could not list tools for MCP server ${serverName}: ${mcpListError.message}`);
+                        console.warn(
+                            `Could not list tools for MCP server ${serverName}: ${mcpListError.message}`,
+                        );
                     }
                 }
             } catch (mcpServersError) {
-                console.warn(`Could not list MCP servers: ${mcpServersError.message}. Proceeding without MCP tool check.`);
+                console.warn(
+                    `Could not list MCP servers: ${mcpServersError.message}. Proceeding without MCP tool check.`,
+                );
             }
-
 
             // 4c. Iterate through names and resolve them
             for (const toolName of toolNamesInput) {
                 let found = false;
 
                 // Check if already resolved by ID earlier (if ID and name were both provided)
-                if (resolvedToolInfos.some(info => info.name === toolName)) {
-                     processingResults.push({ input: toolName, type: 'name', success: true, status: 'found_by_id_earlier', details: `Tool '${toolName}' was already resolved by ID.` });
-                     found = true;
-                     continue; // Skip further processing for this name
+                if (resolvedToolInfos.some((info) => info.name === toolName)) {
+                    processingResults.push({
+                        input: toolName,
+                        type: 'name',
+                        success: true,
+                        status: 'found_by_id_earlier',
+                        details: `Tool '${toolName}' was already resolved by ID.`,
+                    });
+                    found = true;
+                    continue; // Skip further processing for this name
                 }
 
                 // Try finding as existing Letta tool
-                const existingLettaTool = lettaTools.find(t => t.name === toolName);
+                const existingLettaTool = lettaTools.find((t) => t.name === toolName);
                 if (existingLettaTool) {
-                    console.log(`Found existing Letta tool: ${toolName} (ID: ${existingLettaTool.id})`);
+                    console.log(
+                        `Found existing Letta tool: ${toolName} (ID: ${existingLettaTool.id})`,
+                    );
                     const toolInfo = { id: existingLettaTool.id, name: toolName };
-                     if (!toolIdsToAttach.has(toolInfo.id)) {
+                    if (!toolIdsToAttach.has(toolInfo.id)) {
                         resolvedToolInfos.push(toolInfo);
                         toolIdsToAttach.add(toolInfo.id);
                     }
-                    processingResults.push({ input: toolName, type: 'name', success: true, status: 'found_letta', details: toolInfo });
+                    processingResults.push({
+                        input: toolName,
+                        type: 'name',
+                        success: true,
+                        status: 'found_letta',
+                        details: toolInfo,
+                    });
                     found = true;
                     continue;
                 }
@@ -145,28 +186,50 @@ export async function handleAttachTool(server, args) {
                 const mcpToolInfo = mcpToolMap.get(toolName);
                 if (mcpToolInfo) {
                     const { server: mcp_server_name, tool: mcp_tool_details } = mcpToolInfo;
-                    console.log(`Found MCP tool '${toolName}' on server '${mcp_server_name}'. Attempting registration...`);
+                    console.log(
+                        `Found MCP tool '${toolName}' on server '${mcp_server_name}'. Attempting registration...`,
+                    );
                     const registerUrl = `/tools/mcp/servers/${mcp_server_name}/${toolName}`;
                     try {
-                        const registerResponse = await server.api.post(registerUrl, {}, { headers });
+                        const registerResponse = await server.api.post(
+                            registerUrl,
+                            {},
+                            { headers },
+                        );
                         if (registerResponse.data && registerResponse.data.id) {
                             const lettaToolId = registerResponse.data.id;
                             const lettaToolName = registerResponse.data.name || toolName;
-                            console.log(`Successfully registered MCP tool. New Letta ID: ${lettaToolId}`);
+                            console.log(
+                                `Successfully registered MCP tool. New Letta ID: ${lettaToolId}`,
+                            );
                             const toolInfo = { id: lettaToolId, name: lettaToolName };
-                             if (!toolIdsToAttach.has(toolInfo.id)) {
+                            if (!toolIdsToAttach.has(toolInfo.id)) {
                                 resolvedToolInfos.push(toolInfo);
                                 toolIdsToAttach.add(toolInfo.id);
                             }
-                            processingResults.push({ input: toolName, type: 'name', success: true, status: 'registered_mcp', details: toolInfo });
+                            processingResults.push({
+                                input: toolName,
+                                type: 'name',
+                                success: true,
+                                status: 'registered_mcp',
+                                details: toolInfo,
+                            });
                             found = true;
                         } else {
-                            throw new Error(`Registration API call succeeded but did not return expected ID. Response: ${JSON.stringify(registerResponse.data)}`);
+                            throw new Error(
+                                `Registration API call succeeded but did not return expected ID. Response: ${JSON.stringify(registerResponse.data)}`,
+                            );
                         }
                     } catch (registerError) {
                         const message = `Failed to register MCP tool ${mcp_server_name}/${toolName}: ${registerError.message}`;
                         console.error(message);
-                        processingResults.push({ input: toolName, type: 'name', success: false, status: 'error_registration', error: message });
+                        processingResults.push({
+                            input: toolName,
+                            type: 'name',
+                            success: false,
+                            status: 'error_registration',
+                            error: message,
+                        });
                         found = true; // Mark as found to avoid "not found" error below, even though registration failed
                     }
                     continue;
@@ -176,7 +239,13 @@ export async function handleAttachTool(server, args) {
                 if (!found) {
                     const message = `Tool name '${toolName}' not found as an existing Letta tool or a registerable MCP tool.`;
                     console.error(message);
-                    processingResults.push({ input: toolName, type: 'name', success: false, status: 'not_found', error: message });
+                    processingResults.push({
+                        input: toolName,
+                        type: 'name',
+                        success: false,
+                        status: 'not_found',
+                        error: message,
+                    });
                 }
             }
         }
@@ -184,9 +253,11 @@ export async function handleAttachTool(server, args) {
         // --- 5. Attach Resolved Tools ---
         const attachmentResults = [];
         if (resolvedToolInfos.length === 0) {
-            console.log("No tools resolved successfully for attachment.");
+            console.log('No tools resolved successfully for attachment.');
         } else {
-            console.log(`Attempting to attach ${resolvedToolInfos.length} resolved tool(s) to agent ${agent_id} (${agentName})...`);
+            console.log(
+                `Attempting to attach ${resolvedToolInfos.length} resolved tool(s) to agent ${agent_id} (${agentName})...`,
+            );
             for (const tool of resolvedToolInfos) {
                 console.log(`Attaching tool ${tool.name} (${tool.id})...`);
                 const attachUrl = `/agents/${agent_id}/tools/attach/${tool.id}`;
@@ -195,37 +266,55 @@ export async function handleAttachTool(server, args) {
                     // Check if tool is now in agent's tools (optional but good)
                     const attachedToolIds = response.data?.tools?.map((t) => t.id) || [];
                     if (attachedToolIds.includes(tool.id)) {
-                        attachmentResults.push({ tool_id: tool.id, tool_name: tool.name, success: true, message: `Successfully attached.` });
+                        attachmentResults.push({
+                            tool_id: tool.id,
+                            tool_name: tool.name,
+                            success: true,
+                            message: 'Successfully attached.',
+                        });
                     } else {
-                         attachmentResults.push({ tool_id: tool.id, tool_name: tool.name, success: false, error: `Attachment API call succeeded, but tool not found in agent's list afterwards.` });
+                        attachmentResults.push({
+                            tool_id: tool.id,
+                            tool_name: tool.name,
+                            success: false,
+                            error: 'Attachment API call succeeded, but tool not found in agent\'s list afterwards.',
+                        });
                     }
                 } catch (error) {
                     const message = `Failed to attach tool ${tool.name} (${tool.id}): ${error.message}`;
                     console.error(message, error.response?.data || '');
-                    attachmentResults.push({ tool_id: tool.id, tool_name: tool.name, success: false, error: message, details: error.response?.data || error });
+                    attachmentResults.push({
+                        tool_id: tool.id,
+                        tool_name: tool.name,
+                        success: false,
+                        error: message,
+                        details: error.response?.data || error,
+                    });
                 }
             }
         }
 
         // --- 6. Final Response ---
-        const overallSuccess = processingResults.every(r => r.success) && attachmentResults.every(r => r.success);
+        const overallSuccess =
+            processingResults.every((r) => r.success) && attachmentResults.every((r) => r.success);
         const finalMessage = overallSuccess
             ? `Successfully processed and attached all requested tools to agent ${agentName}.`
             : `Completed processing tools for agent ${agentName} with some errors.`;
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent_id: agent_id,
-                    agent_name: agentName,
-                    processing_summary: processingResults,
-                    attachment_summary: attachmentResults
-                }),
-            }],
-            isError: !overallSuccess
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent_id: agent_id,
+                        agent_name: agentName,
+                        processing_summary: processingResults,
+                        attachment_summary: attachmentResults,
+                    }),
+                },
+            ],
+            isError: !overallSuccess,
         };
-
     } catch (error) {
         console.error(`Unhandled error in handleAttachTool: ${error.message}`);
         server.createErrorResponse(error);
@@ -237,7 +326,8 @@ export async function handleAttachTool(server, args) {
  */
 export const attachToolToolDefinition = {
     name: 'attach_tool',
-    description: 'Attach one or more tools (by ID or name) to an agent. If a name corresponds to an MCP tool not yet in Letta, it will be registered first. Find tools with list_mcp_tools_by_server or create custom ones with upload_tool. Use list_agent_tools to verify attachment.',
+    description:
+        'Attach one or more tools (by ID or name) to an agent. If a name corresponds to an MCP tool not yet in Letta, it will be registered first. Find tools with list_mcp_tools_by_server or create custom ones with upload_tool. Use list_agent_tools to verify attachment.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -245,9 +335,11 @@ export const attachToolToolDefinition = {
                 type: 'string',
                 description: 'The ID of the agent to attach the tool(s) to.',
             },
-            tool_id: { // Kept for backward compatibility
+            tool_id: {
+                // Kept for backward compatibility
                 type: 'string',
-                description: 'The ID of a single tool to attach (deprecated, use tool_ids or tool_names instead).',
+                description:
+                    'The ID of a single tool to attach (deprecated, use tool_ids or tool_names instead).',
             },
             tool_ids: {
                 type: 'array',
@@ -257,7 +349,8 @@ export const attachToolToolDefinition = {
             tool_names: {
                 type: 'array',
                 items: { type: 'string' },
-                description: 'Optional array of tool names to attach. These can be existing Letta tools or MCP tools (which will be registered if found).',
+                description:
+                    'Optional array of tool names to attach. These can be existing Letta tools or MCP tools (which will be registered if found).',
             },
         },
         required: ['agent_id'],

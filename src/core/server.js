@@ -12,14 +12,17 @@ export class LettaServer {
      */
     constructor() {
         // Initialize MCP server
-        this.server = new Server({
-            name: 'letta-server',
-            version: '0.1.0',
-        }, {
-            capabilities: {
-                tools: {},
+        this.server = new Server(
+            {
+                name: 'letta-server',
+                version: '0.1.0',
             },
-        });
+            {
+                capabilities: {
+                    tools: {},
+                },
+            },
+        );
 
         // Set up error handler
         this.server.onerror = (error) => console.error('[MCP Error]', error);
@@ -37,7 +40,7 @@ export class LettaServer {
             baseURL: this.apiBase,
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                Accept: 'application/json',
             },
         });
     }
@@ -49,9 +52,9 @@ export class LettaServer {
     getApiHeaders() {
         return {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'X-BARE-PASSWORD': `password ${this.password}`,
-            'Authorization': `Bearer ${this.password}`
+            Authorization: `Bearer ${this.password}`,
         };
     }
 
@@ -64,12 +67,12 @@ export class LettaServer {
     createErrorResponse(error, context) {
         let errorMessage = '';
         let errorCode = ErrorCode.InternalError;
-        
+
         if (typeof error === 'string') {
             errorMessage = error;
         } else if (error instanceof Error) {
             errorMessage = error.message;
-            
+
             // Handle specific HTTP error codes
             if (error.response?.status === 404) {
                 errorCode = ErrorCode.InvalidRequest;
@@ -84,17 +87,17 @@ export class LettaServer {
         } else {
             errorMessage = 'Unknown error occurred';
         }
-        
+
         // Add context if provided
         if (context) {
             errorMessage = `${context}: ${errorMessage}`;
         }
-        
+
         // Add additional details if available
         if (error?.response?.data) {
             errorMessage += ` Details: ${JSON.stringify(error.response.data)}`;
         }
-        
+
         throw new McpError(errorCode, errorMessage);
     }
 }

@@ -3,7 +3,7 @@
  */
 export async function handleDeleteAgent(server, args) {
     if (!args?.agent_id) {
-        server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse('Missing required argument: agent_id');
     }
 
     try {
@@ -16,17 +16,19 @@ export async function handleDeleteAgent(server, args) {
 
         // Successful deletion usually returns 200 or 204 with no body
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent_id: args.agent_id
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent_id: args.agent_id,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         // Handle potential 404 if agent not found, or other API errors
         if (error.response && error.response.status === 404) {
-             server.createErrorResponse(`Agent not found: ${args.agent_id}`);
+            server.createErrorResponse(`Agent not found: ${args.agent_id}`);
         }
         server.createErrorResponse(error);
     }
@@ -37,7 +39,8 @@ export async function handleDeleteAgent(server, args) {
  */
 export const deleteAgentDefinition = {
     name: 'delete_agent',
-    description: 'Delete a specific agent by ID. Use list_agents to find agent IDs. For bulk deletion, use bulk_delete_agents. WARNING: This action is permanent.',
+    description:
+        'Delete a specific agent by ID. Use list_agents to find agent IDs. For bulk deletion, use bulk_delete_agents. WARNING: This action is permanent.',
     inputSchema: {
         type: 'object',
         properties: {

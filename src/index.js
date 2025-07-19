@@ -14,14 +14,14 @@ async function main() {
     try {
         // Create server instance
         const server = new LettaServer();
-        
+
         // Register all tool handlers
         registerToolHandlers(server);
-        
+
         // Determine transport mode from command line arguments
         const useSSE = process.argv.includes('--sse');
         const useHTTP = process.argv.includes('--http');
-        
+
         // Run server with appropriate transport
         if (useHTTP) {
             console.log('Starting Letta server with HTTP transport');

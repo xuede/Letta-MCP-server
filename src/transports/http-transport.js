@@ -86,7 +86,7 @@ export async function runHTTP(server) {
     try {
         const app = express();
         const transports = {};
-        
+
         // Security: Validate Origin header to prevent DNS rebinding attacks
         app.use((req, res, next) => {
             const origin = req.headers.origin;
@@ -95,31 +95,39 @@ export async function runHTTP(server) {
                 'http://127.0.0.1',
                 'http://192.168.50.90',
                 'https://letta.oculair.ca',
-                'https://letta2.oculair.ca'
+                'https://letta2.oculair.ca',
             ];
-            
-            if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+
+            if (origin && !allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
                 console.warn(`Blocked request from unauthorized origin: ${origin}`);
                 return res.status(403).json({
                     jsonrpc: '2.0',
                     error: {
                         code: -32001,
-                        message: 'Forbidden: Invalid origin'
+                        message: 'Forbidden: Invalid origin',
                     },
-                    id: null
+                    id: null,
                 });
             }
             next();
         });
 
         // Middleware
-        app.use(cors({
-            origin: ['http://localhost', 'http://127.0.0.1', 'http://192.168.50.90', 'https://letta.oculair.ca', 'https://letta2.oculair.ca'],
-            credentials: true
-        }));
+        app.use(
+            cors({
+                origin: [
+                    'http://localhost',
+                    'http://127.0.0.1',
+                    'http://192.168.50.90',
+                    'https://letta.oculair.ca',
+                    'https://letta2.oculair.ca',
+                ],
+                credentials: true,
+            }),
+        );
         app.use(express.json({ limit: '10mb' }));
         app.use(express.urlencoded({ extended: true }));
-        
+
         // Request logging middleware
         app.use((req, res, next) => {
             const timestamp = new Date().toISOString();
@@ -135,19 +143,22 @@ export async function runHTTP(server) {
             }
 
             const protocolVersion = req.headers['mcp-protocol-version'];
-            if (protocolVersion && protocolVersion !== '2025-06-18' && protocolVersion !== '2025-03-26') {
+            if (
+                protocolVersion &&
+                protocolVersion !== '2025-06-18' &&
+                protocolVersion !== '2025-03-26'
+            ) {
                 return res.status(400).json({
                     jsonrpc: '2.0',
                     error: {
                         code: -32000,
-                        message: `Unsupported MCP protocol version: ${protocolVersion}`
+                        message: `Unsupported MCP protocol version: ${protocolVersion}`,
                     },
-                    id: null
+                    id: null,
                 });
             }
             next();
         });
-
 
         // Main MCP endpoint - POST
         app.post('/mcp', async (req, res) => {
@@ -171,14 +182,16 @@ export async function runHTTP(server) {
                             // Avoids race conditions before session storage
                             console.log(`Session initialized with ID: ${sessionId}`);
                             transports[sessionId] = transport;
-                        }
+                        },
                     });
 
                     // Set onclose handler to clean up transport on closure
                     transport.onclose = () => {
                         const sid = transport.sessionId;
                         if (sid && transports[sid]) {
-                            console.log(`Transport closed for session ${sid}, removing from transports map`);
+                            console.log(
+                                `Transport closed for session ${sid}, removing from transports map`,
+                            );
                             delete transports[sid];
                         }
                     };
@@ -223,7 +236,7 @@ export async function runHTTP(server) {
         // MCP endpoint - GET (for SSE streaming)
         app.get('/mcp', async (req, res) => {
             const sessionId = req.headers['mcp-session-id'];
-            
+
             if (!sessionId || !transports[sessionId]) {
                 return res.status(400).send('Session ID required');
             }
@@ -235,24 +248,24 @@ export async function runHTTP(server) {
         // Session termination endpoint - DELETE
         app.delete('/mcp', async (req, res) => {
             const sessionId = req.headers['mcp-session-id'];
-            
+
             if (!sessionId) {
                 return res.status(400).json({
                     jsonrpc: '2.0',
-                    error: { 
-                        code: -32000, 
-                        message: 'Bad Request: No session ID provided' 
-                    }
+                    error: {
+                        code: -32000,
+                        message: 'Bad Request: No session ID provided',
+                    },
                 });
             }
 
             if (!transports[sessionId]) {
                 return res.status(404).json({
                     jsonrpc: '2.0',
-                    error: { 
-                        code: -32001, 
-                        message: 'Session not found' 
-                    }
+                    error: {
+                        code: -32001,
+                        message: 'Session not found',
+                    },
                 });
             }
 
@@ -263,11 +276,11 @@ export async function runHTTP(server) {
                     transport.onclose();
                 }
                 delete transports[sessionId];
-                
+
                 console.log(`Session ${sessionId} terminated by client`);
-                res.status(200).json({ 
+                res.status(200).json({
                     jsonrpc: '2.0',
-                    result: { terminated: true } 
+                    result: { terminated: true },
                 });
             } catch (error) {
                 console.error(`Error terminating session ${sessionId}:`, error);
@@ -275,12 +288,12 @@ export async function runHTTP(server) {
                     jsonrpc: '2.0',
                     error: {
                         code: -32603,
-                        message: 'Internal server error during session termination'
-                    }
+                        message: 'Internal server error during session termination',
+                    },
                 });
             }
         });
-        
+
         // Health check endpoint
         app.get('/health', (req, res) => {
             res.json({
@@ -292,21 +305,21 @@ export async function runHTTP(server) {
                 timestamp: new Date().toISOString(),
                 security: {
                     origin_validation: true,
-                    localhost_binding: true
-                }
+                    localhost_binding: true,
+                },
             });
         });
-        
+
         // Start server - bind to all interfaces for Docker container access
         const PORT = process.env.PORT || 3001;
         const HOST = '0.0.0.0'; // Docker containers need to bind to all interfaces
-        
+
         const httpServer = app.listen(PORT, HOST, () => {
             console.log(`Letta MCP HTTP server is running on ${HOST}:${PORT}`);
             console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
             console.log(`Health check: http://localhost:${PORT}/health`);
-            console.log(`Protocol version: 2025-06-18`);
-            console.log(`Security: Origin validation enabled, DNS rebinding protection active`);
+            console.log('Protocol version: 2025-06-18');
+            console.log('Security: Origin validation enabled, DNS rebinding protection active');
             console.log(`API credentials: ${server.apiBase ? 'Available' : 'Not available'}`);
         });
 
@@ -314,7 +327,7 @@ export async function runHTTP(server) {
         const shutdownHandler = async () => {
             console.log('Shutting down HTTP server...');
             httpServer.close();
-            
+
             // Clean up all transports
             for (const [sessionId, transport] of Object.entries(transports)) {
                 try {
@@ -326,14 +339,13 @@ export async function runHTTP(server) {
                     console.error(`Error cleaning up session ${sessionId}:`, error);
                 }
             }
-            
+
             await server.server.close();
             process.exit(0);
         };
 
         process.on('SIGINT', shutdownHandler);
         process.on('SIGTERM', shutdownHandler);
-        
     } catch (error) {
         console.error('Failed to start HTTP server:', error);
         process.exit(1);

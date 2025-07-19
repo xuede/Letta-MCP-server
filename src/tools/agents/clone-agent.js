@@ -1,19 +1,17 @@
 import fs from 'fs/promises'; // Use promises for async file operations
 import path from 'path';
 import os from 'os'; // To get temporary directory
-import axios from 'axios'; // Assuming axios is available
 import FormData from 'form-data'; // Assuming form-data is available
-import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * Tool handler for cloning an agent
  */
 export async function handleCloneAgent(server, args) {
     if (!args?.source_agent_id) {
-        server.createErrorResponse("Missing required argument: source_agent_id");
+        server.createErrorResponse('Missing required argument: source_agent_id');
     }
     if (!args?.new_agent_name) {
-        server.createErrorResponse("Missing required argument: new_agent_name");
+        server.createErrorResponse('Missing required argument: new_agent_name');
     }
 
     const sourceAgentId = args.source_agent_id;
@@ -29,11 +27,13 @@ export async function handleCloneAgent(server, args) {
 
         // --- Step 1: Export the source agent ---
         console.log(`[clone_agent] Exporting source agent ${sourceAgentId}...`);
-        const exportResponse = await server.api.get(`/agents/${encodedSourceAgentId}/export`, { headers });
+        const exportResponse = await server.api.get(`/agents/${encodedSourceAgentId}/export`, {
+            headers,
+        });
         const agentConfig = exportResponse.data;
 
         if (!agentConfig || typeof agentConfig !== 'object') {
-            throw new Error("Received invalid data from agent export endpoint.");
+            throw new Error('Received invalid data from agent export endpoint.');
         }
         console.log(`[clone_agent] Source agent ${sourceAgentId} exported successfully.`);
 
@@ -54,7 +54,7 @@ export async function handleCloneAgent(server, args) {
         tempFilePath = path.join(os.tmpdir(), `agent_clone_temp_${Date.now()}.json`);
         console.log(`[clone_agent] Saving temporary config to ${tempFilePath}...`);
         await fs.writeFile(tempFilePath, agentJsonString);
-        console.log(`[clone_agent] Temporary config saved.`);
+        console.log('[clone_agent] Temporary config saved.');
 
         // --- Step 4: Import the modified configuration ---
         console.log(`[clone_agent] Importing new agent '${newAgentName}' from ${tempFilePath}...`);
@@ -66,55 +66,63 @@ export async function handleCloneAgent(server, args) {
 
         const importParams = {
             append_copy_suffix: false, // We explicitly set the name, don't append suffix
-            override_existing_tools: overrideTools
+            override_existing_tools: overrideTools,
         };
         if (projectId) {
             importParams.project_id = projectId;
         }
 
-        const importResponse = await server.api.post(`/agents/import`, form, {
+        const importResponse = await server.api.post('/agents/import', form, {
             headers: {
                 ...importHeaders,
                 ...form.getHeaders(),
             },
-            params: importParams
+            params: importParams,
         });
 
         const importedAgentState = importResponse.data;
-        console.log(`[clone_agent] Agent '${newAgentName}' imported successfully with ID: ${importedAgentState.id}`);
+        console.log(
+            `[clone_agent] Agent '${newAgentName}' imported successfully with ID: ${importedAgentState.id}`,
+        );
 
         // --- Step 5: Cleanup temporary file ---
         await fs.unlink(tempFilePath);
         console.log(`[clone_agent] Cleaned up temporary file ${tempFilePath}.`);
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    new_agent: importedAgentState
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        new_agent: importedAgentState,
+                    }),
+                },
+            ],
         };
-
     } catch (error) {
-        console.error(`[clone_agent] Error:`, error.response?.data || error.message);
+        console.error('[clone_agent] Error:', error.response?.data || error.message);
         // Attempt cleanup even on error
         if (tempFilePath) {
             try {
                 await fs.unlink(tempFilePath);
                 console.log(`[clone_agent] Cleaned up temporary file ${tempFilePath} after error.`);
             } catch (cleanupError) {
-                console.error(`[clone_agent] Error cleaning up temporary file ${tempFilePath}:`, cleanupError);
+                console.error(
+                    `[clone_agent] Error cleaning up temporary file ${tempFilePath}:`,
+                    cleanupError,
+                );
             }
         }
 
         // Handle specific API errors
         if (error.response) {
-             if (error.response.status === 404 && error.config.url.includes('/export')) {
-                 server.createErrorResponse(`Source agent not found: ${sourceAgentId}`);
+            if (error.response.status === 404 && error.config.url.includes('/export')) {
+                server.createErrorResponse(`Source agent not found: ${sourceAgentId}`);
             }
-             if (error.response.status === 422 && error.config.url.includes('/import')) {
-                 server.createErrorResponse(`Validation error importing cloned agent: ${JSON.stringify(error.response.data)}`);
+            if (error.response.status === 422 && error.config.url.includes('/import')) {
+                server.createErrorResponse(
+                    `Validation error importing cloned agent: ${JSON.stringify(error.response.data)}`,
+                );
             }
         }
         server.createErrorResponse(`Failed to clone agent ${sourceAgentId}: ${error.message}`);
@@ -126,7 +134,8 @@ export async function handleCloneAgent(server, args) {
  */
 export const cloneAgentDefinition = {
     name: 'clone_agent',
-    description: 'Creates a new agent by cloning the configuration of an existing agent. Use list_agents to find source agent ID. Alternative to export_agent + import_agent workflow. Modify the clone with modify_agent afterwards.',
+    description:
+        'Creates a new agent by cloning the configuration of an existing agent. Use list_agents to find source agent ID. Alternative to export_agent + import_agent workflow. Modify the clone with modify_agent afterwards.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -140,7 +149,8 @@ export const cloneAgentDefinition = {
             },
             override_existing_tools: {
                 type: 'boolean',
-                description: 'Optional: If set to True, existing tools can get their source code overwritten by the tool definitions from the source agent. Defaults to true.',
+                description:
+                    'Optional: If set to True, existing tools can get their source code overwritten by the tool definitions from the source agent. Defaults to true.',
                 default: true,
             },
             project_id: {

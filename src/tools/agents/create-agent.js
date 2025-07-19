@@ -4,7 +4,12 @@
 export async function handleCreateAgent(server, args) {
     try {
         // Validate arguments
-        if (!args.name || !args.description || typeof args.name !== 'string' || typeof args.description !== 'string') {
+        if (
+            !args.name ||
+            !args.description ||
+            typeof args.name !== 'string' ||
+            typeof args.description !== 'string'
+        ) {
             throw new Error('Invalid arguments: name and description must be strings');
         }
 
@@ -15,7 +20,7 @@ export async function handleCreateAgent(server, args) {
         const agentConfig = {
             name: args.name,
             description: args.description,
-            agent_type: "memgpt_agent",
+            agent_type: 'memgpt_agent',
             model: model,
             llm_config: {
                 model: model.split('/')[1],
@@ -27,8 +32,8 @@ export async function handleCreateAgent(server, args) {
                 presence_penalty: 0.5,
                 functions_config: {
                     allow: true,
-                    functions: []
-                }
+                    functions: [],
+                },
             },
             embedding: embedding,
             parameters: {
@@ -36,9 +41,9 @@ export async function handleCreateAgent(server, args) {
                 max_tokens: 1000,
                 temperature: 0.7,
                 presence_penalty: 0.5,
-                frequency_penalty: 0.5
+                frequency_penalty: 0.5,
             },
-            core_memory: {}
+            core_memory: {},
         };
 
         // Headers for API requests
@@ -56,13 +61,15 @@ export async function handleCreateAgent(server, args) {
         const capabilities = agentInfo.data.tools?.map((t) => t.name) ?? [];
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent_id: agentId,
-                    capabilities,
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent_id: agentId,
+                        capabilities,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         server.createErrorResponse(error);
@@ -74,7 +81,8 @@ export async function handleCreateAgent(server, args) {
  */
 export const createAgentToolDefinition = {
     name: 'create_agent',
-    description: 'Create a new Letta agent with specified configuration. After creation, use attach_tool to add capabilities, attach_memory_block to configure memory, or prompt_agent to start conversations.',
+    description:
+        'Create a new Letta agent with specified configuration. After creation, use attach_tool to add capabilities, attach_memory_block to configure memory, or prompt_agent to start conversations.',
     inputSchema: {
         type: 'object',
         properties: {

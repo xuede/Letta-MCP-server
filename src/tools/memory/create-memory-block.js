@@ -13,67 +13,71 @@ export async function handleCreateMemoryBlock(server, args) {
         if (!args.value || typeof args.value !== 'string') {
             throw new Error('Missing required argument: value (must be a string)');
         }
-        
+
         // Headers for API requests
         const headers = server.getApiHeaders();
-        
+
         // If agent_id is provided, set the user_id header
         if (args.agent_id) {
             headers['user_id'] = args.agent_id;
         }
-        
+
         // Prepare metadata
         const metadata = args.metadata || {
             type: args.label,
-            version: "1.0",
-            last_updated: new Date().toISOString()
+            version: '1.0',
+            last_updated: new Date().toISOString(),
         };
-        
+
         // Prepare block data
         const blockData = {
             name: args.name,
             label: args.label,
             value: args.value,
-            metadata: metadata
+            metadata: metadata,
         };
-        
+
         // Create the memory block
         console.log(`Creating memory block "${args.name}" with label "${args.label}"...`);
         const createResponse = await server.api.post('/blocks', blockData, { headers });
         const blockId = createResponse.data.id;
-        
+
         // If agent_id is provided, attach the block to the agent
         if (args.agent_id) {
             const attachUrl = `/agents/${args.agent_id}/core-memory/blocks/attach/${blockId}`;
             await server.api.patch(attachUrl, {}, { headers });
-            
+
             // Get agent info
             const agentInfoResponse = await server.api.get(`/agents/${args.agent_id}`, { headers });
             const agentName = agentInfoResponse.data.name || 'Unknown';
-            
+
             return {
-                content: [{
-                    type: 'text',
-                    text: JSON.stringify({
-                        block_id: blockId,
-                        name: args.name,
-                        label: args.label,
-                        agent_id: args.agent_id,
-                        agent_name: agentName
-                    }),
-                }],
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({
+                            block_id: blockId,
+                            name: args.name,
+                            label: args.label,
+                            agent_id: args.agent_id,
+                            agent_name: agentName,
+                        }),
+                    },
+                ],
             };
         } else {
             // Just return the created block info
             return {
-                content: [{
-                    type: 'text',
-                    text: JSON.stringify({
-                        block_id: blockId,
-                        name: args.name,
-                        label: args.label
-                    }),
-                }],
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({
+                            block_id: blockId,
+                            name: args.name,
+                            label: args.label,
+                        }),
+                    },
+                ],
             };
         }
     } catch (error) {
@@ -86,7 +90,8 @@ export async function handleCreateMemoryBlock(server, args) {
  */
 export const createMemoryBlockToolDefinition = {
     name: 'create_memory_block',
-    description: 'Create a new memory block in the Letta system. Common labels: "persona", "human", "system". Use attach_memory_block to link to agents, or update_memory_block to modify later.',
+    description:
+        'Create a new memory block in the Letta system. Common labels: "persona", "human", "system". Use attach_memory_block to link to agents, or update_memory_block to modify later.',
     inputSchema: {
         type: 'object',
         properties: {

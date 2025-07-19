@@ -1,15 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios'; // Assuming axios is available
 import FormData from 'form-data'; // Assuming form-data is available
-import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * Tool handler for importing an agent from a JSON file
  */
 export async function handleImportAgent(server, args) {
     if (!args?.file_path) {
-        server.createErrorResponse("Missing required argument: file_path");
+        server.createErrorResponse('Missing required argument: file_path');
     }
 
     const filePath = path.resolve(args.file_path); // Resolve to absolute path
@@ -40,34 +38,40 @@ export async function handleImportAgent(server, args) {
         }
 
         // Use the specific endpoint from the OpenAPI spec
-        const response = await server.api.post(`/agents/import`, form, {
+        const response = await server.api.post('/agents/import', form, {
             headers: {
                 ...headers,
                 ...form.getHeaders(), // Let FormData set the Content-Type with boundary
             },
-            params: params // Add optional query parameters
+            params: params, // Add optional query parameters
         });
 
         const importedAgentState = response.data; // Assuming response.data is the new AgentState object
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent_id: importedAgentState.id,
-                    agent: importedAgentState
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent_id: importedAgentState.id,
+                        agent: importedAgentState,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         // Handle potential 422 for validation errors, or other API/file errors
         if (error.response) {
-             if (error.response.status === 422) {
-                 server.createErrorResponse(`Validation error importing agent from ${args.file_path}: ${JSON.stringify(error.response.data)}`);
+            if (error.response.status === 422) {
+                server.createErrorResponse(
+                    `Validation error importing agent from ${args.file_path}: ${JSON.stringify(error.response.data)}`,
+                );
             }
         }
-        console.error(`[import_agent] Error:`, error.response?.data || error.message);
-        server.createErrorResponse(`Failed to import agent from ${args.file_path}: ${error.message}`);
+        console.error('[import_agent] Error:', error.response?.data || error.message);
+        server.createErrorResponse(
+            `Failed to import agent from ${args.file_path}: ${error.message}`,
+        );
     }
 }
 
@@ -76,7 +80,8 @@ export async function handleImportAgent(server, args) {
  */
 export const importAgentDefinition = {
     name: 'import_agent',
-    description: 'Import a serialized agent JSON file and recreate the agent in the system. Use export_agent to create the JSON file, then modify_agent or attach_tool to customize the imported agent.',
+    description:
+        'Import a serialized agent JSON file and recreate the agent in the system. Use export_agent to create the JSON file, then modify_agent or attach_tool to customize the imported agent.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -86,12 +91,14 @@ export const importAgentDefinition = {
             },
             append_copy_suffix: {
                 type: 'boolean',
-                description: 'Optional: If set to True, appends "_copy" to the end of the agent name. Defaults to true.',
+                description:
+                    'Optional: If set to True, appends "_copy" to the end of the agent name. Defaults to true.',
                 default: true,
             },
             override_existing_tools: {
                 type: 'boolean',
-                description: 'Optional: If set to True, existing tools can get their source code overwritten by the uploaded tool definitions. Letta core tools cannot be updated. Defaults to true.',
+                description:
+                    'Optional: If set to True, existing tools can get their source code overwritten by the uploaded tool definitions. Letta core tools cannot be updated. Defaults to true.',
                 default: true,
             },
             project_id: {

@@ -3,10 +3,10 @@
  */
 export async function handleCreatePassage(server, args) {
     if (!args?.agent_id) {
-        server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse('Missing required argument: agent_id');
     }
     if (!args?.text) {
-        server.createErrorResponse("Missing required argument: text");
+        server.createErrorResponse('Missing required argument: text');
     }
 
     try {
@@ -15,25 +15,29 @@ export async function handleCreatePassage(server, args) {
         const payload = { text: args.text }; // Body requires 'text'
 
         // Use the specific endpoint from the OpenAPI spec
-        const response = await server.api.post(`/agents/${agentId}/archival-memory`, payload, { headers });
+        const response = await server.api.post(`/agents/${agentId}/archival-memory`, payload, {
+            headers,
+        });
         let createdPassages = response.data; // Assuming response.data is an array of created Passage objects
 
         // Optionally remove embeddings from the response
         const includeEmbeddings = args?.include_embeddings ?? false;
         if (!includeEmbeddings) {
-            createdPassages = createdPassages.map(passage => {
+            createdPassages = createdPassages.map((passage) => {
                 const { embedding, ...rest } = passage; // Destructure to remove embedding
                 return rest;
             });
         }
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    passages: createdPassages
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        passages: createdPassages,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         // Handle potential 404 if agent not found, 422 for validation, or other API errors
@@ -41,8 +45,10 @@ export async function handleCreatePassage(server, args) {
             if (error.response.status === 404) {
                 server.createErrorResponse(`Agent not found: ${args.agent_id}`);
             }
-             if (error.response.status === 422) {
-                 server.createErrorResponse(`Validation error creating passage for agent ${args.agent_id}: ${JSON.stringify(error.response.data)}`);
+            if (error.response.status === 422) {
+                server.createErrorResponse(
+                    `Validation error creating passage for agent ${args.agent_id}: ${JSON.stringify(error.response.data)}`,
+                );
             }
         }
         server.createErrorResponse(error);
@@ -54,7 +60,8 @@ export async function handleCreatePassage(server, args) {
  */
 export const createPassageDefinition = {
     name: 'create_passage',
-    description: "Insert a memory into an agent's archival memory store. Use list_passages to view existing memories, modify_passage to edit, or delete_passage to remove.",
+    description:
+        'Insert a memory into an agent\'s archival memory store. Use list_passages to view existing memories, modify_passage to edit, or delete_passage to remove.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -68,9 +75,10 @@ export const createPassageDefinition = {
             },
             include_embeddings: {
                 type: 'boolean',
-                description: 'Whether to include the full embedding vectors in the response (default: false).',
+                description:
+                    'Whether to include the full embedding vectors in the response (default: false).',
                 default: false,
-            }
+            },
         },
         required: ['agent_id', 'text'],
     },

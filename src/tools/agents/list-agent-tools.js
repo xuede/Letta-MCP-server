@@ -14,15 +14,17 @@ export async function handleListAgentTools(server, args) {
         const tools = agentInfoResponse.data.tools || [];
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent_id: args.agent_id,
-                    agent_name: agentName,
-                    tool_count: tools.length,
-                    tools: tools
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent_id: args.agent_id,
+                        agent_name: agentName,
+                        tool_count: tools.length,
+                        tools: tools,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         server.createErrorResponse(error);
@@ -34,7 +36,8 @@ export async function handleListAgentTools(server, args) {
  */
 export const listAgentToolsDefinition = {
     name: 'list_agent_tools',
-    description: 'List all tools available for a specific agent. Use attach_tool to add more tools or list_mcp_tools_by_server to discover available tools.',
+    description:
+        'List all tools available for a specific agent. Use attach_tool to add more tools or list_mcp_tools_by_server to discover available tools.',
     inputSchema: {
         type: 'object',
         properties: {

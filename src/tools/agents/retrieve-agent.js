@@ -3,7 +3,7 @@
  */
 export async function handleRetrieveAgent(server, args) {
     if (!args?.agent_id) {
-        server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse('Missing required argument: agent_id');
     }
 
     try {
@@ -15,17 +15,19 @@ export async function handleRetrieveAgent(server, args) {
         const agentState = response.data; // Assuming response.data is the AgentState object
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    agent: agentState
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        agent: agentState,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         // Handle potential 404 if agent not found, or other API errors
         if (error.response && error.response.status === 404) {
-             server.createErrorResponse(`Agent not found: ${args.agent_id}`);
+            server.createErrorResponse(`Agent not found: ${args.agent_id}`);
         }
         server.createErrorResponse(error);
     }
@@ -36,7 +38,8 @@ export async function handleRetrieveAgent(server, args) {
  */
 export const retrieveAgentDefinition = {
     name: 'retrieve_agent',
-    description: 'Get the full state of a specific agent by ID. Similar to get_agent_summary but returns complete details. Use list_agents to find agent IDs.',
+    description:
+        'Get the full state of a specific agent by ID. Similar to get_agent_summary but returns complete details. Use list_agents to find agent IDs.',
     inputSchema: {
         type: 'object',
         properties: {

@@ -29,23 +29,34 @@ export async function handleAddMcpToolToLetta(server, args) {
         for (const serverName of serverNames) {
             console.log(`Checking server: ${serverName}`);
             try {
-                const toolsResponse = await server.api.get(`/tools/mcp/servers/${serverName}/tools`, { headers });
+                const toolsResponse = await server.api.get(
+                    `/tools/mcp/servers/${serverName}/tools`,
+                    { headers },
+                );
                 if (toolsResponse.data && Array.isArray(toolsResponse.data)) {
-                    const foundTool = toolsResponse.data.find(tool => tool.name === mcp_tool_name);
+                    const foundTool = toolsResponse.data.find(
+                        (tool) => tool.name === mcp_tool_name,
+                    );
                     if (foundTool) {
                         mcp_server_name = serverName;
-                        console.log(`Found tool '${mcp_tool_name}' on server '${mcp_server_name}'.`);
+                        console.log(
+                            `Found tool '${mcp_tool_name}' on server '${mcp_server_name}'.`,
+                        );
                         break; // Stop searching once found
                     }
                 }
             } catch (toolListError) {
                 // Log error but continue searching other servers
-                console.warn(`Could not list tools for server ${serverName}: ${toolListError.message}`);
+                console.warn(
+                    `Could not list tools for server ${serverName}: ${toolListError.message}`,
+                );
             }
         }
 
         if (!mcp_server_name) {
-            throw new Error(`Could not find any MCP server providing the tool named '${mcp_tool_name}'.`);
+            throw new Error(
+                `Could not find any MCP server providing the tool named '${mcp_tool_name}'.`,
+            );
         }
         // --- End of Find MCP Server Name ---
 
@@ -54,7 +65,9 @@ export async function handleAddMcpToolToLetta(server, args) {
         // but adding it might be necessary depending on Letta's auth setup.
         // If issues arise, consider adding: headers['user_id'] = args.user_id; (and add user_id to schema)
 
-        console.log(`Attempting to register MCP tool ${mcp_server_name}/${mcp_tool_name} with Letta...`);
+        console.log(
+            `Attempting to register MCP tool ${mcp_server_name}/${mcp_tool_name} with Letta...`,
+        );
         const registerUrl = `/tools/mcp/servers/${mcp_server_name}/${mcp_tool_name}`;
 
         // Make the POST request to register the tool
@@ -63,7 +76,9 @@ export async function handleAddMcpToolToLetta(server, args) {
 
         // Check registration response data for success and the new tool ID
         if (!registerResponse.data || !registerResponse.data.id) {
-            throw new Error(`Registration API call succeeded but did not return the expected tool ID. Response: ${JSON.stringify(registerResponse.data)}`);
+            throw new Error(
+                `Registration API call succeeded but did not return the expected tool ID. Response: ${JSON.stringify(registerResponse.data)}`,
+            );
         }
 
         const lettaToolId = registerResponse.data.id;
@@ -84,7 +99,11 @@ export async function handleAddMcpToolToLetta(server, args) {
             // attachHeaders['user_id'] = agent_id;
 
             console.log(`DEBUG: Calling attachment URL: PATCH ${attachUrl}`); // Added for debugging
-            const attachResponse = await server.api.patch(attachUrl, {}, { headers: attachHeaders });
+            const attachResponse = await server.api.patch(
+                attachUrl,
+                {},
+                { headers: attachHeaders },
+            );
 
             // Verify attachment (optional but good practice)
             const attachedToolIds = attachResponse.data.tools?.map((t) => t.id) || [];
@@ -106,25 +125,29 @@ export async function handleAddMcpToolToLetta(server, args) {
 
         // Return combined result
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    letta_tool_id: lettaToolId,
-                    letta_tool_name: lettaToolName,
-                    agent_id: agent_id,
-                    attached: attachSuccess,
-                    mcp_server_name: mcp_server_name,
-                    mcp_tool_name: mcp_tool_name,
-                    ...(attachError ? { error: attachError } : {})
-                }),
-            }],
-            isError: !attachSuccess // Consider it an error if attachment failed
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        letta_tool_id: lettaToolId,
+                        letta_tool_name: lettaToolName,
+                        agent_id: agent_id,
+                        attached: attachSuccess,
+                        mcp_server_name: mcp_server_name,
+                        mcp_tool_name: mcp_tool_name,
+                        ...(attachError ? { error: attachError } : {}),
+                    }),
+                },
+            ],
+            isError: !attachSuccess, // Consider it an error if attachment failed
         };
-
     } catch (error) {
         console.error(`Error during MCP tool registration or attachment: ${error.message}`);
         // Ensure the error response includes context about which step failed if possible
-        server.createErrorResponse(error, `Failed during registration/attachment of ${args.mcp_server_name || 'unknown_server'}/${args.mcp_tool_name || 'unknown_tool'}`);
+        server.createErrorResponse(
+            error,
+            `Failed during registration/attachment of ${args.mcp_server_name || 'unknown_server'}/${args.mcp_tool_name || 'unknown_tool'}`,
+        );
     }
 }
 
@@ -133,11 +156,13 @@ export async function handleAddMcpToolToLetta(server, args) {
  */
 export const addMcpToolToLettaDefinition = {
     name: 'add_mcp_tool_to_letta',
-    description: 'Registers a tool from a connected MCP server as a native Letta tool AND attaches it to a specified agent. Use list_mcp_tools_by_server to find available tools, and list_agents to get agent IDs.',
+    description:
+        'Registers a tool from a connected MCP server as a native Letta tool AND attaches it to a specified agent. Use list_mcp_tools_by_server to find available tools, and list_agents to get agent IDs.',
     inputSchema: {
         type: 'object',
         properties: {
-            tool_name: { // Changed from mcp_tool_name
+            tool_name: {
+                // Changed from mcp_tool_name
                 type: 'string',
                 description: 'The name of the MCP tool to find, register, and attach.',
             },

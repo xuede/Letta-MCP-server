@@ -3,21 +3,21 @@
  */
 export async function handleListMcpToolsByServer(server, args) {
     if (!args?.mcp_server_name) {
-        server.createErrorResponse("Missing required argument: mcp_server_name");
+        server.createErrorResponse('Missing required argument: mcp_server_name');
     }
 
     try {
         const serverName = encodeURIComponent(args.mcp_server_name);
         // Construct the relative API path
-        const api_path = `/tools/mcp/servers/${serverName}/tools`; 
-        
+        const api_path = `/tools/mcp/servers/${serverName}/tools`;
+
         // Get headers using the server's built-in method
-        const headers = server.getApiHeaders(); 
-        
+        const headers = server.getApiHeaders();
+
         // Use the server's configured api instance and get method
-        const response = await server.api.get(api_path, { 
+        const response = await server.api.get(api_path, {
             headers,
-            timeout: 60000 // Keep the increased timeout
+            timeout: 60000, // Keep the increased timeout
         });
 
         let tools = response.data; // Assuming response.data is an array of MCPTool objects
@@ -25,9 +25,10 @@ export async function handleListMcpToolsByServer(server, args) {
         // Apply filtering if provided
         if (args?.filter) {
             const filterLower = args.filter.toLowerCase();
-            tools = tools.filter(tool =>
-                (tool.name && tool.name.toLowerCase().includes(filterLower)) ||
-                (tool.description && tool.description.toLowerCase().includes(filterLower))
+            tools = tools.filter(
+                (tool) =>
+                    (tool.name && tool.name.toLowerCase().includes(filterLower)) ||
+                    (tool.description && tool.description.toLowerCase().includes(filterLower)),
             );
         }
 
@@ -41,31 +42,35 @@ export async function handleListMcpToolsByServer(server, args) {
         const paginatedTools = tools.slice(startIndex, endIndex);
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    mcp_server_name: args.mcp_server_name,
-                    pagination: {
-                        page,
-                        pageSize,
-                        totalTools,
-                        totalPages,
-                        hasNextPage: page < totalPages,
-                        hasPreviousPage: page > 1
-                    },
-                    tool_count: paginatedTools.length,
-                    tools: paginatedTools
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        mcp_server_name: args.mcp_server_name,
+                        pagination: {
+                            page,
+                            pageSize,
+                            totalTools,
+                            totalPages,
+                            hasNextPage: page < totalPages,
+                            hasPreviousPage: page > 1,
+                        },
+                        tool_count: paginatedTools.length,
+                        tools: paginatedTools,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         console.error('Full error:', error); // Keep detailed logging
         // Handle potential 404 if server name not found, or other API errors
         if (error.response && error.response.status === 404) {
-             server.createErrorResponse(`MCP Server not found: ${args.mcp_server_name}`);
+            server.createErrorResponse(`MCP Server not found: ${args.mcp_server_name}`);
         }
         // Provide more context in the error response
-        server.createErrorResponse(`Error executing list_mcp_tools_by_server: ${error.message}\nResponse: ${JSON.stringify(error.response?.data || {})}`);
+        server.createErrorResponse(
+            `Error executing list_mcp_tools_by_server: ${error.message}\nResponse: ${JSON.stringify(error.response?.data || {})}`,
+        );
     }
 }
 
@@ -74,7 +79,8 @@ export async function handleListMcpToolsByServer(server, args) {
  */
 export const listMcpToolsByServerDefinition = {
     name: 'list_mcp_tools_by_server',
-    description: 'List all available tools for a specific MCP server. Use list_mcp_servers first to see available servers, then add_mcp_tool_to_letta to import tools into Letta.',
+    description:
+        'List all available tools for a specific MCP server. Use list_mcp_servers first to see available servers, then add_mcp_tool_to_letta to import tools into Letta.',
     inputSchema: {
         type: 'object',
         properties: {

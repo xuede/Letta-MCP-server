@@ -13,86 +13,94 @@ export async function handleUploadTool(server, args) {
         if (!args.source_code || typeof args.source_code !== 'string') {
             throw new Error('Missing required argument: source_code (must be a string)');
         }
-        
+
         // Headers for API requests
         const headers = server.getApiHeaders();
-        
+
         // If agent_id is provided, set the user_id header
         if (args.agent_id) {
             headers['user_id'] = args.agent_id;
         }
-        
+
         // Prepare category/tag
         const category = args.category || 'custom';
-        
+
         // Check if tool exists and delete if found
         const toolsResponse = await server.api.get('/tools/', { headers });
         const existingTools = toolsResponse.data;
         let existingToolId = null;
-        
+
         for (const tool of existingTools) {
             if (tool.name === args.name) {
                 existingToolId = tool.id;
-                console.log(`Found existing tool ${args.name} with ID ${existingToolId}, will delete it first...`);
+                console.log(
+                    `Found existing tool ${args.name} with ID ${existingToolId}, will delete it first...`,
+                );
                 break;
             }
         }
-        
+
         if (existingToolId) {
             try {
                 await server.api.delete(`/tools/${existingToolId}`, { headers });
                 console.log(`Successfully deleted existing tool ${args.name}`);
             } catch (deleteError) {
-                console.warn(`Failed to delete existing tool: ${deleteError}. Will try to continue anyway.`);
+                console.warn(
+                    `Failed to delete existing tool: ${deleteError}. Will try to continue anyway.`,
+                );
             }
         }
-        
+
         // Prepare tool data
         const toolData = {
             source_code: args.source_code,
             description: args.description,
             tags: [category],
-            source_type: "python"
+            source_type: 'python',
         };
-        
+
         // Create the tool
         console.log(`Creating tool "${args.name}"...`);
         const createResponse = await server.api.post('/tools/', toolData, { headers });
         const toolId = createResponse.data.id;
-        
+
         // If agent_id is provided, attach the tool to the agent
         if (args.agent_id) {
             // Attach tool to agent
             const attachUrl = `/agents/${args.agent_id}/tools/attach/${toolId}`;
             await server.api.patch(attachUrl, {}, { headers });
-            
+
             // Get agent info
             const agentInfoResponse = await server.api.get(`/agents/${args.agent_id}`, { headers });
             const agentName = agentInfoResponse.data.name || 'Unknown';
-            
+
             return {
-                content: [{
-                    type: 'text',
-                    text: JSON.stringify({
-                        tool_id: toolId,
-                        tool_name: args.name,
-                        agent_id: args.agent_id,
-                        agent_name: agentName,
-                        category: category
-                    }),
-                }],
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({
+                            tool_id: toolId,
+                            tool_name: args.name,
+                            agent_id: args.agent_id,
+                            agent_name: agentName,
+                            category: category,
+                        }),
+                    },
+                ],
             };
         } else {
             // Just return the created tool info
             return {
-                content: [{
-                    type: 'text',
-                    text: JSON.stringify({
-                        tool_id: toolId,
-                        tool_name: args.name,
-                        category: category
-                    }),
-                }],
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({
+                            tool_id: toolId,
+                            tool_name: args.name,
+                            category: category,
+                        }),
+                    },
+                ],
             };
         }
     } catch (error) {
@@ -105,7 +113,8 @@ export async function handleUploadTool(server, args) {
  */
 export const uploadToolToolDefinition = {
     name: 'upload_tool',
-    description: 'Upload a new tool to the Letta system. Use with attach_tool to add it to agents, or list_agent_tools to verify attachment.',
+    description:
+        'Upload a new tool to the Letta system. Use with attach_tool to add it to agents, or list_agent_tools to verify attachment.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -129,7 +138,7 @@ export const uploadToolToolDefinition = {
             agent_id: {
                 type: 'string',
                 description: 'Optional agent ID to attach the tool to after creation',
-            }
+            },
         },
         required: ['name', 'description', 'source_code'],
     },

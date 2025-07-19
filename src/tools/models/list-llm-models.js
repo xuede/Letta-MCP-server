@@ -6,17 +6,19 @@ export async function handleListLlmModels(server, args) {
         const headers = server.getApiHeaders();
 
         // Use the specific endpoint from the OpenAPI spec
-        const response = await server.api.get(`/models/`, { headers });
+        const response = await server.api.get('/models/', { headers });
         const models = response.data; // Assuming response.data is an array of LLMConfig objects
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    model_count: models.length,
-                    models: models
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        model_count: models.length,
+                        models: models,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         server.createErrorResponse(error);
@@ -28,7 +30,8 @@ export async function handleListLlmModels(server, args) {
  */
 export const listLlmModelsDefinition = {
     name: 'list_llm_models',
-    description: 'List available LLM models configured on the Letta server. Use with create_agent or modify_agent to set agent model preferences.',
+    description:
+        'List available LLM models configured on the Letta server. Use with create_agent or modify_agent to set agent model preferences.',
     inputSchema: {
         type: 'object',
         properties: {}, // No input arguments needed

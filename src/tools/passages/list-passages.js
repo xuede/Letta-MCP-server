@@ -3,7 +3,7 @@
  */
 export async function handleListPassages(server, args) {
     if (!args?.agent_id) {
-        server.createErrorResponse("Missing required argument: agent_id");
+        server.createErrorResponse('Missing required argument: agent_id');
     }
 
     try {
@@ -19,30 +19,35 @@ export async function handleListPassages(server, args) {
         if (args.ascending !== undefined) params.ascending = args.ascending; // Handle boolean false
 
         // Use the specific endpoint from the OpenAPI spec
-        const response = await server.api.get(`/agents/${agentId}/archival-memory`, { headers, params });
+        const response = await server.api.get(`/agents/${agentId}/archival-memory`, {
+            headers,
+            params,
+        });
         let passages = response.data; // Assuming response.data is an array of Passage objects
 
         // Optionally remove embeddings from the response
         const includeEmbeddings = args?.include_embeddings ?? false;
         if (!includeEmbeddings) {
-            passages = passages.map(passage => {
+            passages = passages.map((passage) => {
                 const { embedding, ...rest } = passage; // Destructure to remove embedding
                 return rest;
             });
         }
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    passages: passages
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        passages: passages,
+                    }),
+                },
+            ],
         };
     } catch (error) {
         // Handle potential 404 if agent not found, or other API errors
         if (error.response && error.response.status === 404) {
-             server.createErrorResponse(`Agent not found: ${args.agent_id}`);
+            server.createErrorResponse(`Agent not found: ${args.agent_id}`);
         }
         server.createErrorResponse(error);
     }
@@ -53,7 +58,8 @@ export async function handleListPassages(server, args) {
  */
 export const listPassagesDefinition = {
     name: 'list_passages',
-    description: "Retrieve the memories in an agent's archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.",
+    description:
+        'Retrieve the memories in an agent\'s archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -63,7 +69,8 @@ export const listPassagesDefinition = {
             },
             after: {
                 type: 'string',
-                description: 'Unique ID of the memory to start the query range at (for pagination).',
+                description:
+                    'Unique ID of the memory to start the query range at (for pagination).',
             },
             before: {
                 type: 'string',
@@ -79,14 +86,16 @@ export const listPassagesDefinition = {
             },
             ascending: {
                 type: 'boolean',
-                description: 'Whether to sort passages oldest to newest (True, default) or newest to oldest (False).',
+                description:
+                    'Whether to sort passages oldest to newest (True, default) or newest to oldest (False).',
                 default: true,
             },
             include_embeddings: {
                 type: 'boolean',
-                description: 'Whether to include the full embedding vectors in the response (default: false).',
+                description:
+                    'Whether to include the full embedding vectors in the response (default: false).',
                 default: false,
-            }
+            },
         },
         required: ['agent_id'],
     },

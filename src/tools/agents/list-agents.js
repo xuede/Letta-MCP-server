@@ -14,27 +14,30 @@ export async function handleListAgents(server, args) {
         let filteredAgents = agents;
         if (args?.filter) {
             const filter = args.filter.toLowerCase();
-            filteredAgents = agents.filter(agent => 
-                agent.name.toLowerCase().includes(filter) ||
-                (agent.description && agent.description.toLowerCase().includes(filter))
+            filteredAgents = agents.filter(
+                (agent) =>
+                    agent.name.toLowerCase().includes(filter) ||
+                    (agent.description && agent.description.toLowerCase().includes(filter)),
             );
         }
 
         // Extract only essential details for the response
-        const summarizedAgents = filteredAgents.map(agent => ({
+        const summarizedAgents = filteredAgents.map((agent) => ({
             id: agent.id,
             name: agent.name,
             description: agent.description,
         }));
 
         return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify({
-                    count: summarizedAgents.length,
-                    agents: summarizedAgents // Use summarized list
-                }),
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify({
+                        count: summarizedAgents.length,
+                        agents: summarizedAgents, // Use summarized list
+                    }),
+                },
+            ],
         };
     } catch (error) {
         console.error('Error in list_agents:', error.message);
@@ -49,7 +52,8 @@ export async function handleListAgents(server, args) {
  */
 export const listAgentsToolDefinition = {
     name: 'list_agents',
-    description: 'List all available agents in the Letta system. Use with create_agent to add new ones, get_agent_summary for details, or prompt_agent to interact with them.',
+    description:
+        'List all available agents in the Letta system. Use with create_agent to add new ones, get_agent_summary for details, or prompt_agent to interact with them.',
     inputSchema: {
         type: 'object',
         properties: {

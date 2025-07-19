@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Management
+
+This repository is tracked in the Huly project management system:
+- **Project**: Letta MCP Project (LMP)
+- **Description**: Project for Letta MCP server
+- **Issues**: Track bugs, features, and improvements in Huly under the LMP project identifier
+
 ## Commands
 
 ### Development
