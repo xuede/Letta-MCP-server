@@ -291,6 +291,9 @@ export async function runSSE(server) {
             logger.error('Uncaught exception:', error);
             await cleanup();
         });
+        
+        // Return the server instance for testing
+        return httpServer;
     } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         logger.error('Failed to start SSE server:', error);
