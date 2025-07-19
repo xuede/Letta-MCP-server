@@ -15,7 +15,7 @@ export async function handleModifyPassage(server, args) {
     if (!args?.update_data || typeof args.update_data.text !== 'string') {
         // Ensure text is provided and is a string
         server.createErrorResponse(
-            "Missing or invalid required argument: update_data must contain a 'text' field (string).",
+            'Missing or invalid required argument: update_data must contain a \'text\' field (string).',
         );
     }
 
@@ -133,7 +133,7 @@ export async function handleModifyPassage(server, args) {
 export const modifyPassageDefinition = {
     name: 'modify_passage',
     description:
-        "Modify a memory in the agent's archival memory store. Use list_passages to find memory IDs. Currently only supports updating the text content.",
+        'Modify a memory in the agent\'s archival memory store. Use list_passages to find memory IDs. Currently only supports updating the text content.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -148,7 +148,7 @@ export const modifyPassageDefinition = {
             update_data: {
                 type: 'object',
                 description:
-                    "Object containing the fields to update. Currently only supports updating the 'text' field.",
+                    'Object containing the fields to update. Currently only supports updating the \'text\' field.',
                 properties: {
                     text: {
                         type: 'string',

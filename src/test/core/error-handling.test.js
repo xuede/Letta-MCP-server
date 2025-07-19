@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LettaServer } from '../../core/server.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { createMockLettaServer } from '../utils/mock-server.js';
-import { fixtures } from '../utils/test-fixtures.js';
 
 // Mock dependencies
 vi.mock('@modelcontextprotocol/sdk/server/index.js');

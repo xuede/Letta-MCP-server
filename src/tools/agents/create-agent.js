@@ -92,7 +92,7 @@ export const createAgentToolDefinition = {
             },
             description: {
                 type: 'string',
-                description: "Description of the agent's purpose/role",
+                description: 'Description of the agent\'s purpose/role',
             },
             model: {
                 type: 'string',

@@ -280,7 +280,7 @@ export async function handleAttachTool(server, args) {
                             tool_id: tool.id,
                             tool_name: tool.name,
                             success: false,
-                            error: "Attachment API call succeeded, but tool not found in agent's list afterwards.",
+                            error: 'Attachment API call succeeded, but tool not found in agent\'s list afterwards.',
                         });
                     }
                 } catch (error) {

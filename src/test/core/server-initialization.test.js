@@ -122,7 +122,7 @@ describe('LettaServer Initialization (LMP-82)', () => {
         });
 
         it('should set error handler on MCP server', () => {
-            const server = new LettaServer();
+            new LettaServer();
             const testError = new Error('Test error');
 
             // Trigger the error handler
@@ -175,7 +175,7 @@ describe('LettaServer Initialization (LMP-82)', () => {
             process.env.LETTA_BASE_URL = 'https://test.letta.com/v1';
             process.env.LETTA_PASSWORD = 'test-password';
 
-            const server = new LettaServer();
+            new LettaServer();
 
             expect(axios.create).toHaveBeenCalledWith({
                 baseURL: 'https://test.letta.com/v1/v1',

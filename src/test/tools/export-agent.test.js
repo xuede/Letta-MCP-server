@@ -221,7 +221,7 @@ describe('Export Agent', () => {
                 data: { url: 'https://custom.xbackbone.test/file/xyz789' },
             });
 
-            const result = await handleExportAgent(mockServer, {
+            await handleExportAgent(mockServer, {
                 agent_id: 'agent-123',
                 upload_to_xbackbone: true,
                 xbackbone_url: 'https://custom.xbackbone.test',

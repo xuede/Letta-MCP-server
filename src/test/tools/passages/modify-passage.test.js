@@ -22,7 +22,7 @@ describe('Modify Passage', () => {
         it('should have correct tool definition', () => {
             expect(modifyPassageDefinition.name).toBe('modify_passage');
             expect(modifyPassageDefinition.description).toContain(
-                "Modify a memory in the agent's archival memory",
+                'Modify a memory in the agent\'s archival memory',
             );
             expect(modifyPassageDefinition.inputSchema.required).toEqual([
                 'agent_id',
@@ -417,7 +417,7 @@ describe('Modify Passage', () => {
             ).rejects.toThrow();
 
             expect(mockServer.createErrorResponse).toHaveBeenCalledWith(
-                expect.stringContaining("update_data must contain a 'text' field"),
+                expect.stringContaining('update_data must contain a \'text\' field'),
             );
         });
 
@@ -431,7 +431,7 @@ describe('Modify Passage', () => {
             ).rejects.toThrow();
 
             expect(mockServer.createErrorResponse).toHaveBeenCalledWith(
-                expect.stringContaining("update_data must contain a 'text' field (string)"),
+                expect.stringContaining('update_data must contain a \'text\' field (string)'),
             );
         });
 

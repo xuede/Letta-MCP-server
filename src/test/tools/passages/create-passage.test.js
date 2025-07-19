@@ -22,7 +22,7 @@ describe('Create Passage', () => {
         it('should have correct tool definition', () => {
             expect(createPassageDefinition.name).toBe('create_passage');
             expect(createPassageDefinition.description).toContain(
-                "Insert a memory into an agent's archival memory",
+                'Insert a memory into an agent\'s archival memory',
             );
             expect(createPassageDefinition.inputSchema.required).toEqual(['agent_id', 'text']);
             expect(createPassageDefinition.inputSchema.properties).toHaveProperty('agent_id');

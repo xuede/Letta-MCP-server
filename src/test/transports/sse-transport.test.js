@@ -108,7 +108,7 @@ describe('SSE Transport - Basic Tests', () => {
             .get('/sse')
             .set('Accept', 'text/event-stream')
             .timeout(500) // Set short timeout
-            .end((err, res) => {
+            .end((err, _res) => {
                 // We expect this to timeout since SSE keeps connection open
                 expect(err).toBeDefined();
                 expect(err.timeout).toBe(500);

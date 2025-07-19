@@ -9,7 +9,6 @@ vi.mock('axios');
 vi.mock('../../core/logger.js');
 
 describe('API Client Configuration (LMP-85)', () => {
-    let server;
     let mockAxiosInstance;
     let originalEnv;
 
@@ -275,7 +274,7 @@ describe('API Client Configuration (LMP-85)', () => {
                 data: { agents: [] },
             });
 
-            const response = await server.api.get('/agents', { headers });
+            await server.api.get('/agents', { headers });
 
             expect(mockAxiosInstance.get).toHaveBeenCalledWith('/agents', {
                 headers: expect.objectContaining({
