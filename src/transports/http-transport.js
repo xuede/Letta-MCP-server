@@ -3,6 +3,7 @@ import cors from 'cors';
 import { randomUUID } from 'crypto';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { createLogger } from '../core/logger.js';
 
 /**
  * A simple in-memory implementation of the EventStore interface for recovery
@@ -83,6 +84,7 @@ class InMemoryEventStore {
  * @param {Object} server - The LettaServer instance
  */
 export async function runHTTP(server) {
+    const logger = createLogger('http-transport');
     try {
         const app = express();
         const transports = {};
@@ -99,7 +101,7 @@ export async function runHTTP(server) {
             ];
 
             if (origin && !allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
-                console.warn(`Blocked request from unauthorized origin: ${origin}`);
+                logger.warn(`Blocked request from unauthorized origin: ${origin}`);
                 return res.status(403).json({
                     jsonrpc: '2.0',
                     error: {
@@ -130,8 +132,7 @@ export async function runHTTP(server) {
 
         // Request logging middleware
         app.use((req, res, next) => {
-            const timestamp = new Date().toISOString();
-            console.log(`[${timestamp}] ${req.method} ${req.path} - ${req.ip}`);
+            logger.info(`${req.method} ${req.path} - ${req.ip}`);
             next();
         });
 
@@ -162,7 +163,7 @@ export async function runHTTP(server) {
 
         // Main MCP endpoint - POST
         app.post('/mcp', async (req, res) => {
-            console.log('Received MCP request:', req.body);
+            logger.info('Received MCP request:', req.body);
             try {
                 // Check for session ID
                 const sessionId = req.headers['mcp-session-id'];
@@ -180,7 +181,7 @@ export async function runHTTP(server) {
                         onsessioninitialized: (sessionId) => {
                             // Store transport by session ID when initialized
                             // Avoids race conditions before session storage
-                            console.log(`Session initialized with ID: ${sessionId}`);
+                            logger.info(`Session initialized with ID: ${sessionId}`);
                             transports[sessionId] = transport;
                         },
                     });
@@ -189,7 +190,7 @@ export async function runHTTP(server) {
                     transport.onclose = () => {
                         const sid = transport.sessionId;
                         if (sid && transports[sid]) {
-                            console.log(
+                            logger.info(
                                 `Transport closed for session ${sid}, removing from transports map`,
                             );
                             delete transports[sid];
@@ -219,7 +220,7 @@ export async function runHTTP(server) {
                 // Existing transport is already connected to the server
                 await transport.handleRequest(req, res, req.body);
             } catch (error) {
-                console.error('Error handling MCP request:', error);
+                logger.error('Error handling MCP request:', error);
                 if (!res.headersSent) {
                     res.status(500).json({
                         jsonrpc: '2.0',
@@ -277,13 +278,13 @@ export async function runHTTP(server) {
                 }
                 delete transports[sessionId];
 
-                console.log(`Session ${sessionId} terminated by client`);
+                logger.info(`Session ${sessionId} terminated by client`);
                 res.status(200).json({
                     jsonrpc: '2.0',
                     result: { terminated: true },
                 });
             } catch (error) {
-                console.error(`Error terminating session ${sessionId}:`, error);
+                logger.error(`Error terminating session ${sessionId}:`, error);
                 res.status(500).json({
                     jsonrpc: '2.0',
                     error: {
@@ -315,28 +316,28 @@ export async function runHTTP(server) {
         const HOST = '0.0.0.0'; // Docker containers need to bind to all interfaces
 
         const httpServer = app.listen(PORT, HOST, () => {
-            console.log(`Letta MCP HTTP server is running on ${HOST}:${PORT}`);
-            console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
-            console.log(`Health check: http://localhost:${PORT}/health`);
-            console.log('Protocol version: 2025-06-18');
-            console.log('Security: Origin validation enabled, DNS rebinding protection active');
-            console.log(`API credentials: ${server.apiBase ? 'Available' : 'Not available'}`);
+            logger.info(`Letta MCP HTTP server is running on ${HOST}:${PORT}`);
+            logger.info(`MCP endpoint: http://localhost:${PORT}/mcp`);
+            logger.info(`Health check: http://localhost:${PORT}/health`);
+            logger.info('Protocol version: 2025-06-18');
+            logger.info('Security: Origin validation enabled, DNS rebinding protection active');
+            logger.info(`API credentials: ${server.apiBase ? 'Available' : 'Not available'}`);
         });
 
         // Graceful shutdown
         const shutdownHandler = async () => {
-            console.log('Shutting down HTTP server...');
+            logger.info('Shutting down HTTP server...');
             httpServer.close();
 
             // Clean up all transports
             for (const [sessionId, transport] of Object.entries(transports)) {
                 try {
-                    console.log(`Cleaning up session: ${sessionId}`);
+                    logger.info(`Cleaning up session: ${sessionId}`);
                     if (transport.onclose) {
                         transport.onclose();
                     }
                 } catch (error) {
-                    console.error(`Error cleaning up session ${sessionId}:`, error);
+                    logger.error(`Error cleaning up session ${sessionId}:`, error);
                 }
             }
 
@@ -347,7 +348,7 @@ export async function runHTTP(server) {
         process.on('SIGINT', shutdownHandler);
         process.on('SIGTERM', shutdownHandler);
     } catch (error) {
-        console.error('Failed to start HTTP server:', error);
+        logger.error('Failed to start HTTP server:', error);
         process.exit(1);
     }
 }

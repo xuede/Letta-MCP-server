@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('modify_passage');
+
 /**
  * Tool handler for modifying a passage in an agent's archival memory
  */
@@ -42,10 +46,7 @@ export async function handleModifyPassage(server, args) {
                 !existingPassage.id ||
                 !existingPassage.text
             ) {
-                console.error(
-                    'Fetched passage object is missing required fields:',
-                    existingPassage,
-                );
+                logger.error('Fetched passage object is missing required fields:', existingPassage);
                 throw new Error(
                     `Fetched passage ${memoryId} is missing required fields (embedding, embedding_config, id, text).`,
                 );
@@ -56,7 +57,7 @@ export async function handleModifyPassage(server, args) {
                     `Agent not found when listing passages: ${args.agent_id}`,
                 );
             }
-            console.error('Error fetching passages:', fetchError);
+            logger.error('Error fetching passages:', fetchError);
             server.createErrorResponse(
                 `Failed to fetch passages for agent ${args.agent_id}: ${fetchError.message}`,
             );
@@ -76,7 +77,7 @@ export async function handleModifyPassage(server, args) {
         // delete updatePayload.organization_id;
         // delete updatePayload.agent_id; // agent_id is in the URL path
 
-        console.log(
+        logger.info(
             `[modify_passage] Sending payload for memory_id ${memoryId}:`,
             JSON.stringify(updatePayload),
         );
@@ -93,6 +94,7 @@ export async function handleModifyPassage(server, args) {
         const includeEmbeddings = args?.include_embeddings ?? false;
         if (!includeEmbeddings && Array.isArray(modifiedPassages)) {
             modifiedPassages = modifiedPassages.map((passage) => {
+                // eslint-disable-next-line no-unused-vars
                 const { embedding, ...rest } = passage;
                 return rest;
             });
@@ -109,7 +111,7 @@ export async function handleModifyPassage(server, args) {
             ],
         };
     } catch (error) {
-        console.error('[modify_passage] Error:', error.response?.data || error.message);
+        logger.error('[modify_passage] Error:', error.response?.data || error.message);
         if (error.response) {
             if (error.response.status === 404) {
                 server.createErrorResponse(

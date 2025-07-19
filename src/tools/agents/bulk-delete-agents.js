@@ -1,4 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
 // McpError and ErrorCode imported for future use
+const logger = createLogger('bulk_delete_agents');
 
 /**
  * Tool handler for deleting multiple agents based on filter criteria
@@ -24,18 +27,14 @@ export async function handleBulkDeleteAgents(server, args) {
         // Step 1: Identify agents to delete
         if (specificAgentIds && Array.isArray(specificAgentIds) && specificAgentIds.length > 0) {
             // If a list of IDs is provided, use that directly
-            console.log(
-                `[bulk_delete_agents] Received specific list of ${specificAgentIds.length} agents to delete.`,
-            );
+            logger.info(`Received specific list of ${specificAgentIds.length} agents to delete.`);
             // We need agent objects (at least with 'id' and 'name') for consistent reporting
             // Fetch details for each ID or use list_agents with multiple ID filter if supported
             // For simplicity, we'll just use the IDs for deletion and report only IDs
             agentsToDelete = specificAgentIds.map((id) => ({ id: id, name: `ID: ${id}` })); // Create placeholder objects
         } else {
             // Otherwise, list agents based on filters
-            console.log(
-                `[bulk_delete_agents] Listing agents with filter: name='${nameFilter}', tags='${tagFilter}'...`,
-            );
+            logger.info(`Listing agents with filter: name='${nameFilter}', tags='${tagFilter}'...`);
             const listParams = {};
             if (nameFilter) listParams.name = nameFilter;
             if (tagFilter) listParams.tags = tagFilter; // Adjust if API uses different param name
@@ -56,7 +55,7 @@ export async function handleBulkDeleteAgents(server, args) {
                     ],
                 };
             }
-            console.log(`[bulk_delete_agents] Found ${agentsToDelete.length} agents to delete.`);
+            logger.info(`Found ${agentsToDelete.length} agents to delete.`);
         }
 
         // Step 2: Iterate and delete each agent
@@ -64,17 +63,17 @@ export async function handleBulkDeleteAgents(server, args) {
             const agentId = agent.id;
             const encodedAgentId = encodeURIComponent(agentId);
             try {
-                console.log(`[bulk_delete_agents] Deleting agent ${agentId} (${agent.name})...`);
+                logger.info(`Deleting agent ${agentId} (${agent.name})...`);
                 // Use the specific endpoint from the OpenAPI spec
                 await server.api.delete(`/agents/${encodedAgentId}`, { headers });
                 results.push({ agent_id: agentId, name: agent.name, status: 'success' });
-                console.log(`[bulk_delete_agents] Successfully deleted agent ${agentId}.`);
+                logger.info(`Successfully deleted agent ${agentId}.`);
             } catch (deleteError) {
                 let errorMessage = `Failed to delete agent ${agentId} (${agent.name}): ${deleteError.message}`;
                 if (deleteError.response) {
                     errorMessage += ` (Status: ${deleteError.response.status}, Data: ${JSON.stringify(deleteError.response.data)})`;
                 }
-                console.error(`[bulk_delete_agents] ${errorMessage}`);
+                logger.error(errorMessage);
                 results.push({
                     agent_id: agentId,
                     name: agent.name,
@@ -105,7 +104,7 @@ export async function handleBulkDeleteAgents(server, args) {
         };
     } catch (error) {
         // Handle errors during the list_agents call or unexpected issues
-        console.error('[bulk_delete_agents] Error:', error.response?.data || error.message);
+        logger.error('Error:', error.response?.data || error.message);
         server.createErrorResponse(`Failed during bulk delete operation: ${error.message}`);
     }
 }

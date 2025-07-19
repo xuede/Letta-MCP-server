@@ -1,11 +1,13 @@
 import express from 'express';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { createLogger } from '../core/logger.js';
 
 /**
  * Run the server using SSE transport
  * @param {Object} server - The LettaServer instance
  */
 export async function runSSE(server) {
+    const logger = createLogger('sse-transport');
     try {
         const app = express();
         let transport;
@@ -28,7 +30,7 @@ export async function runSSE(server) {
             lastClientId = clientId;
 
             try {
-                console.log(`Establishing SSE transport for client ${clientId} (${clientIp})`);
+                logger.info(`Establishing SSE transport for client ${clientId} (${clientIp})`);
                 transport = new SSEServerTransport('/message', res);
 
                 // Store connection info
@@ -43,10 +45,10 @@ export async function runSSE(server) {
                 await server.server.connect(transport);
                 isConnected = true;
                 reconnectAttempts = 0;
-                console.log(`SSE transport connected successfully for client ${clientId}`);
+                logger.info(`SSE transport connected successfully for client ${clientId}`);
                 return { success: true, clientId };
             } catch (error) {
-                console.error(`Failed to connect SSE transport for client ${clientId}:`, error);
+                logger.error(`Failed to connect SSE transport for client ${clientId}:`, error);
                 activeConnections.delete(clientId);
                 isConnected = false;
                 return { success: false, clientId };
@@ -56,7 +58,7 @@ export async function runSSE(server) {
         // Function to handle reconnection with exponential backoff
         const attemptReconnect = async (req, res) => {
             if (reconnectAttempts >= maxReconnectAttempts) {
-                console.error(
+                logger.error(
                     `Maximum reconnection attempts (${maxReconnectAttempts}) reached. Giving up.`,
                 );
                 return { success: false };
@@ -64,7 +66,7 @@ export async function runSSE(server) {
 
             reconnectAttempts++;
             const delay = reconnectDelay * Math.pow(1.5, reconnectAttempts - 1);
-            console.log(
+            logger.info(
                 `Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts}) in ${delay}ms...`,
             );
 
@@ -72,12 +74,12 @@ export async function runSSE(server) {
                 setTimeout(async () => {
                     try {
                         const result = await connectTransport(req, res);
-                        console.log(
+                        logger.info(
                             `Reconnection attempt ${reconnectAttempts} ${result.success ? 'successful' : 'failed'} for client ${result.clientId}`,
                         );
                         resolve(result);
                     } catch (error) {
-                        console.error(
+                        logger.error(
                             `Reconnection attempt ${reconnectAttempts} failed with error:`,
                             error,
                         );
@@ -91,16 +93,16 @@ export async function runSSE(server) {
         const cleanupConnection = async (clientId) => {
             if (activeConnections.has(clientId)) {
                 activeConnections.get(clientId);
-                console.log(`Cleaning up connection for client ${clientId}`);
+                logger.info(`Cleaning up connection for client ${clientId}`);
 
                 try {
                     // Remove from active connections
                     activeConnections.delete(clientId);
 
                     // Log connection stats
-                    console.log(`Connection stats: ${activeConnections.size} active connections`);
+                    logger.info(`Connection stats: ${activeConnections.size} active connections`);
                 } catch (error) {
-                    console.error(`Error cleaning up connection for client ${clientId}:`, error);
+                    logger.error(`Error cleaning up connection for client ${clientId}:`, error);
                 }
             }
         };
@@ -110,12 +112,12 @@ export async function runSSE(server) {
             const wasDisconnected = !isConnected && transport !== undefined;
 
             if (wasDisconnected) {
-                console.log(
+                logger.info(
                     `Received SSE connection request from ${clientIp} after previous disconnection`,
                 );
-                console.log('Attempting to reconnect (previous connection was lost)');
+                logger.info('Attempting to reconnect (previous connection was lost)');
             } else {
-                console.log(`Received new SSE connection request from ${clientIp}`);
+                logger.info(`Received new SSE connection request from ${clientIp}`);
             }
 
             // Set headers for SSE
@@ -126,10 +128,10 @@ export async function runSSE(server) {
             // Connect transport
             const result = await connectTransport(req, res);
             if (!result.success) {
-                console.log('Initial connection failed, attempting to reconnect...');
+                logger.info('Initial connection failed, attempting to reconnect...');
                 await attemptReconnect(req, res);
             } else if (wasDisconnected) {
-                console.log(
+                logger.info(
                     `Successfully reconnected after previous disconnection (client ${result.clientId})`,
                 );
             }
@@ -141,11 +143,11 @@ export async function runSSE(server) {
             try {
                 res.write(': connected\n\n');
             } catch (error) {
-                console.error(`Error sending initial ping to client ${clientId}:`, error);
+                logger.error(`Error sending initial ping to client ${clientId}:`, error);
             }
 
             req.on('close', async () => {
-                console.log(`SSE connection closed for client ${clientId}`);
+                logger.info(`SSE connection closed for client ${clientId}`);
                 isConnected = false;
 
                 // Clean up the connection
@@ -153,7 +155,7 @@ export async function runSSE(server) {
 
                 // Only attempt to reconnect if the server is still running
                 if (server.server && !server.server.closed) {
-                    console.log(
+                    logger.info(
                         'Connection lost, waiting for new client connection to reconnect...',
                     );
 
@@ -164,7 +166,7 @@ export async function runSSE(server) {
             });
 
             server.server.onclose = async () => {
-                console.log('Server closing...');
+                logger.info('Server closing...');
                 isConnected = false;
                 await server.server.close();
             };
@@ -172,15 +174,15 @@ export async function runSSE(server) {
 
         app.post('/message', async (req, res) => {
             try {
-                console.log('Received message');
+                logger.info('Received message');
                 if (!transport || !isConnected) {
-                    console.error('No active SSE connection');
+                    logger.error('No active SSE connection');
                     res.status(503).json({ error: 'No active SSE connection' });
                     return;
                 }
                 await transport.handlePostMessage(req, res);
             } catch (error) {
-                console.error('Error handling message:', error);
+                logger.error('Error handling message:', error);
 
                 // If error is related to connection, mark as disconnected
                 if (
@@ -190,8 +192,8 @@ export async function runSSE(server) {
                         error.message.includes('closed'))
                 ) {
                     isConnected = false;
-                    console.log('Connection error detected, marking as disconnected');
-                    console.log('Will attempt to reconnect on next client connection');
+                    logger.info('Connection error detected, marking as disconnected');
+                    logger.info('Will attempt to reconnect on next client connection');
 
                     // Reset reconnect attempts for next connection
                     reconnectAttempts = 0;
@@ -221,15 +223,15 @@ export async function runSSE(server) {
         // Set up a ping interval to keep connections alive
         const pingInterval = setInterval(() => {
             if (activeConnections.size > 0) {
-                console.log(`Sending ping to ${activeConnections.size} active connections`);
+                logger.info(`Sending ping to ${activeConnections.size} active connections`);
 
-                for (const [clientId] of activeConnections.entries()) {
+                for (const [clientId, connection] of activeConnections.entries()) {
                     try {
                         if (connection.res && !connection.res.finished) {
                             connection.res.write(': ping\n\n');
                         }
                     } catch (error) {
-                        console.error(`Error sending ping to client ${clientId}:`, error);
+                        logger.error(`Error sending ping to client ${clientId}:`, error);
                         isConnected = false;
                         cleanupConnection(clientId);
                     }
@@ -239,59 +241,59 @@ export async function runSSE(server) {
 
         const PORT = process.env.PORT || 3001;
         const httpServer = app.listen(PORT, () => {
-            console.log(`Letta SSE server is running on port ${PORT}`);
-            console.log(`API credentials: ${server.apiBase ? 'Available' : 'Not available'}`);
-            console.log(
+            logger.info(`Letta SSE server is running on port ${PORT}`);
+            logger.info(`API credentials: ${server.apiBase ? 'Available' : 'Not available'}`);
+            logger.info(
                 `Reconnection enabled: max attempts=${maxReconnectAttempts}, initial delay=${reconnectDelay}ms`,
             );
-            console.log('Connection tracking: enabled with ping interval (30s)');
+            logger.info('Connection tracking: enabled with ping interval (30s)');
         });
 
         const cleanup = async () => {
-            console.log('Starting cleanup process...');
+            logger.info('Starting cleanup process...');
 
             // Clear the ping interval
             if (pingInterval) {
-                console.log('Clearing ping interval');
+                logger.info('Clearing ping interval');
                 clearInterval(pingInterval);
             }
 
             // Clean up all active connections
-            console.log(`Cleaning up ${activeConnections.size} active connections`);
+            logger.info(`Cleaning up ${activeConnections.size} active connections`);
             for (const [clientId] of activeConnections.entries()) {
                 try {
-                    console.log(`Closing connection for client ${clientId}`);
+                    logger.info(`Closing connection for client ${clientId}`);
                     activeConnections.delete(clientId);
                 } catch (error) {
-                    console.error(`Error cleaning up connection for client ${clientId}:`, error);
+                    logger.error(`Error cleaning up connection for client ${clientId}:`, error);
                 }
             }
 
             // Close the HTTP server
             if (httpServer) {
-                console.log('Closing HTTP server...');
+                logger.info('Closing HTTP server...');
                 httpServer.close();
             }
 
             // Close the MCP server
             if (server.server) {
-                console.log('Closing MCP server...');
+                logger.info('Closing MCP server...');
                 await server.server.close();
             }
 
-            console.log('Cleanup complete, exiting process');
+            logger.info('Cleanup complete, exiting process');
             process.exit(0);
         };
 
         process.on('SIGINT', cleanup);
         process.on('SIGTERM', cleanup);
         process.on('uncaughtException', async (error) => {
-            console.error('Uncaught exception:', error);
+            logger.error('Uncaught exception:', error);
             await cleanup();
         });
     } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        console.error('Failed to start SSE server:', error);
+        logger.error('Failed to start SSE server:', error);
         process.exit(1);
     }
 }

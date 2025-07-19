@@ -1,7 +1,7 @@
 /**
  * Tool handler for listing all configured MCP servers on the Letta server
  */
-export async function handleListMcpServers(server, args) {
+export async function handleListMcpServers(server, _args) {
     try {
         const headers = server.getApiHeaders();
 

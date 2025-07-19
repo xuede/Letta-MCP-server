@@ -1,4 +1,7 @@
+import { createLogger } from '../../core/logger.js';
 // McpError and ErrorCode imported by framework
+
+const logger = createLogger('get_agent_summary');
 
 /**
  * Tool handler for getting a summary of an agent's configuration
@@ -13,7 +16,7 @@ export async function handleGetAgentSummary(server, args) {
     const headers = server.getApiHeaders();
 
     try {
-        console.log(`[get_agent_summary] Fetching summary for agent ${agentId}...`);
+        logger.info(`Fetching summary for agent ${agentId}...`);
 
         // Fetch data from multiple endpoints concurrently
         const [agentStateRes, coreMemoryRes, toolsRes, sourcesRes] = await Promise.allSettled([
@@ -30,10 +33,7 @@ export async function handleGetAgentSummary(server, args) {
                 agentStateRes.reason?.message ||
                 agentStateRes.value?.data ||
                 'Unknown error fetching agent state';
-            console.error(
-                `[get_agent_summary] Failed to fetch agent state for ${agentId}:`,
-                errorInfo,
-            );
+            logger.error(`Failed to fetch agent state for ${agentId}:`, errorInfo);
             // If agent doesn't exist, return a specific error
             if (
                 agentStateRes.reason?.response?.status === 404 ||
@@ -54,8 +54,8 @@ export async function handleGetAgentSummary(server, args) {
                     block.value.substring(0, 100) + (block.value.length > 100 ? '...' : ''),
             }));
         } else {
-            console.warn(
-                `[get_agent_summary] Could not fetch core memory for ${agentId}:`,
+            logger.warn(
+                `Could not fetch core memory for ${agentId}:`,
                 coreMemoryRes.reason?.response?.data ||
                     coreMemoryRes.reason?.message ||
                     'Non-200 status',
@@ -71,8 +71,8 @@ export async function handleGetAgentSummary(server, args) {
                 type: tool.tool_type,
             }));
         } else {
-            console.warn(
-                `[get_agent_summary] Could not fetch tools for ${agentId}:`,
+            logger.warn(
+                `Could not fetch tools for ${agentId}:`,
                 toolsRes.reason?.response?.data || toolsRes.reason?.message || 'Non-200 status',
             );
         }
@@ -85,8 +85,8 @@ export async function handleGetAgentSummary(server, args) {
                 name: source.name,
             }));
         } else {
-            console.warn(
-                `[get_agent_summary] Could not fetch sources for ${agentId}:`,
+            logger.warn(
+                `Could not fetch sources for ${agentId}:`,
                 sourcesRes.reason?.response?.data || sourcesRes.reason?.message || 'Non-200 status',
             );
         }
@@ -121,7 +121,7 @@ export async function handleGetAgentSummary(server, args) {
         };
     } catch (error) {
         // Catch any unexpected errors during processing
-        console.error(`[get_agent_summary] Unexpected error for agent ${agentId}:`, error);
+        logger.error(`Unexpected error for agent ${agentId}:`, error);
         server.createErrorResponse(`Failed to get agent summary: ${error.message}`);
     }
 }

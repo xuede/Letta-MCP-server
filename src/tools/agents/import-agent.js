@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import FormData from 'form-data'; // Assuming form-data is available
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('import_agent');
 
 /**
  * Tool handler for importing an agent from a JSON file
@@ -68,7 +71,7 @@ export async function handleImportAgent(server, args) {
                 );
             }
         }
-        console.error('[import_agent] Error:', error.response?.data || error.message);
+        logger.error('[import_agent] Error:', error.response?.data || error.message);
         server.createErrorResponse(
             `Failed to import agent from ${args.file_path}: ${error.message}`,
         );

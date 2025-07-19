@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('upload_tool');
+
 /**
  * Tool handler for uploading a new tool to the Letta system
  */
@@ -33,7 +37,7 @@ export async function handleUploadTool(server, args) {
         for (const tool of existingTools) {
             if (tool.name === args.name) {
                 existingToolId = tool.id;
-                console.log(
+                logger.info(
                     `Found existing tool ${args.name} with ID ${existingToolId}, will delete it first...`,
                 );
                 break;
@@ -43,9 +47,9 @@ export async function handleUploadTool(server, args) {
         if (existingToolId) {
             try {
                 await server.api.delete(`/tools/${existingToolId}`, { headers });
-                console.log(`Successfully deleted existing tool ${args.name}`);
+                logger.info(`Successfully deleted existing tool ${args.name}`);
             } catch (deleteError) {
-                console.warn(
+                logger.info(
                     `Failed to delete existing tool: ${deleteError}. Will try to continue anyway.`,
                 );
             }
@@ -60,7 +64,7 @@ export async function handleUploadTool(server, args) {
         };
 
         // Create the tool
-        console.log(`Creating tool "${args.name}"...`);
+        logger.info(`Creating tool "${args.name}"...`);
         const createResponse = await server.api.post('/tools/', toolData, { headers });
         const toolId = createResponse.data.id;
 

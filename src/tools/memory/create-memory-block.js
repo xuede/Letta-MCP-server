@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('create_memory_block');
+
 /**
  * Tool handler for creating a new memory block in the Letta system
  */
@@ -38,7 +42,7 @@ export async function handleCreateMemoryBlock(server, args) {
         };
 
         // Create the memory block
-        console.log(`Creating memory block "${args.name}" with label "${args.label}"...`);
+        logger.info(`Creating memory block "${args.name}" with label "${args.label}"...`);
         const createResponse = await server.api.post('/blocks', blockData, { headers });
         const blockId = createResponse.data.id;
 

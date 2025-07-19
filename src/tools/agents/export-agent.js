@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios'; // Assuming axios is available
 import FormData from 'form-data'; // Assuming form-data is available
+import { createLogger } from '../../core/logger.js';
 // McpError and ErrorCode imported by framework
+
+const logger = createLogger('export_agent');
 
 /**
  * Tool handler for exporting an agent's configuration
@@ -38,7 +41,7 @@ export async function handleExportAgent(server, args) {
         try {
             fs.writeFileSync(absoluteOutputPath, agentJsonString);
         } catch (writeError) {
-            console.error(`Error writing agent export to ${absoluteOutputPath}:`, writeError);
+            logger.error(`Error writing agent export to ${absoluteOutputPath}:`, writeError);
             server.createErrorResponse(
                 `Failed to save agent export to ${absoluteOutputPath}: ${writeError.message}`,
             );
@@ -48,7 +51,7 @@ export async function handleExportAgent(server, args) {
         let xbackboneResult = null;
         if (uploadToXBackbone) {
             if (!xbackboneUrl || !xbackboneToken) {
-                console.warn('XBackbone URL or Token not configured, skipping upload.');
+                logger.warn('XBackbone URL or Token not configured, skipping upload.');
             } else {
                 try {
                     const form = new FormData();
@@ -79,11 +82,11 @@ export async function handleExportAgent(server, args) {
                             // Assuming XBackbone provides a delete URL structure like this
                             delete_url: `${uploadResponse.data.url}/delete/${xbackboneToken}`,
                         };
-                        console.log(
+                        logger.info(
                             `Successfully uploaded ${absoluteOutputPath} to XBackbone: ${xbackboneResult.url}`,
                         );
                     } else {
-                        console.error(
+                        logger.error(
                             `XBackbone upload failed with status ${uploadResponse.status}:`,
                             uploadResponse.data,
                         );
@@ -93,7 +96,7 @@ export async function handleExportAgent(server, args) {
                         };
                     }
                 } catch (uploadError) {
-                    console.error('Error uploading to XBackbone:', uploadError);
+                    logger.error('Error uploading to XBackbone:', uploadError);
                     xbackboneResult = { error: `Upload failed: ${uploadError.message}` };
                 }
             }
@@ -126,7 +129,7 @@ export async function handleExportAgent(server, args) {
         if (error.response && error.response.status === 404) {
             server.createErrorResponse(`Agent not found: ${agentId}`);
         }
-        console.error('[export_agent] Error:', error.response?.data || error.message);
+        logger.error('Error:', error.response?.data || error.message);
         server.createErrorResponse(`Failed to export agent ${agentId}: ${error.message}`);
     }
 }

@@ -1,4 +1,6 @@
-import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('attach_tool');
 
 /**
  * Tool handler for attaching tools (by ID or name) to an agent in the Letta system.
@@ -39,17 +41,17 @@ export async function handleAttachTool(server, args) {
 
         let agentName = 'Unknown';
         try {
-            console.log(`Fetching info for agent ${agent_id}...`);
+            logger.info(`Fetching info for agent ${agent_id}...`);
             const agentInfoResponse = await server.api.get(`/agents/${agent_id}`, { headers });
             agentName = agentInfoResponse.data?.name || agent_id;
         } catch (agentError) {
             // Proceed even if agent info fetch fails, but log warning
-            console.warn(`Could not fetch agent info for ${agent_id}: ${agentError.message}`);
+            logger.info(`Could not fetch agent info for ${agent_id}: ${agentError.message}`);
             agentName = agent_id; // Use ID as name fallback
         }
 
         // --- 3. Process Provided Tool IDs ---
-        console.log(`Processing provided tool IDs: ${toolIdsInput.join(', ')}`);
+        logger.info(`Processing provided tool IDs: ${toolIdsInput.join(', ')}`);
         for (const toolId of toolIdsInput) {
             try {
                 const toolResponse = await server.api.get(`/tools/${toolId}`, { headers });
@@ -70,7 +72,7 @@ export async function handleAttachTool(server, args) {
                 });
             } catch (error) {
                 const message = `Provided tool ID ${toolId} not found or error fetching: ${error.message}`;
-                console.error(message);
+                logger.error(message);
                 processingResults.push({
                     input: toolId,
                     type: 'id',
@@ -83,7 +85,7 @@ export async function handleAttachTool(server, args) {
 
         // --- 4. Process Provided Tool Names ---
         if (toolNamesInput.length > 0) {
-            console.log(`Processing provided tool names: ${toolNamesInput.join(', ')}`);
+            logger.info(`Processing provided tool names: ${toolNamesInput.join(', ')}`);
 
             // 4a. Fetch all existing Letta tools for efficient lookup
             let lettaTools = [];
@@ -91,11 +93,11 @@ export async function handleAttachTool(server, args) {
                 const listToolsResponse = await server.api.get('/tools/', { headers });
                 lettaTools = listToolsResponse.data || []; // Assuming API returns list directly
                 if (!Array.isArray(lettaTools)) {
-                    console.warn('Unexpected format for /tools/ response, expected array.');
+                    logger.info('Unexpected format for /tools/ response, expected array.');
                     lettaTools = [];
                 }
             } catch (listError) {
-                console.warn(
+                logger.info(
                     `Could not list existing Letta tools: ${listError.message}. Proceeding without Letta tool check.`,
                 );
             }
@@ -107,7 +109,7 @@ export async function handleAttachTool(server, args) {
                 const serversResponse = await server.api.get('/tools/mcp/servers', { headers });
                 mcpServersData = serversResponse.data || {};
                 if (typeof mcpServersData !== 'object') {
-                    console.warn(
+                    logger.info(
                         'Unexpected format for /tools/mcp/servers response, expected object.',
                     );
                     mcpServersData = {};
@@ -125,20 +127,20 @@ export async function handleAttachTool(server, args) {
                                     // Avoid overwriting if names clash, take first found
                                     mcpToolMap.set(tool.name, { server: serverName, tool: tool });
                                 } else {
-                                    console.warn(
+                                    logger.info(
                                         `Duplicate MCP tool name found: '${tool.name}' exists on multiple servers. Using first found on server '${mcpToolMap.get(tool.name).server}'.`,
                                     );
                                 }
                             });
                         }
                     } catch (mcpListError) {
-                        console.warn(
+                        logger.info(
                             `Could not list tools for MCP server ${serverName}: ${mcpListError.message}`,
                         );
                     }
                 }
             } catch (mcpServersError) {
-                console.warn(
+                logger.info(
                     `Could not list MCP servers: ${mcpServersError.message}. Proceeding without MCP tool check.`,
                 );
             }
@@ -163,7 +165,7 @@ export async function handleAttachTool(server, args) {
                 // Try finding as existing Letta tool
                 const existingLettaTool = lettaTools.find((t) => t.name === toolName);
                 if (existingLettaTool) {
-                    console.log(
+                    logger.info(
                         `Found existing Letta tool: ${toolName} (ID: ${existingLettaTool.id})`,
                     );
                     const toolInfo = { id: existingLettaTool.id, name: toolName };
@@ -185,8 +187,9 @@ export async function handleAttachTool(server, args) {
                 // Try finding as MCP tool and register if found
                 const mcpToolInfo = mcpToolMap.get(toolName);
                 if (mcpToolInfo) {
-                    const { server: mcp_server_name, tool: mcp_tool_details } = mcpToolInfo;
-                    console.log(
+                    // eslint-disable-next-line no-unused-vars
+                    const { server: mcp_server_name, tool } = mcpToolInfo;
+                    logger.info(
                         `Found MCP tool '${toolName}' on server '${mcp_server_name}'. Attempting registration...`,
                     );
                     const registerUrl = `/tools/mcp/servers/${mcp_server_name}/${toolName}`;
@@ -199,7 +202,7 @@ export async function handleAttachTool(server, args) {
                         if (registerResponse.data && registerResponse.data.id) {
                             const lettaToolId = registerResponse.data.id;
                             const lettaToolName = registerResponse.data.name || toolName;
-                            console.log(
+                            logger.info(
                                 `Successfully registered MCP tool. New Letta ID: ${lettaToolId}`,
                             );
                             const toolInfo = { id: lettaToolId, name: lettaToolName };
@@ -222,7 +225,7 @@ export async function handleAttachTool(server, args) {
                         }
                     } catch (registerError) {
                         const message = `Failed to register MCP tool ${mcp_server_name}/${toolName}: ${registerError.message}`;
-                        console.error(message);
+                        logger.error(message);
                         processingResults.push({
                             input: toolName,
                             type: 'name',
@@ -238,7 +241,7 @@ export async function handleAttachTool(server, args) {
                 // If not found anywhere
                 if (!found) {
                     const message = `Tool name '${toolName}' not found as an existing Letta tool or a registerable MCP tool.`;
-                    console.error(message);
+                    logger.error(message);
                     processingResults.push({
                         input: toolName,
                         type: 'name',
@@ -253,13 +256,13 @@ export async function handleAttachTool(server, args) {
         // --- 5. Attach Resolved Tools ---
         const attachmentResults = [];
         if (resolvedToolInfos.length === 0) {
-            console.log('No tools resolved successfully for attachment.');
+            logger.info('No tools resolved successfully for attachment.');
         } else {
-            console.log(
+            logger.info(
                 `Attempting to attach ${resolvedToolInfos.length} resolved tool(s) to agent ${agent_id} (${agentName})...`,
             );
             for (const tool of resolvedToolInfos) {
-                console.log(`Attaching tool ${tool.name} (${tool.id})...`);
+                logger.info(`Attaching tool ${tool.name} (${tool.id})...`);
                 const attachUrl = `/agents/${agent_id}/tools/attach/${tool.id}`;
                 try {
                     const response = await server.api.patch(attachUrl, {}, { headers });
@@ -282,7 +285,7 @@ export async function handleAttachTool(server, args) {
                     }
                 } catch (error) {
                     const message = `Failed to attach tool ${tool.name} (${tool.id}): ${error.message}`;
-                    console.error(message, error.response?.data || '');
+                    logger.error(message, error.response?.data || '');
                     attachmentResults.push({
                         tool_id: tool.id,
                         tool_name: tool.name,
@@ -297,9 +300,6 @@ export async function handleAttachTool(server, args) {
         // --- 6. Final Response ---
         const overallSuccess =
             processingResults.every((r) => r.success) && attachmentResults.every((r) => r.success);
-        const finalMessage = overallSuccess
-            ? `Successfully processed and attached all requested tools to agent ${agentName}.`
-            : `Completed processing tools for agent ${agentName} with some errors.`;
 
         return {
             content: [
@@ -316,7 +316,7 @@ export async function handleAttachTool(server, args) {
             isError: !overallSuccess,
         };
     } catch (error) {
-        console.error(`Unhandled error in handleAttachTool: ${error.message}`);
+        logger.error(`Unhandled error in handleAttachTool: ${error.message}`);
         server.createErrorResponse(error);
     }
 }

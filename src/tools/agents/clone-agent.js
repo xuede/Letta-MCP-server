@@ -2,6 +2,9 @@ import fs from 'fs/promises'; // Use promises for async file operations
 import path from 'path';
 import os from 'os'; // To get temporary directory
 import FormData from 'form-data'; // Assuming form-data is available
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('clone_agent');
 
 /**
  * Tool handler for cloning an agent
@@ -26,7 +29,7 @@ export async function handleCloneAgent(server, args) {
         const encodedSourceAgentId = encodeURIComponent(sourceAgentId);
 
         // --- Step 1: Export the source agent ---
-        console.log(`[clone_agent] Exporting source agent ${sourceAgentId}...`);
+        logger.info(`Exporting source agent ${sourceAgentId}...`);
         const exportResponse = await server.api.get(`/agents/${encodedSourceAgentId}/export`, {
             headers,
         });
@@ -35,7 +38,7 @@ export async function handleCloneAgent(server, args) {
         if (!agentConfig || typeof agentConfig !== 'object') {
             throw new Error('Received invalid data from agent export endpoint.');
         }
-        console.log(`[clone_agent] Source agent ${sourceAgentId} exported successfully.`);
+        logger.info(`Source agent ${sourceAgentId} exported successfully.`);
 
         // --- Step 2: Modify the configuration for the new agent ---
         agentConfig.name = newAgentName; // Set the new name
@@ -52,12 +55,12 @@ export async function handleCloneAgent(server, args) {
         // --- Step 3: Save modified config to a temporary file ---
         // Use os.tmpdir() which should work inside Docker if /tmp is writable
         tempFilePath = path.join(os.tmpdir(), `agent_clone_temp_${Date.now()}.json`);
-        console.log(`[clone_agent] Saving temporary config to ${tempFilePath}...`);
+        logger.info(`Saving temporary config to ${tempFilePath}...`);
         await fs.writeFile(tempFilePath, agentJsonString);
-        console.log('[clone_agent] Temporary config saved.');
+        logger.info('Temporary config saved.');
 
         // --- Step 4: Import the modified configuration ---
-        console.log(`[clone_agent] Importing new agent '${newAgentName}' from ${tempFilePath}...`);
+        logger.info(`Importing new agent '${newAgentName}' from ${tempFilePath}...`);
         const importHeaders = server.getApiHeaders();
         delete importHeaders['Content-Type']; // Let FormData set the correct header
 
@@ -81,13 +84,13 @@ export async function handleCloneAgent(server, args) {
         });
 
         const importedAgentState = importResponse.data;
-        console.log(
-            `[clone_agent] Agent '${newAgentName}' imported successfully with ID: ${importedAgentState.id}`,
+        logger.info(
+            `Agent '${newAgentName}' imported successfully with ID: ${importedAgentState.id}`,
         );
 
         // --- Step 5: Cleanup temporary file ---
         await fs.unlink(tempFilePath);
-        console.log(`[clone_agent] Cleaned up temporary file ${tempFilePath}.`);
+        logger.info(`Cleaned up temporary file ${tempFilePath}.`);
 
         return {
             content: [
@@ -100,17 +103,14 @@ export async function handleCloneAgent(server, args) {
             ],
         };
     } catch (error) {
-        console.error('[clone_agent] Error:', error.response?.data || error.message);
+        logger.error('Error:', error.response?.data || error.message);
         // Attempt cleanup even on error
         if (tempFilePath) {
             try {
                 await fs.unlink(tempFilePath);
-                console.log(`[clone_agent] Cleaned up temporary file ${tempFilePath} after error.`);
+                logger.info(`Cleaned up temporary file ${tempFilePath} after error.`);
             } catch (cleanupError) {
-                console.error(
-                    `[clone_agent] Error cleaning up temporary file ${tempFilePath}:`,
-                    cleanupError,
-                );
+                logger.error(`Error cleaning up temporary file ${tempFilePath}:`, cleanupError);
             }
         }
 

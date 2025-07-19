@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('list_agents');
+
 /**
  * Tool handler for listing agents in the Letta system
  */
@@ -40,9 +44,9 @@ export async function handleListAgents(server, args) {
             ],
         };
     } catch (error) {
-        console.error('Error in list_agents:', error.message);
-        console.error('API Base URL:', server.apiBase);
-        console.error('Full error:', error.response?.data || error);
+        logger.error('Error in list_agents:', error.message);
+        logger.error('API Base URL:', server.apiBase);
+        logger.error('Full error:', error.response?.data || error);
         server.createErrorResponse(error);
     }
 }

@@ -1,7 +1,7 @@
 /**
  * Tool handler for listing available embedding models
  */
-export async function handleListEmbeddingModels(server, args) {
+export async function handleListEmbeddingModels(server, _args) {
     try {
         const headers = server.getApiHeaders();
 

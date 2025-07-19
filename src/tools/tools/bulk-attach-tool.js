@@ -1,6 +1,8 @@
-import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import { createLogger } from '../../core/logger.js';
 // We might need the list_agents handler logic if it's complex, or re-implement the API call.
 // For simplicity, let's assume we can call the API directly here.
+
+const logger = createLogger('bulk_attach_tool_to_agents');
 
 /**
  * Tool handler for attaching a tool to multiple agents based on a filter
@@ -27,7 +29,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
         const headers = server.getApiHeaders();
 
         // Step 1: List agents based on filter criteria
-        console.log(
+        logger.info(
             `[bulk_attach_tool] Listing agents with filter: name='${nameFilter}', tags='${tagFilter}'...`,
         );
         const listParams = {};
@@ -50,7 +52,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
                 ],
             };
         }
-        console.log(`[bulk_attach_tool] Found ${agentsToProcess.length} agents to process.`);
+        logger.info(`[bulk_attach_tool] Found ${agentsToProcess.length} agents to process.`);
 
         // Step 2: Iterate and attach tool to each agent
         const encodedToolId = encodeURIComponent(toolId);
@@ -58,7 +60,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
             const agentId = agent.id;
             const encodedAgentId = encodeURIComponent(agentId);
             try {
-                console.log(`[bulk_attach_tool] Attaching tool ${toolId} to agent ${agentId}...`);
+                logger.info(`[bulk_attach_tool] Attaching tool ${toolId} to agent ${agentId}...`);
                 // Use the specific endpoint from the OpenAPI spec
                 await server.api.patch(
                     `/agents/${encodedAgentId}/tools/attach/${encodedToolId}`,
@@ -66,7 +68,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
                     { headers },
                 ); // PATCH often has empty body for attach/detach
                 results.push({ agent_id: agentId, name: agent.name, status: 'success' });
-                console.log(
+                logger.info(
                     `[bulk_attach_tool] Successfully attached tool ${toolId} to agent ${agentId}.`,
                 );
             } catch (attachError) {
@@ -74,7 +76,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
                 if (attachError.response) {
                     errorMessage += ` (Status: ${attachError.response.status}, Data: ${JSON.stringify(attachError.response.data)})`;
                 }
-                console.error(`[bulk_attach_tool] ${errorMessage}`);
+                logger.error(`[bulk_attach_tool] ${errorMessage}`);
                 results.push({
                     agent_id: agentId,
                     name: agent.name,
@@ -105,7 +107,7 @@ export async function handleBulkAttachToolToAgents(server, args) {
         };
     } catch (error) {
         // Handle errors during the list_agents call or unexpected issues
-        console.error('[bulk_attach_tool] Error:', error.response?.data || error.message);
+        logger.error('[bulk_attach_tool] Error:', error.response?.data || error.message);
         server.createErrorResponse(`Failed during bulk attach operation: ${error.message}`);
     }
 }

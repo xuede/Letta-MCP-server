@@ -1,7 +1,7 @@
 /**
  * Tool handler for listing available LLM models
  */
-export async function handleListLlmModels(server, args) {
+export async function handleListLlmModels(server, _args) {
     try {
         const headers = server.getApiHeaders();
 

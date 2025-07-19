@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('add_mcp_tool_to_letta');
+
 /**
  * Tool handler for registering an MCP tool as a native Letta tool.
  */
@@ -18,7 +22,7 @@ export async function handleAddMcpToolToLetta(server, args) {
         const headers = server.getApiHeaders();
 
         // --- Find the MCP Server Name for the given tool_name ---
-        console.log(`Searching for MCP server providing tool: ${mcp_tool_name}...`);
+        logger.info(`Searching for MCP server providing tool: ${mcp_tool_name}...`);
         let mcp_server_name = null;
         const serversResponse = await server.api.get('/tools/mcp/servers', { headers });
         if (!serversResponse.data || typeof serversResponse.data !== 'object') {
@@ -27,7 +31,7 @@ export async function handleAddMcpToolToLetta(server, args) {
         const serverNames = Object.keys(serversResponse.data);
 
         for (const serverName of serverNames) {
-            console.log(`Checking server: ${serverName}`);
+            logger.info(`Checking server: ${serverName}`);
             try {
                 const toolsResponse = await server.api.get(
                     `/tools/mcp/servers/${serverName}/tools`,
@@ -39,7 +43,7 @@ export async function handleAddMcpToolToLetta(server, args) {
                     );
                     if (foundTool) {
                         mcp_server_name = serverName;
-                        console.log(
+                        logger.info(
                             `Found tool '${mcp_tool_name}' on server '${mcp_server_name}'.`,
                         );
                         break; // Stop searching once found
@@ -47,7 +51,7 @@ export async function handleAddMcpToolToLetta(server, args) {
                 }
             } catch (toolListError) {
                 // Log error but continue searching other servers
-                console.warn(
+                logger.info(
                     `Could not list tools for server ${serverName}: ${toolListError.message}`,
                 );
             }
@@ -65,13 +69,13 @@ export async function handleAddMcpToolToLetta(server, args) {
         // but adding it might be necessary depending on Letta's auth setup.
         // If issues arise, consider adding: headers['user_id'] = args.user_id; (and add user_id to schema)
 
-        console.log(
+        logger.info(
             `Attempting to register MCP tool ${mcp_server_name}/${mcp_tool_name} with Letta...`,
         );
         const registerUrl = `/tools/mcp/servers/${mcp_server_name}/${mcp_tool_name}`;
 
         // Make the POST request to register the tool
-        console.log(`DEBUG: Calling registration URL: POST ${registerUrl}`); // Added for debugging
+        logger.info(`DEBUG: Calling registration URL: POST ${registerUrl}`); // Added for debugging
         const registerResponse = await server.api.post(registerUrl, {}, { headers });
 
         // Check registration response data for success and the new tool ID
@@ -83,10 +87,10 @@ export async function handleAddMcpToolToLetta(server, args) {
 
         const lettaToolId = registerResponse.data.id;
         const lettaToolName = registerResponse.data.name || mcp_tool_name; // Use returned name if available
-        console.log(`Successfully registered tool. Letta Tool ID: ${lettaToolId}`);
+        logger.info(`Successfully registered tool. Letta Tool ID: ${lettaToolId}`);
 
         // Now, attempt to attach the newly registered tool to the agent
-        console.log(`Attempting to attach tool ${lettaToolId} to agent ${agent_id}...`);
+        logger.info(`Attempting to attach tool ${lettaToolId} to agent ${agent_id}...`);
         const attachUrl = `/agents/${agent_id}/tools/attach/${lettaToolId}`;
         let attachSuccess = false;
         let attachMessage = '';
@@ -98,7 +102,7 @@ export async function handleAddMcpToolToLetta(server, args) {
             // If user_id needs to be agent_id for this call, uncomment below
             // attachHeaders['user_id'] = agent_id;
 
-            console.log(`DEBUG: Calling attachment URL: PATCH ${attachUrl}`); // Added for debugging
+            logger.info(`DEBUG: Calling attachment URL: PATCH ${attachUrl}`); // Added for debugging
             const attachResponse = await server.api.patch(
                 attachUrl,
                 {},
@@ -110,17 +114,17 @@ export async function handleAddMcpToolToLetta(server, args) {
             if (attachedToolIds.includes(lettaToolId)) {
                 attachSuccess = true;
                 attachMessage = `Successfully attached tool '${lettaToolName}' (ID: ${lettaToolId}) to agent ${agent_id}.`;
-                console.log(attachMessage);
+                logger.info(attachMessage);
             } else {
                 attachMessage = `Attachment API call succeeded, but tool ${lettaToolId} was not found in agent's tools list afterwards.`;
-                console.warn(attachMessage);
+                logger.info(attachMessage);
                 // Consider this a partial failure
             }
         } catch (error) {
             attachSuccess = false;
             attachMessage = `Failed to attach tool ${lettaToolId} to agent ${agent_id}.`;
             attachError = error.response?.data || error.message || error;
-            console.error(`${attachMessage} Error:`, attachError);
+            logger.error(`${attachMessage} Error:`, attachError);
         }
 
         // Return combined result
@@ -142,7 +146,7 @@ export async function handleAddMcpToolToLetta(server, args) {
             isError: !attachSuccess, // Consider it an error if attachment failed
         };
     } catch (error) {
-        console.error(`Error during MCP tool registration or attachment: ${error.message}`);
+        logger.error(`Error during MCP tool registration or attachment: ${error.message}`);
         // Ensure the error response includes context about which step failed if possible
         server.createErrorResponse(
             error,

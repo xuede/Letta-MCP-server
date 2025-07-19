@@ -24,6 +24,7 @@ export async function handleCreatePassage(server, args) {
         const includeEmbeddings = args?.include_embeddings ?? false;
         if (!includeEmbeddings) {
             createdPassages = createdPassages.map((passage) => {
+                // eslint-disable-next-line no-unused-vars
                 const { embedding, ...rest } = passage; // Destructure to remove embedding
                 return rest;
             });

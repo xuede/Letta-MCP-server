@@ -2,6 +2,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
+import { createLogger } from './logger.js';
 
 /**
  * Core LettaServer class that handles initialization and API communication
@@ -11,6 +12,9 @@ export class LettaServer {
      * Initialize the Letta MCP server
      */
     constructor() {
+        // Create logger for this module
+        this.logger = createLogger('LettaServer');
+
         // Initialize MCP server
         this.server = new Server(
             {
@@ -25,7 +29,7 @@ export class LettaServer {
         );
 
         // Set up error handler
-        this.server.onerror = (error) => console.error('[MCP Error]', error);
+        this.server.onerror = (error) => this.logger.error('MCP Error', { error });
 
         // Validate environment variables
         this.apiBase = process.env.LETTA_BASE_URL ?? '';

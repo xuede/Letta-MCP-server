@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('prompt_agent');
+
 /**
  * Tool handler for prompting an agent in the Letta system
  */
@@ -68,7 +72,7 @@ export async function handlePromptAgent(server, args) {
                             messages.push(eventData.delta.content);
                         }
                     } catch (jsonError) {
-                        console.error('Error parsing SSE JSON:', jsonError);
+                        logger.error('Error parsing SSE JSON:', jsonError);
                         // If we can't parse the JSON, just add the raw line
                         messages.push(line.substring(6));
                     }
@@ -88,7 +92,7 @@ export async function handlePromptAgent(server, args) {
                 responseText = JSON.stringify(response.data);
             }
         } catch (error) {
-            console.error('Error parsing response:', error);
+            logger.error('Error parsing response:', error);
             responseText = 'Error parsing agent response';
         }
 

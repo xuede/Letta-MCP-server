@@ -1,3 +1,7 @@
+import { createLogger } from '../../core/logger.js';
+
+const logger = createLogger('attach_memory_block');
+
 /**
  * Tool handler for attaching a memory block to an agent in the Letta system
  */
@@ -24,7 +28,7 @@ export async function handleAttachMemoryBlock(server, args) {
         const label = args.label || blockData.label || 'custom';
 
         // Attach block to agent
-        console.log(
+        logger.info(
             `Attaching memory block ${blockName} (${args.block_id}) to agent ${args.agent_id} with label ${label}...`,
         );
 
@@ -32,7 +36,7 @@ export async function handleAttachMemoryBlock(server, args) {
         const attachUrl = `/agents/${args.agent_id}/core-memory/blocks/attach/${args.block_id}`;
 
         // Send an empty object as the request body
-        const response = await server.api.patch(attachUrl, {}, { headers });
+        await server.api.patch(attachUrl, {}, { headers });
 
         // Get updated agent data to verify attachment
         const agentInfoResponse = await server.api.get(`/agents/${args.agent_id}`, { headers });

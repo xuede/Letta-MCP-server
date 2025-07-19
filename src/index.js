@@ -3,9 +3,13 @@ import dotenv from 'dotenv';
 import { LettaServer } from './core/server.js';
 import { registerToolHandlers } from './tools/index.js';
 import { runStdio, runSSE, runHTTP } from './transports/index.js';
+import { createLogger } from './core/logger.js';
 
 // Load environment variables
 dotenv.config();
+
+// Create logger for main module
+const logger = createLogger('Main');
 
 /**
  * Initialize and run the Letta MCP server
@@ -24,20 +28,23 @@ async function main() {
 
         // Run server with appropriate transport
         if (useHTTP) {
-            console.log('Starting Letta server with HTTP transport');
+            logger.info('Starting Letta server with HTTP transport');
             await runHTTP(server);
         } else if (useSSE) {
-            console.log('Starting Letta server with SSE transport');
+            logger.info('Starting Letta server with SSE transport');
             await runSSE(server);
         } else {
-            console.log('Starting Letta server with stdio transport');
+            logger.info('Starting Letta server with stdio transport');
             await runStdio(server);
         }
     } catch (error) {
-        console.error('Failed to start Letta server:', error);
+        logger.error('Failed to start Letta server:', error);
         process.exit(1);
     }
 }
 
 // Run the server
-main().catch(console.error);
+main().catch((error) => {
+    logger.error('Uncaught error in main:', error);
+    process.exit(1);
+});
