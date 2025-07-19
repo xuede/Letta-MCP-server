@@ -45,6 +45,7 @@ export function createMockMCPServer() {
         onerror: vi.fn(),
         connect: vi.fn(),
         close: vi.fn(),
+        handleRequest: vi.fn(),
         _handlers: new Map(),
     };
 
@@ -61,6 +62,21 @@ export function createMockMCPServer() {
         }
         return await handler(args);
     };
+
+    // Mock handleRequest for transport tests
+    mockMCPServer.handleRequest.mockImplementation(async (request) => {
+        if (request.method === 'initialize') {
+            return {
+                protocolVersion: '2025-06-18',
+                capabilities: {},
+                serverInfo: {
+                    name: 'letta-mcp-server',
+                    version: '1.0.0'
+                }
+            };
+        }
+        return { result: {} };
+    });
 
     return mockMCPServer;
 }

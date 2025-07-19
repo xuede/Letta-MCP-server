@@ -299,6 +299,7 @@ export async function runHTTP(server) {
         app.get('/health', (req, res) => {
             res.json({
                 status: 'healthy',
+                service: 'letta-mcp-server',
                 transport: 'streamable_http',
                 protocol_version: '2025-06-18',
                 sessions: Object.keys(transports).length,
@@ -347,6 +348,9 @@ export async function runHTTP(server) {
 
         process.on('SIGINT', shutdownHandler);
         process.on('SIGTERM', shutdownHandler);
+        
+        // Return the server instance for testing
+        return httpServer;
     } catch (error) {
         logger.error('Failed to start HTTP server:', error);
         process.exit(1);
