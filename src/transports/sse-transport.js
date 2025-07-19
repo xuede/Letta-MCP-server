@@ -282,7 +282,9 @@ export async function runSSE(server) {
             }
 
             logger.info('Cleanup complete, exiting process');
-            process.exit(0);
+            if (process.env.NODE_ENV !== 'test') {
+                process.exit(0);
+            }
         };
 
         process.on('SIGINT', cleanup);
@@ -297,6 +299,9 @@ export async function runSSE(server) {
     } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         logger.error('Failed to start SSE server:', error);
-        process.exit(1);
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(1);
+        }
+        throw error;
     }
 }

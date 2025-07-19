@@ -343,7 +343,9 @@ export async function runHTTP(server) {
             }
 
             await server.server.close();
-            process.exit(0);
+            if (process.env.NODE_ENV !== 'test') {
+                process.exit(0);
+            }
         };
 
         process.on('SIGINT', shutdownHandler);
@@ -353,6 +355,9 @@ export async function runHTTP(server) {
         return httpServer;
     } catch (error) {
         logger.error('Failed to start HTTP server:', error);
-        process.exit(1);
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(1);
+        }
+        throw error;
     }
 }

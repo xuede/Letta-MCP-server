@@ -7,6 +7,26 @@ import { createMockLettaServer } from '../utils/mock-server.js';
 import { fixtures } from '../utils/test-fixtures.js';
 import { expectValidToolResponse } from '../utils/test-helpers.js';
 
+// Create mock instances that will be used in tests
+const mockFormDataInstance = {
+    append: vi.fn(),
+    getHeaders: vi.fn().mockReturnValue({ 'content-type': 'multipart/form-data' }),
+};
+
+// Mock axios globally
+const mockAxios = {
+    post: vi.fn()
+};
+
+// Mock dependencies
+vi.mock('axios', () => ({
+    default: mockAxios
+}));
+
+vi.mock('form-data', () => ({
+    default: vi.fn(() => mockFormDataInstance)
+}));
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('Export Agent', () => {
@@ -20,8 +40,18 @@ describe('Export Agent', () => {
             XBACKBONE_TOKEN: process.env.XBACKBONE_TOKEN,
         };
 
-        // Mock fs.writeFileSync
+        // Clear mocks
+        vi.clearAllMocks();
+        mockFormDataInstance.append.mockClear();
+        mockFormDataInstance.getHeaders.mockReturnValue({ 'content-type': 'multipart/form-data' });
+        mockAxios.post.mockClear();
+
+        // Mock fs methods
         vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+        vi.spyOn(fs, 'createReadStream').mockReturnValue({
+            pipe: vi.fn(),
+            on: vi.fn(),
+        });
     });
 
     afterEach(() => {
@@ -117,6 +147,145 @@ describe('Export Agent', () => {
             await expect(handleExportAgent(mockServer, { agent_id: 'agent-123' })).rejects.toThrow(
                 /Failed to save agent export/,
             );
+        });
+
+        it('should upload to XBackbone successfully', async () => {
+            process.env.XBACKBONE_URL = 'https://xbackbone.test';
+            process.env.XBACKBONE_TOKEN = 'test-token';
+
+            mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
+            mockAxios.post.mockResolvedValue({
+                status: 200,
+                data: { url: 'https://xbackbone.test/file/abc123' },
+            });
+
+            const result = await handleExportAgent(mockServer, {
+                agent_id: 'agent-123',
+                upload_to_xbackbone: true,
+            });
+
+            const data = expectValidToolResponse(result);
+            expect(data.xbackbone_url).toBe('https://xbackbone.test/file/abc123');
+            expect(mockAxios.post).toHaveBeenCalledWith(
+                'https://xbackbone.test/upload',
+                mockFormDataInstance,
+                expect.any(Object),
+            );
+            expect(mockFormDataInstance.append).toHaveBeenCalledWith('token', 'test-token');
+        });
+
+        it('should handle XBackbone upload errors', async () => {
+            process.env.XBACKBONE_URL = 'https://xbackbone.test';
+            process.env.XBACKBONE_TOKEN = 'test-token';
+
+            mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
+            mockAxios.post.mockRejectedValue(new Error('Network error'));
+
+            const result = await handleExportAgent(mockServer, {
+                agent_id: 'agent-123',
+                upload_to_xbackbone: true,
+            });
+
+            const data = expectValidToolResponse(result);
+            expect(data.xbackbone_url).toBeUndefined();
+            expect(data.agent_id).toBe('agent-123');
+            expect(data.file_path).toBeDefined();
+        });
+
+        it('should handle XBackbone non-200 status', async () => {
+            process.env.XBACKBONE_URL = 'https://xbackbone.test';
+            process.env.XBACKBONE_TOKEN = 'test-token';
+
+            mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
+            mockAxios.post.mockResolvedValue({
+                status: 400,
+                data: { error: 'Bad request' },
+            });
+
+            const result = await handleExportAgent(mockServer, {
+                agent_id: 'agent-123',
+                upload_to_xbackbone: true,
+            });
+
+            const data = expectValidToolResponse(result);
+            expect(data.xbackbone_url).toBeUndefined();
+        });
+
+        it('should use provided XBackbone credentials over env vars', async () => {
+            process.env.XBACKBONE_URL = 'https://env.xbackbone.test';
+            process.env.XBACKBONE_TOKEN = 'env-token';
+
+            mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
+            mockAxios.post.mockResolvedValue({
+                status: 200,
+                data: { url: 'https://custom.xbackbone.test/file/xyz789' },
+            });
+
+            const result = await handleExportAgent(mockServer, {
+                agent_id: 'agent-123',
+                upload_to_xbackbone: true,
+                xbackbone_url: 'https://custom.xbackbone.test',
+                xbackbone_token: 'custom-token',
+            });
+
+            expect(mockAxios.post).toHaveBeenCalledWith(
+                'https://custom.xbackbone.test/upload',
+                mockFormDataInstance,
+                expect.any(Object),
+            );
+            expect(mockFormDataInstance.append).toHaveBeenCalledWith('token', 'custom-token');
+        });
+
+        it('should handle empty agent data', async () => {
+            mockServer.api.get.mockResolvedValue({ data: null });
+
+            await expect(
+                handleExportAgent(mockServer, { agent_id: 'agent-123' }),
+            ).rejects.toThrow('Received empty data from agent export endpoint');
+        });
+
+        it('should handle API errors', async () => {
+            const error = new Error('API Error');
+            error.response = { status: 500, data: { detail: 'Internal server error' } };
+            mockServer.api.get.mockRejectedValue(error);
+
+            await expect(
+                handleExportAgent(mockServer, { agent_id: 'agent-123' }),
+            ).rejects.toThrow(/Failed to export agent/);
+        });
+
+        it('should handle missing agent_id', async () => {
+            await expect(handleExportAgent(mockServer, {})).rejects.toThrow();
+        });
+
+        it('should use default output path when not provided', async () => {
+            mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
+
+            const result = await handleExportAgent(mockServer, {
+                agent_id: 'test-agent-456',
+            });
+
+            const data = expectValidToolResponse(result);
+            expect(data.file_path).toContain('agent_test-agent-456.json');
+        });
+
+        it('should handle XBackbone response without URL', async () => {
+            process.env.XBACKBONE_URL = 'https://xbackbone.test';
+            process.env.XBACKBONE_TOKEN = 'test-token';
+
+            mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
+            mockAxios.post.mockResolvedValue({
+                status: 200,
+                data: { message: 'Success but no URL' }, // No url field
+            });
+
+            const result = await handleExportAgent(mockServer, {
+                agent_id: 'agent-123',
+                upload_to_xbackbone: true,
+            });
+
+            const data = expectValidToolResponse(result);
+            expect(data.xbackbone_url).toBeUndefined();
         });
     });
 
