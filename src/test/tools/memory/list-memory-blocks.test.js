@@ -4,7 +4,6 @@ import {
     listMemoryBlocksToolDefinition,
 } from '../../../tools/memory/list-memory-blocks.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
-import { fixtures } from '../../utils/test-fixtures.js';
 import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 describe('List Memory Blocks', () => {
@@ -137,7 +136,14 @@ describe('List Memory Blocks', () => {
         });
 
         it('should filter by label', async () => {
-            const mockBlocks = fixtures.memory.blocks.filter((b) => b.label === 'human');
+            const mockBlocks = [
+                {
+                    id: 'block-1',
+                    name: 'Human Block',
+                    label: 'human',
+                    value: 'Human related content',
+                },
+            ];
 
             mockServer.api.get.mockResolvedValueOnce({ data: mockBlocks });
 
@@ -370,7 +376,20 @@ describe('List Memory Blocks', () => {
         });
 
         it('should handle invalid page numbers', async () => {
-            const mockBlocks = fixtures.memory.blocks;
+            const mockBlocks = [
+                {
+                    id: 'block-1',
+                    name: 'Test Block 1',
+                    label: 'persona',
+                    value: 'Content 1',
+                },
+                {
+                    id: 'block-2',
+                    name: 'Test Block 2',
+                    label: 'human',
+                    value: 'Content 2',
+                },
+            ];
 
             mockServer.api.get.mockResolvedValueOnce({ data: mockBlocks });
 
@@ -463,7 +482,7 @@ describe('List Memory Blocks', () => {
 
             mockServer.api.get.mockResolvedValueOnce({ data: mockBlocks });
 
-            const result = await handleListMemoryBlocks(mockServer, {
+            await handleListMemoryBlocks(mockServer, {
                 name: 'Specific Name',
             });
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { handleCloneAgent, cloneAgentDefinition } from '../../../tools/agents/clone-agent.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
-import { mockApiSuccess, mockApiError, expectValidToolResponse } from '../../utils/test-helpers.js';
+import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 // Mock the logger
 vi.mock('../../../core/logger.js', () => ({
@@ -33,6 +33,9 @@ vi.mock('fs/promises', () => ({
     },
 }));
 
+// Import the mocked fs module to access mocked functions
+import fs from 'fs/promises';
+
 // Mock os
 vi.mock('os', () => ({
     default: {
@@ -50,11 +53,6 @@ const mockFormDataInstance = {
 vi.mock('form-data', () => ({
     default: vi.fn(() => mockFormDataInstance),
 }));
-
-import fs from 'fs/promises';
-import os from 'os';
-import path from 'path';
-import FormData from 'form-data';
 
 describe('Clone Agent', () => {
     let mockServer;
@@ -229,11 +227,14 @@ describe('Clone Agent', () => {
                 }
             });
 
-            await handleCloneAgent(mockServer, {
+            const result = await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
                 new_agent_name: newAgentName,
                 override_existing_tools: false,
             });
+
+            // Verify result is valid
+            expectValidToolResponse(result);
         });
 
         it('should handle special characters in agent ID', async () => {
@@ -255,10 +256,13 @@ describe('Clone Agent', () => {
                 data: { id: 'new-agent', name: newAgentName },
             });
 
-            await handleCloneAgent(mockServer, {
+            const result = await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
                 new_agent_name: newAgentName,
             });
+
+            // Verify result is valid
+            expectValidToolResponse(result);
 
             // Verify URL was properly encoded
             expect(mockApi.get).toHaveBeenCalledWith(
@@ -285,10 +289,13 @@ describe('Clone Agent', () => {
                 data: { id: 'new-agent', name: newAgentName },
             });
 
-            await handleCloneAgent(mockServer, {
+            const result = await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
                 new_agent_name: newAgentName,
             });
+
+            // Verify result is valid
+            expectValidToolResponse(result);
 
             // Get the actual path used
             const actualPath = fs.writeFile.mock.calls[0][0];
@@ -316,10 +323,13 @@ describe('Clone Agent', () => {
                 data: { id: 'new-agent', name: newAgentName },
             });
 
-            await handleCloneAgent(mockServer, {
+            const result = await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
                 new_agent_name: newAgentName,
             });
+
+            // Verify result is valid
+            expectValidToolResponse(result);
 
             // Verify JSON was formatted with 2-space indentation
             const expectedJson = JSON.stringify({ ...exportedConfig, name: newAgentName }, null, 2);

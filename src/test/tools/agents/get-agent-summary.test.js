@@ -4,7 +4,7 @@ import {
     getAgentSummaryDefinition,
 } from '../../../tools/agents/get-agent-summary.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
-import { mockApiSuccess, mockApiError, expectValidToolResponse } from '../../utils/test-helpers.js';
+import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 // Mock the logger
 vi.mock('../../../core/logger.js', () => ({

@@ -4,7 +4,6 @@ import {
     createPassageDefinition,
 } from '../../../tools/passages/create-passage.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
-import { fixtures } from '../../utils/test-fixtures.js';
 import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 describe('Create Passage', () => {
@@ -479,7 +478,7 @@ describe('Create Passage', () => {
 
             mockServer.api.post.mockResolvedValueOnce({ data: createdPassages });
 
-            const result = await handleCreatePassage(mockServer, {
+            await handleCreatePassage(mockServer, {
                 agent_id: agentId,
                 text: passageText,
             });

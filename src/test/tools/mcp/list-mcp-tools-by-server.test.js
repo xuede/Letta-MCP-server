@@ -8,12 +8,10 @@ import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 describe('List MCP Tools By Server', () => {
     let mockServer;
-    let consoleErrorSpy;
-
     beforeEach(() => {
         mockServer = createMockLettaServer();
         // Mock console.error to suppress error logging in tests
-        consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {

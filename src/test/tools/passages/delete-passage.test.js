@@ -4,7 +4,6 @@ import {
     deletePassageDefinition,
 } from '../../../tools/passages/delete-passage.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
-import { fixtures } from '../../utils/test-fixtures.js';
 import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 describe('Delete Passage', () => {

@@ -4,7 +4,6 @@ import {
     listPassagesDefinition,
 } from '../../../tools/passages/list-passages.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
-import { fixtures } from '../../utils/test-fixtures.js';
 import { expectValidToolResponse } from '../../utils/test-helpers.js';
 
 describe('List Passages', () => {
@@ -344,7 +343,7 @@ describe('List Passages', () => {
 
             mockServer.api.get.mockResolvedValueOnce({ data: [] });
 
-            const result = await handleListPassages(mockServer, {
+            await handleListPassages(mockServer, {
                 agent_id: agentId,
             });
 
@@ -519,7 +518,7 @@ describe('List Passages', () => {
             const agentId = '550e8400-e29b-41d4-a716-446655440000';
             mockServer.api.get.mockResolvedValueOnce({ data: [] });
 
-            const result = await handleListPassages(mockServer, {
+            await handleListPassages(mockServer, {
                 agent_id: agentId,
             });
 
@@ -556,7 +555,7 @@ describe('List Passages', () => {
 
             mockServer.api.get.mockResolvedValueOnce({ data: [] });
 
-            const result = await handleListPassages(mockServer, {
+            await handleListPassages(mockServer, {
                 agent_id: agentId,
                 search: longSearch,
             });
@@ -606,7 +605,7 @@ describe('List Passages', () => {
             // Negative limit
             mockServer.api.get.mockResolvedValueOnce({ data: [] });
 
-            const result = await handleListPassages(mockServer, {
+            await handleListPassages(mockServer, {
                 agent_id: agentId,
                 limit: -5,
             });
@@ -623,7 +622,7 @@ describe('List Passages', () => {
             const agentId = 'agent-undefined';
             mockServer.api.get.mockResolvedValueOnce({ data: [] });
 
-            const result = await handleListPassages(mockServer, {
+            await handleListPassages(mockServer, {
                 agent_id: agentId,
                 after: undefined,
                 before: undefined,

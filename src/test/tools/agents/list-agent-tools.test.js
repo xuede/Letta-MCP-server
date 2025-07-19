@@ -3,7 +3,6 @@ import {
     handleListAgentTools,
     listAgentToolsDefinition,
 } from '../../../tools/agents/list-agent-tools.js';
-import { z } from 'zod';
 
 describe('List Agent Tools (LMP-95)', () => {
     let mockServer;
