@@ -2,10 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { handleExportAgent, exportAgentDefinition } from '../../tools/agents/export-agent.js';
-import { createMockLettaServer } from '../utils/mock-server.js';
-import { fixtures } from '../utils/test-fixtures.js';
-import { expectValidToolResponse } from '../utils/test-helpers.js';
+import axios from 'axios';
 
 // Create mock instances that will be used in tests
 const mockFormDataInstance = {
@@ -13,19 +10,16 @@ const mockFormDataInstance = {
     getHeaders: vi.fn().mockReturnValue({ 'content-type': 'multipart/form-data' }),
 };
 
-// Mock axios globally
-const mockAxios = {
-    post: vi.fn(),
-};
-
 // Mock dependencies
-vi.mock('axios', () => ({
-    default: mockAxios,
-}));
-
+vi.mock('axios');
 vi.mock('form-data', () => ({
     default: vi.fn(() => mockFormDataInstance),
 }));
+
+import { handleExportAgent, exportAgentDefinition } from '../../tools/agents/export-agent.js';
+import { createMockLettaServer } from '../utils/mock-server.js';
+import { fixtures } from '../utils/test-fixtures.js';
+import { expectValidToolResponse } from '../utils/test-helpers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,7 +38,7 @@ describe('Export Agent', () => {
         vi.clearAllMocks();
         mockFormDataInstance.append.mockClear();
         mockFormDataInstance.getHeaders.mockReturnValue({ 'content-type': 'multipart/form-data' });
-        mockAxios.post.mockClear();
+        axios.post.mockClear();
 
         // Mock fs methods
         vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
@@ -154,7 +148,7 @@ describe('Export Agent', () => {
             process.env.XBACKBONE_TOKEN = 'test-token';
 
             mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
-            mockAxios.post.mockResolvedValue({
+            axios.post.mockResolvedValue({
                 status: 200,
                 data: { url: 'https://xbackbone.test/file/abc123' },
             });
@@ -166,7 +160,7 @@ describe('Export Agent', () => {
 
             const data = expectValidToolResponse(result);
             expect(data.xbackbone_url).toBe('https://xbackbone.test/file/abc123');
-            expect(mockAxios.post).toHaveBeenCalledWith(
+            expect(axios.post).toHaveBeenCalledWith(
                 'https://xbackbone.test/upload',
                 mockFormDataInstance,
                 expect.any(Object),
@@ -179,7 +173,7 @@ describe('Export Agent', () => {
             process.env.XBACKBONE_TOKEN = 'test-token';
 
             mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
-            mockAxios.post.mockRejectedValue(new Error('Network error'));
+            axios.post.mockRejectedValue(new Error('Network error'));
 
             const result = await handleExportAgent(mockServer, {
                 agent_id: 'agent-123',
@@ -197,7 +191,7 @@ describe('Export Agent', () => {
             process.env.XBACKBONE_TOKEN = 'test-token';
 
             mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
-            mockAxios.post.mockResolvedValue({
+            axios.post.mockResolvedValue({
                 status: 400,
                 data: { error: 'Bad request' },
             });
@@ -216,7 +210,7 @@ describe('Export Agent', () => {
             process.env.XBACKBONE_TOKEN = 'env-token';
 
             mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
-            mockAxios.post.mockResolvedValue({
+            axios.post.mockResolvedValue({
                 status: 200,
                 data: { url: 'https://custom.xbackbone.test/file/xyz789' },
             });
@@ -228,7 +222,7 @@ describe('Export Agent', () => {
                 xbackbone_token: 'custom-token',
             });
 
-            expect(mockAxios.post).toHaveBeenCalledWith(
+            expect(axios.post).toHaveBeenCalledWith(
                 'https://custom.xbackbone.test/upload',
                 mockFormDataInstance,
                 expect.any(Object),
@@ -274,7 +268,7 @@ describe('Export Agent', () => {
             process.env.XBACKBONE_TOKEN = 'test-token';
 
             mockServer.api.get.mockResolvedValue({ data: fixtures.agent.basic });
-            mockAxios.post.mockResolvedValue({
+            axios.post.mockResolvedValue({
                 status: 200,
                 data: { message: 'Success but no URL' }, // No url field
             });
