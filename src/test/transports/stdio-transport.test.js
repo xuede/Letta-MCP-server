@@ -266,14 +266,23 @@ describe('Stdio Transport Integration', () => {
             // Make close throw an error
             mockServer.server.close.mockRejectedValueOnce(new Error('Close failed'));
 
+            // Create a promise to catch the unhandled rejection
+            const unhandledRejectionPromise = new Promise((resolve) => {
+                const handler = (error) => {
+                    process.removeListener('unhandledRejection', handler);
+                    resolve(error);
+                };
+                process.once('unhandledRejection', handler);
+            });
+
             // Emit SIGINT
             process.emit('SIGINT');
 
-            // Wait for async cleanup
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            // Wait for the unhandled rejection
+            const rejectionError = await unhandledRejectionPromise;
+            expect(rejectionError.message).toBe('Close failed');
 
-            // The cleanup function doesn't handle errors, so process.exit won't be called
-            // But the close method should have been attempted
+            // The close method should have been attempted
             expect(mockServer.server.close).toHaveBeenCalled();
         });
     });
