@@ -115,69 +115,69 @@ export function registerToolHandlers(server) {
     // Register tool call handler
     server.server.setRequestHandler(CallToolRequestSchema, async (request) => {
         switch (request.params.name) {
-            case 'list_agents':
-                return handleListAgents(server, request.params.arguments);
-            case 'prompt_agent':
-                return handlePromptAgent(server, request.params.arguments);
-            case 'list_agent_tools':
-                return handleListAgentTools(server, request.params.arguments);
-            case 'create_agent':
-                return handleCreateAgent(server, request.params.arguments);
-            case 'attach_tool':
-                return handleAttachTool(server, request.params.arguments);
-            case 'list_memory_blocks':
-                return handleListMemoryBlocks(server, request.params.arguments);
-            case 'read_memory_block':
-                return handleReadMemoryBlock(server, request.params.arguments);
-            case 'update_memory_block':
-                return handleUpdateMemoryBlock(server, request.params.arguments);
-            case 'attach_memory_block':
-                return handleAttachMemoryBlock(server, request.params.arguments);
-            case 'create_memory_block':
-                return handleCreateMemoryBlock(server, request.params.arguments);
-            case 'upload_tool':
-                return handleUploadTool(server, request.params.arguments);
-            case 'list_mcp_tools_by_server':
-                return handleListMcpToolsByServer(server, request.params.arguments);
-            case 'list_mcp_servers':
-                return handleListMcpServers(server, request.params.arguments);
-            case 'retrieve_agent':
-                return handleRetrieveAgent(server, request.params.arguments);
-            case 'modify_agent':
-                return handleModifyAgent(server, request.params.arguments);
-            case 'delete_agent':
-                return handleDeleteAgent(server, request.params.arguments);
-            case 'list_llm_models':
-                return handleListLlmModels(server, request.params.arguments);
-            case 'list_embedding_models':
-                return handleListEmbeddingModels(server, request.params.arguments);
-            case 'list_passages':
-                return handleListPassages(server, request.params.arguments);
-            case 'create_passage':
-                return handleCreatePassage(server, request.params.arguments);
-            case 'modify_passage':
-                return handleModifyPassage(server, request.params.arguments);
-            case 'delete_passage':
-                return handleDeletePassage(server, request.params.arguments);
-            case 'export_agent':
-                return handleExportAgent(server, request.params.arguments);
-            case 'import_agent':
-                return handleImportAgent(server, request.params.arguments);
-            case 'clone_agent':
-                return handleCloneAgent(server, request.params.arguments);
-            case 'bulk_attach_tool_to_agents':
-                return handleBulkAttachToolToAgents(server, request.params.arguments);
-            case 'get_agent_summary':
-                return handleGetAgentSummary(server, request.params.arguments);
-            case 'bulk_delete_agents':
-                return handleBulkDeleteAgents(server, request.params.arguments);
-            case 'add_mcp_tool_to_letta':
-                return handleAddMcpToolToLetta(server, request.params.arguments);
-            default:
-                throw new McpError(
-                    ErrorCode.MethodNotFound,
-                    `Unknown tool: ${request.params.name}`,
-                );
+        case 'list_agents':
+            return handleListAgents(server, request.params.arguments);
+        case 'prompt_agent':
+            return handlePromptAgent(server, request.params.arguments);
+        case 'list_agent_tools':
+            return handleListAgentTools(server, request.params.arguments);
+        case 'create_agent':
+            return handleCreateAgent(server, request.params.arguments);
+        case 'attach_tool':
+            return handleAttachTool(server, request.params.arguments);
+        case 'list_memory_blocks':
+            return handleListMemoryBlocks(server, request.params.arguments);
+        case 'read_memory_block':
+            return handleReadMemoryBlock(server, request.params.arguments);
+        case 'update_memory_block':
+            return handleUpdateMemoryBlock(server, request.params.arguments);
+        case 'attach_memory_block':
+            return handleAttachMemoryBlock(server, request.params.arguments);
+        case 'create_memory_block':
+            return handleCreateMemoryBlock(server, request.params.arguments);
+        case 'upload_tool':
+            return handleUploadTool(server, request.params.arguments);
+        case 'list_mcp_tools_by_server':
+            return handleListMcpToolsByServer(server, request.params.arguments);
+        case 'list_mcp_servers':
+            return handleListMcpServers(server, request.params.arguments);
+        case 'retrieve_agent':
+            return handleRetrieveAgent(server, request.params.arguments);
+        case 'modify_agent':
+            return handleModifyAgent(server, request.params.arguments);
+        case 'delete_agent':
+            return handleDeleteAgent(server, request.params.arguments);
+        case 'list_llm_models':
+            return handleListLlmModels(server, request.params.arguments);
+        case 'list_embedding_models':
+            return handleListEmbeddingModels(server, request.params.arguments);
+        case 'list_passages':
+            return handleListPassages(server, request.params.arguments);
+        case 'create_passage':
+            return handleCreatePassage(server, request.params.arguments);
+        case 'modify_passage':
+            return handleModifyPassage(server, request.params.arguments);
+        case 'delete_passage':
+            return handleDeletePassage(server, request.params.arguments);
+        case 'export_agent':
+            return handleExportAgent(server, request.params.arguments);
+        case 'import_agent':
+            return handleImportAgent(server, request.params.arguments);
+        case 'clone_agent':
+            return handleCloneAgent(server, request.params.arguments);
+        case 'bulk_attach_tool_to_agents':
+            return handleBulkAttachToolToAgents(server, request.params.arguments);
+        case 'get_agent_summary':
+            return handleGetAgentSummary(server, request.params.arguments);
+        case 'bulk_delete_agents':
+            return handleBulkDeleteAgents(server, request.params.arguments);
+        case 'add_mcp_tool_to_letta':
+            return handleAddMcpToolToLetta(server, request.params.arguments);
+        default:
+            throw new McpError(
+                ErrorCode.MethodNotFound,
+                `Unknown tool: ${request.params.name}`,
+            );
         }
     });
 }

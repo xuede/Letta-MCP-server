@@ -140,7 +140,7 @@ export async function handleExportAgent(server, args) {
 export const exportAgentDefinition = {
     name: 'export_agent',
     description:
-        "Export an agent's configuration to a JSON file and optionally upload it. Use import_agent to recreate the agent later, or clone_agent for a quick copy. Use list_agents to find agent IDs.",
+        'Export an agent\'s configuration to a JSON file and optionally upload it. Use import_agent to recreate the agent later, or clone_agent for a quick copy. Use list_agents to find agent IDs.',
     inputSchema: {
         type: 'object',
         properties: {

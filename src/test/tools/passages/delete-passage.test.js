@@ -21,7 +21,7 @@ describe('Delete Passage', () => {
         it('should have correct tool definition', () => {
             expect(deletePassageDefinition.name).toBe('delete_passage');
             expect(deletePassageDefinition.description).toContain(
-                "Delete a memory from an agent's archival memory",
+                'Delete a memory from an agent\'s archival memory',
             );
             expect(deletePassageDefinition.description).toContain(
                 'WARNING: This action is permanent',

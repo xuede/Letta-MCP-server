@@ -272,7 +272,7 @@ describe('Add MCP Tool to Letta', () => {
                     agent_id: 'agent-123',
                 }),
             ).rejects.toThrow(
-                "Could not find any MCP server providing the tool named 'non-existent-tool'",
+                'Could not find any MCP server providing the tool named \'non-existent-tool\'',
             );
         });
 
@@ -400,7 +400,7 @@ describe('Add MCP Tool to Letta', () => {
                     tool_name: 'test-tool',
                     agent_id: 'agent-123',
                 }),
-            ).rejects.toThrow("Could not find any MCP server providing the tool named 'test-tool'");
+            ).rejects.toThrow('Could not find any MCP server providing the tool named \'test-tool\'');
         });
 
         it('should handle tool name with special characters', async () => {
@@ -483,7 +483,7 @@ describe('Add MCP Tool to Letta', () => {
                     tool_name: 'test-tool',
                     agent_id: 'agent-123',
                 }),
-            ).rejects.toThrow("Could not find any MCP server providing the tool named 'test-tool'");
+            ).rejects.toThrow('Could not find any MCP server providing the tool named \'test-tool\'');
         });
     });
 });
