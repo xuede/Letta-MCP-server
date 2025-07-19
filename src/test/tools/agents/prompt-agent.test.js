@@ -102,12 +102,12 @@ describe('Prompt Agent', () => {
 
             const result = await handlePromptAgent(mockServer, {
                 agent_id: 'agent-123',
-                message: 'What\'s the weather like?',
+                message: "What's the weather like?",
             });
 
             const data = expectValidToolResponse(result);
             expect(data.response).toBe(
-                'I\'d be happy to help with weather information! Could you tell me which location you\'re interested in?',
+                "I'd be happy to help with weather information! Could you tell me which location you're interested in?",
             );
         });
 
@@ -170,7 +170,7 @@ describe('Prompt Agent', () => {
             });
 
             const data = expectValidToolResponse(result);
-            expect(data.response).toBe('Received response but couldn\'t extract message content');
+            expect(data.response).toBe("Received response but couldn't extract message content");
         });
 
         it('should handle non-string response data', async () => {
@@ -274,7 +274,8 @@ describe('Prompt Agent', () => {
             mockServer.api.get.mockResolvedValueOnce({ data: agentData });
 
             const longMessage = 'A'.repeat(10000);
-            const sseResponse = 'data: {"message_type": "assistant_message", "content": "Received long message"}\n';
+            const sseResponse =
+                'data: {"message_type": "assistant_message", "content": "Received long message"}\n';
 
             mockServer.api.post.mockResolvedValueOnce({ data: sseResponse });
 
@@ -301,7 +302,8 @@ describe('Prompt Agent', () => {
             mockServer.api.get.mockResolvedValueOnce({ data: agentData });
 
             const unicodeMessage = 'Hello 🤖 世界 🌍';
-            const sseResponse = 'data: {"message_type": "assistant_message", "content": "Hello! I see emojis and Chinese characters: 🤖 世界 🌍"}\n';
+            const sseResponse =
+                'data: {"message_type": "assistant_message", "content": "Hello! I see emojis and Chinese characters: 🤖 世界 🌍"}\n';
 
             mockServer.api.post.mockResolvedValueOnce({ data: sseResponse });
 
@@ -334,7 +336,7 @@ describe('Prompt Agent', () => {
             });
 
             const data = expectValidToolResponse(result);
-            expect(data.response).toBe('Received response but couldn\'t extract message content');
+            expect(data.response).toBe("Received response but couldn't extract message content");
         });
 
         it('should preserve agent name from initial lookup', async () => {
@@ -344,7 +346,8 @@ describe('Prompt Agent', () => {
             };
             mockServer.api.get.mockResolvedValueOnce({ data: agentData });
 
-            const sseResponse = 'data: {"message_type": "assistant_message", "content": "Hello!"}\n';
+            const sseResponse =
+                'data: {"message_type": "assistant_message", "content": "Hello!"}\n';
             mockServer.api.post.mockResolvedValueOnce({ data: sseResponse });
 
             const result = await handlePromptAgent(mockServer, {

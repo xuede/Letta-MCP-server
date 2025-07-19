@@ -85,7 +85,7 @@ export async function handlePromptAgent(server, args) {
 
                 // If we still don't have a response, use the raw data
                 if (!responseText) {
-                    responseText = 'Received response but couldn\'t extract message content';
+                    responseText = "Received response but couldn't extract message content";
                 }
             } else if (response.data) {
                 // Handle non-string response (unlikely with SSE)
