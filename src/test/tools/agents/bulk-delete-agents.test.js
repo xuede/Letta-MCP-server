@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { handleBulkDeleteAgents, bulkDeleteAgentsDefinition } from '../../../tools/agents/bulk-delete-agents.js';
+import {
+    handleBulkDeleteAgents,
+    bulkDeleteAgentsDefinition,
+} from '../../../tools/agents/bulk-delete-agents.js';
 import { createMockLettaServer } from '../../utils/mock-server.js';
 import { mockApiSuccess, mockApiError, expectValidToolResponse } from '../../utils/test-helpers.js';
 
@@ -9,8 +12,8 @@ vi.mock('../../../core/logger.js', () => ({
         info: vi.fn(),
         error: vi.fn(),
         warn: vi.fn(),
-        debug: vi.fn()
-    })
+        debug: vi.fn(),
+    }),
 }));
 
 describe('Bulk Delete Agents', () => {
@@ -33,19 +36,19 @@ describe('Bulk Delete Agents', () => {
                         agent_ids: {
                             type: 'array',
                             items: { type: 'string' },
-                            description: expect.any(String)
+                            description: expect.any(String),
                         },
                         agent_name_filter: {
                             type: 'string',
-                            description: expect.any(String)
+                            description: expect.any(String),
                         },
                         agent_tag_filter: {
                             type: 'string',
-                            description: expect.any(String)
-                        }
+                            description: expect.any(String),
+                        },
                     },
-                    required: []
-                }
+                    required: [],
+                },
             });
         });
     });
@@ -53,7 +56,7 @@ describe('Bulk Delete Agents', () => {
     describe('Functionality Tests', () => {
         it('should delete agents by specific IDs', async () => {
             const agentIds = ['agent-1', 'agent-2', 'agent-3'];
-            
+
             // Mock delete calls for each agent
             mockApi.delete
                 .mockImplementationOnce((url) => {
@@ -78,14 +81,14 @@ describe('Bulk Delete Agents', () => {
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 3,
                 success_count: 3,
-                error_count: 0
+                error_count: 0,
             });
 
             expect(parsedResult.results).toHaveLength(3);
             expect(parsedResult.results[0]).toMatchObject({
                 agent_id: 'agent-1',
                 name: 'ID: agent-1',
-                status: 'success'
+                status: 'success',
             });
 
             // Verify all delete calls were made
@@ -98,7 +101,7 @@ describe('Bulk Delete Agents', () => {
         it('should delete agents by name filter', async () => {
             const mockAgents = [
                 { id: 'agent-1', name: 'Test Agent 1' },
-                { id: 'agent-2', name: 'Test Agent 2' }
+                { id: 'agent-2', name: 'Test Agent 2' },
             ];
 
             // Mock list agents response
@@ -119,27 +122,27 @@ describe('Bulk Delete Agents', () => {
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 2,
                 success_count: 2,
-                error_count: 0
+                error_count: 0,
             });
 
             expect(parsedResult.results).toHaveLength(2);
             expect(parsedResult.results[0]).toMatchObject({
                 agent_id: 'agent-1',
                 name: 'Test Agent 1',
-                status: 'success'
+                status: 'success',
             });
 
             // Verify list was called with correct params
             expect(mockApi.get).toHaveBeenCalledWith('/agents/', {
                 headers: expect.any(Object),
-                params: { name: 'Test' }
+                params: { name: 'Test' },
             });
         });
 
         it('should delete agents by tag filter', async () => {
             const mockAgents = [
                 { id: 'agent-1', name: 'Production Agent' },
-                { id: 'agent-2', name: 'Another Prod Agent' }
+                { id: 'agent-2', name: 'Another Prod Agent' },
             ];
 
             // Mock list agents response
@@ -154,25 +157,27 @@ describe('Bulk Delete Agents', () => {
                 .mockImplementationOnce(() => Promise.resolve({ status: 200 }))
                 .mockImplementationOnce(() => Promise.resolve({ status: 200 }));
 
-            const result = await handleBulkDeleteAgents(mockServer, { agent_tag_filter: 'production' });
+            const result = await handleBulkDeleteAgents(mockServer, {
+                agent_tag_filter: 'production',
+            });
             const parsedResult = expectValidToolResponse(result);
 
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 2,
                 success_count: 2,
-                error_count: 0
+                error_count: 0,
             });
 
             // Verify list was called with correct params
             expect(mockApi.get).toHaveBeenCalledWith('/agents/', {
                 headers: expect.any(Object),
-                params: { tags: 'production' }
+                params: { tags: 'production' },
             });
         });
 
         it('should handle mixed success and failure', async () => {
             const agentIds = ['agent-1', 'agent-2', 'agent-3'];
-            
+
             // Mock delete calls with mixed results
             mockApi.delete
                 .mockImplementationOnce((url) => {
@@ -185,9 +190,9 @@ describe('Bulk Delete Agents', () => {
                         return Promise.reject({
                             response: {
                                 status: 404,
-                                data: { error: 'Agent not found' }
+                                data: { error: 'Agent not found' },
                             },
-                            message: 'Not found'
+                            message: 'Not found',
                         });
                     }
                 })
@@ -203,7 +208,7 @@ describe('Bulk Delete Agents', () => {
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 3,
                 success_count: 2,
-                error_count: 1
+                error_count: 1,
             });
 
             // Check individual results
@@ -215,11 +220,11 @@ describe('Bulk Delete Agents', () => {
 
         it('should handle no agents found', async () => {
             // Mock empty list response
-            mockApi.get.mockImplementationOnce(() => 
-                Promise.resolve({ status: 200, data: [] })
-            );
+            mockApi.get.mockImplementationOnce(() => Promise.resolve({ status: 200, data: [] }));
 
-            const result = await handleBulkDeleteAgents(mockServer, { agent_name_filter: 'NonExistent' });
+            const result = await handleBulkDeleteAgents(mockServer, {
+                agent_name_filter: 'NonExistent',
+            });
             const parsedResult = expectValidToolResponse(result);
 
             expect(parsedResult.message).toBe('No agents found matching the specified filter.');
@@ -230,15 +235,15 @@ describe('Bulk Delete Agents', () => {
         });
 
         it('should handle multiple filters (name and tag)', async () => {
-            const mockAgents = [
-                { id: 'agent-1', name: 'Test Production Agent' }
-            ];
+            const mockAgents = [{ id: 'agent-1', name: 'Test Production Agent' }];
 
             // Mock list agents response
             mockApi.get.mockImplementationOnce((url, config) => {
-                if (url === '/agents/' && 
-                    config.params.name === 'Test' && 
-                    config.params.tags === 'production') {
+                if (
+                    url === '/agents/' &&
+                    config.params.name === 'Test' &&
+                    config.params.tags === 'production'
+                ) {
                     return Promise.resolve({ status: 200, data: mockAgents });
                 }
             });
@@ -246,28 +251,28 @@ describe('Bulk Delete Agents', () => {
             // Mock delete call
             mockApi.delete.mockImplementationOnce(() => Promise.resolve({ status: 200 }));
 
-            const result = await handleBulkDeleteAgents(mockServer, { 
+            const result = await handleBulkDeleteAgents(mockServer, {
                 agent_name_filter: 'Test',
-                agent_tag_filter: 'production'
+                agent_tag_filter: 'production',
             });
             const parsedResult = expectValidToolResponse(result);
 
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 1,
                 success_count: 1,
-                error_count: 0
+                error_count: 0,
             });
 
             // Verify list was called with both params
             expect(mockApi.get).toHaveBeenCalledWith('/agents/', {
                 headers: expect.any(Object),
-                params: { name: 'Test', tags: 'production' }
+                params: { name: 'Test', tags: 'production' },
             });
         });
 
         it('should handle special characters in agent IDs', async () => {
             const agentIds = ['agent with spaces', 'agent/with/slashes', 'agent@special'];
-            
+
             // Mock delete calls with proper encoding
             mockApi.delete
                 .mockImplementationOnce((url) => {
@@ -292,14 +297,23 @@ describe('Bulk Delete Agents', () => {
             expect(parsedResult.summary.success_count).toBe(3);
 
             // Verify URLs were properly encoded
-            expect(mockApi.delete).toHaveBeenCalledWith('/agents/agent%20with%20spaces', expect.any(Object));
-            expect(mockApi.delete).toHaveBeenCalledWith('/agents/agent%2Fwith%2Fslashes', expect.any(Object));
-            expect(mockApi.delete).toHaveBeenCalledWith('/agents/agent%40special', expect.any(Object));
+            expect(mockApi.delete).toHaveBeenCalledWith(
+                '/agents/agent%20with%20spaces',
+                expect.any(Object),
+            );
+            expect(mockApi.delete).toHaveBeenCalledWith(
+                '/agents/agent%2Fwith%2Fslashes',
+                expect.any(Object),
+            );
+            expect(mockApi.delete).toHaveBeenCalledWith(
+                '/agents/agent%40special',
+                expect.any(Object),
+            );
         });
 
         it('should handle delete errors without response object', async () => {
             const agentIds = ['agent-1'];
-            
+
             // Mock delete call with network error
             mockApi.delete.mockRejectedValueOnce(new Error('Network error'));
 
@@ -309,35 +323,37 @@ describe('Bulk Delete Agents', () => {
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 1,
                 success_count: 0,
-                error_count: 1
+                error_count: 1,
             });
 
             expect(parsedResult.results[0]).toMatchObject({
                 status: 'error',
-                error: expect.stringContaining('Network error')
+                error: expect.stringContaining('Network error'),
             });
         });
     });
 
     describe('Error Handling', () => {
         it('should throw error when no filter criteria provided', async () => {
-            await expect(handleBulkDeleteAgents(mockServer, {}))
-                .rejects.toThrow('Missing required argument: Provide agent_ids, agent_name_filter, or agent_tag_filter.');
-            
-            await expect(handleBulkDeleteAgents(mockServer, null))
-                .rejects.toThrow('Missing required argument: Provide agent_ids, agent_name_filter, or agent_tag_filter.');
+            await expect(handleBulkDeleteAgents(mockServer, {})).rejects.toThrow(
+                'Missing required argument: Provide agent_ids, agent_name_filter, or agent_tag_filter.',
+            );
+
+            await expect(handleBulkDeleteAgents(mockServer, null)).rejects.toThrow(
+                'Missing required argument: Provide agent_ids, agent_name_filter, or agent_tag_filter.',
+            );
         });
-        
+
         it('should handle empty agent_ids array', async () => {
             // When agent_ids is empty array, it should list all agents (no filter)
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: [] 
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: [],
             });
-            
+
             const result = await handleBulkDeleteAgents(mockServer, { agent_ids: [] });
             const parsedResult = expectValidToolResponse(result);
-            
+
             expect(parsedResult.message).toBe('No agents found matching the specified filter.');
             expect(parsedResult.results).toEqual([]);
         });
@@ -347,20 +363,21 @@ describe('Bulk Delete Agents', () => {
             mockApi.get.mockRejectedValueOnce({
                 response: {
                     status: 500,
-                    data: { error: 'Internal server error' }
+                    data: { error: 'Internal server error' },
                 },
-                message: 'Server error'
+                message: 'Server error',
             });
 
-            await expect(handleBulkDeleteAgents(mockServer, { agent_name_filter: 'Test' }))
-                .rejects.toThrow('Failed during bulk delete operation');
+            await expect(
+                handleBulkDeleteAgents(mockServer, { agent_name_filter: 'Test' }),
+            ).rejects.toThrow('Failed during bulk delete operation');
         });
 
         it('should handle unexpected response format', async () => {
             // Mock list agents with non-array response
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { agents: [] } // Wrong format
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: { agents: [] }, // Wrong format
             });
 
             const result = await handleBulkDeleteAgents(mockServer, { agent_name_filter: 'Test' });
@@ -372,7 +389,7 @@ describe('Bulk Delete Agents', () => {
 
         it('should continue deleting remaining agents after individual failures', async () => {
             const agentIds = ['agent-1', 'agent-2', 'agent-3'];
-            
+
             // Mock delete calls where middle one fails
             mockApi.delete
                 .mockResolvedValueOnce({ status: 200 })
@@ -385,7 +402,7 @@ describe('Bulk Delete Agents', () => {
             expect(parsedResult.summary).toMatchObject({
                 total_agents: 3,
                 success_count: 2,
-                error_count: 1
+                error_count: 1,
             });
 
             // All delete calls should have been attempted
@@ -396,13 +413,14 @@ describe('Bulk Delete Agents', () => {
             mockApi.get.mockRejectedValueOnce({
                 response: {
                     status: 401,
-                    data: { error: 'Unauthorized' }
+                    data: { error: 'Unauthorized' },
                 },
-                message: 'Authentication failed'
+                message: 'Authentication failed',
             });
 
-            await expect(handleBulkDeleteAgents(mockServer, { agent_tag_filter: 'test' }))
-                .rejects.toThrow('Failed during bulk delete operation');
+            await expect(
+                handleBulkDeleteAgents(mockServer, { agent_tag_filter: 'test' }),
+            ).rejects.toThrow('Failed during bulk delete operation');
         });
     });
 });

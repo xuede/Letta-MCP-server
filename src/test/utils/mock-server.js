@@ -18,13 +18,14 @@ export function createMockLettaServer(overrides = {}) {
         server: createMockMCPServer(),
         logger: createMockLogger(),
         getApiHeaders: vi.fn().mockReturnValue({
-            'Authorization': 'Bearer test-token',
+            Authorization: 'Bearer test-token',
             'Content-Type': 'application/json',
         }),
         createErrorResponse: vi.fn((errorOrMessage, context) => {
-            let message = typeof errorOrMessage === 'string'
-                ? errorOrMessage
-                : errorOrMessage.message || 'Unknown error';
+            let message =
+                typeof errorOrMessage === 'string'
+                    ? errorOrMessage
+                    : errorOrMessage.message || 'Unknown error';
             if (context) {
                 message = `${context}: ${message}`;
             }

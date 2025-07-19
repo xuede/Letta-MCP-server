@@ -30,10 +30,10 @@ describe('API Client Configuration (LMP-85)', () => {
             request: vi.fn(),
             defaults: {
                 baseURL: '',
-                headers: {}
-            }
+                headers: {},
+            },
         };
-        
+
         axios.create.mockReturnValue(mockAxiosInstance);
     });
 
@@ -207,8 +207,8 @@ describe('API Client Configuration (LMP-85)', () => {
 
                 expect(axios.create).toHaveBeenCalledWith(
                     expect.objectContaining({
-                        baseURL: expected
-                    })
+                        baseURL: expected,
+                    }),
                 );
 
                 vi.clearAllMocks();
@@ -272,7 +272,7 @@ describe('API Client Configuration (LMP-85)', () => {
 
             // Simulate a tool handler making an API call
             mockAxiosInstance.get.mockResolvedValue({
-                data: { agents: [] }
+                data: { agents: [] },
             });
 
             const response = await server.api.get('/agents', { headers });
@@ -281,7 +281,7 @@ describe('API Client Configuration (LMP-85)', () => {
                 headers: expect.objectContaining({
                     Authorization: 'Bearer test-password',
                     'X-BARE-PASSWORD': 'password test-password',
-                })
+                }),
             });
         });
 
@@ -290,7 +290,7 @@ describe('API Client Configuration (LMP-85)', () => {
             const apiError = new Error('API Error');
             apiError.response = {
                 status: 404,
-                data: { error: 'Not found' }
+                data: { error: 'Not found' },
             };
 
             mockAxiosInstance.get.mockRejectedValue(apiError);
@@ -309,7 +309,7 @@ describe('API Client Configuration (LMP-85)', () => {
 
             const headers = mockServer.getApiHeaders();
             expect(headers).toEqual({
-                'Authorization': 'Bearer test-token',
+                Authorization: 'Bearer test-token',
                 'Content-Type': 'application/json',
             });
         });
@@ -353,8 +353,8 @@ describe('API Client Configuration (LMP-85)', () => {
 
             expect(axios.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    baseURL: longUrl + '/v1'
-                })
+                    baseURL: longUrl + '/v1',
+                }),
             );
         });
 
@@ -367,8 +367,8 @@ describe('API Client Configuration (LMP-85)', () => {
             // Should append /v1 before query params (current behavior)
             expect(axios.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    baseURL: 'https://api.letta.com?key=value/v1'
-                })
+                    baseURL: 'https://api.letta.com?key=value/v1',
+                }),
             );
         });
 
@@ -380,8 +380,8 @@ describe('API Client Configuration (LMP-85)', () => {
 
             expect(axios.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    baseURL: 'https://api.letta.com#section/v1'
-                })
+                    baseURL: 'https://api.letta.com#section/v1',
+                }),
             );
         });
     });
@@ -410,10 +410,8 @@ describe('API Client Configuration (LMP-85)', () => {
                 delete: vi.fn(),
                 request: vi.fn(),
             };
-            
-            axios.create
-                .mockReturnValueOnce(mockInstance1)
-                .mockReturnValueOnce(mockInstance2);
+
+            axios.create.mockReturnValueOnce(mockInstance1).mockReturnValueOnce(mockInstance2);
 
             const server1 = new LettaServer();
             const server2 = new LettaServer();
@@ -426,7 +424,7 @@ describe('API Client Configuration (LMP-85)', () => {
 
         it('should allow different passwords for different instances', () => {
             const server1 = new LettaServer();
-            
+
             process.env.LETTA_PASSWORD = 'different-password';
             const server2 = new LettaServer();
 

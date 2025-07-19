@@ -37,7 +37,7 @@ global.testUtils = {
     },
 
     // Wait for promises to resolve
-    flushPromises: () => new Promise(resolve => setImmediate(resolve)),
+    flushPromises: () => new Promise((resolve) => setImmediate(resolve)),
 };
 
 // Set test environment variables

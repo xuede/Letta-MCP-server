@@ -186,7 +186,7 @@ describe('LettaServer Error Handling (LMP-83)', () => {
                 const errorWithData = new Error('API Error');
                 errorWithData.response = {
                     status: 400,
-                    data: { message: 'Bad request', field: 'name' }
+                    data: { message: 'Bad request', field: 'name' },
                 };
 
                 try {
@@ -206,10 +206,10 @@ describe('LettaServer Error Handling (LMP-83)', () => {
                     data: {
                         errors: [
                             { field: 'name', message: 'Required' },
-                            { field: 'email', message: 'Invalid format' }
+                            { field: 'email', message: 'Invalid format' },
                         ],
-                        code: 'VALIDATION_ERROR'
-                    }
+                        code: 'VALIDATION_ERROR',
+                    },
                 };
 
                 try {
@@ -226,7 +226,7 @@ describe('LettaServer Error Handling (LMP-83)', () => {
                 circularData.self = circularData;
                 errorWithCircular.response = {
                     status: 400,
-                    data: circularData
+                    data: circularData,
                 };
 
                 // createErrorResponse will throw TypeError when trying to stringify circular data
@@ -329,10 +329,10 @@ describe('LettaServer Error Handling (LMP-83)', () => {
                     null,
                     undefined,
                     42,
-                    { invalid: 'object' }
+                    { invalid: 'object' },
                 ];
 
-                testCases.forEach(testCase => {
+                testCases.forEach((testCase) => {
                     try {
                         server.createErrorResponse(testCase);
                     } catch (error) {
@@ -345,11 +345,31 @@ describe('LettaServer Error Handling (LMP-83)', () => {
 
             it('should preserve error codes correctly', () => {
                 const errorCases = [
-                    { error: new Error('Not found'), response: { status: 404 }, expectedCode: ErrorCode.InvalidRequest },
-                    { error: new Error('Invalid'), response: { status: 422 }, expectedCode: ErrorCode.InvalidParams },
-                    { error: new Error('Unauthorized'), response: { status: 401 }, expectedCode: ErrorCode.InvalidRequest },
-                    { error: new Error('Server error'), response: { status: 500 }, expectedCode: ErrorCode.InternalError },
-                    { error: 'String error', response: null, expectedCode: ErrorCode.InternalError }
+                    {
+                        error: new Error('Not found'),
+                        response: { status: 404 },
+                        expectedCode: ErrorCode.InvalidRequest,
+                    },
+                    {
+                        error: new Error('Invalid'),
+                        response: { status: 422 },
+                        expectedCode: ErrorCode.InvalidParams,
+                    },
+                    {
+                        error: new Error('Unauthorized'),
+                        response: { status: 401 },
+                        expectedCode: ErrorCode.InvalidRequest,
+                    },
+                    {
+                        error: new Error('Server error'),
+                        response: { status: 500 },
+                        expectedCode: ErrorCode.InternalError,
+                    },
+                    {
+                        error: 'String error',
+                        response: null,
+                        expectedCode: ErrorCode.InternalError,
+                    },
                 ];
 
                 errorCases.forEach(({ error, response, expectedCode }) => {

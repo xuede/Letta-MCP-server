@@ -291,7 +291,7 @@ export async function runSSE(server) {
             logger.error('Uncaught exception:', error);
             await cleanup();
         });
-        
+
         // Return the server instance for testing
         return httpServer;
     } catch (err) {

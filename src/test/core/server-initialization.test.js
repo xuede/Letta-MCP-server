@@ -57,7 +57,7 @@ describe('LettaServer Initialization (LMP-82)', () => {
         // Restore original env vars
         process.env.LETTA_BASE_URL = originalEnv.LETTA_BASE_URL;
         process.env.LETTA_PASSWORD = originalEnv.LETTA_PASSWORD;
-        
+
         // Clear all mocks
         vi.clearAllMocks();
     });
@@ -117,7 +117,7 @@ describe('LettaServer Initialization (LMP-82)', () => {
                     capabilities: {
                         tools: {},
                     },
-                }
+                },
             );
         });
 
@@ -198,7 +198,7 @@ describe('LettaServer Initialization (LMP-82)', () => {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
                     },
-                })
+                }),
             );
         });
 
@@ -253,7 +253,7 @@ describe('LettaServer Initialization (LMP-82)', () => {
             expect(axios.create).toHaveBeenCalledWith(
                 expect.objectContaining({
                     baseURL: 'not-a-valid-url/v1',
-                })
+                }),
             );
         });
 

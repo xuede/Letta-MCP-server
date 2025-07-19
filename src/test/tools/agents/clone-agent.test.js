@@ -9,8 +9,8 @@ vi.mock('../../../core/logger.js', () => ({
         info: vi.fn(),
         error: vi.fn(),
         warn: vi.fn(),
-        debug: vi.fn()
-    })
+        debug: vi.fn(),
+    }),
 }));
 
 // Mock path module to mimic actual path.join behavior
@@ -20,8 +20,8 @@ vi.mock('path', () => ({
             // Simply join all arguments with /
             return args.filter(Boolean).join('/');
         }),
-        basename: vi.fn((p) => p.split('/').pop())
-    }
+        basename: vi.fn((p) => p.split('/').pop()),
+    },
 }));
 
 // Mock fs/promises
@@ -29,26 +29,26 @@ vi.mock('fs/promises', () => ({
     default: {
         writeFile: vi.fn().mockResolvedValue(undefined),
         readFile: vi.fn().mockResolvedValue(Buffer.from('{"test": "data"}')),
-        unlink: vi.fn().mockResolvedValue(undefined)
-    }
+        unlink: vi.fn().mockResolvedValue(undefined),
+    },
 }));
 
 // Mock os
 vi.mock('os', () => ({
     default: {
-        tmpdir: vi.fn(() => '/tmp')
-    }
+        tmpdir: vi.fn(() => '/tmp'),
+    },
 }));
 
 // Create a mock FormData instance
 const mockFormDataInstance = {
     append: vi.fn(),
-    getHeaders: vi.fn().mockReturnValue({ 'content-type': 'multipart/form-data; boundary=test' })
+    getHeaders: vi.fn().mockReturnValue({ 'content-type': 'multipart/form-data; boundary=test' }),
 };
 
 // Mock form-data
 vi.mock('form-data', () => ({
-    default: vi.fn(() => mockFormDataInstance)
+    default: vi.fn(() => mockFormDataInstance),
 }));
 
 import fs from 'fs/promises';
@@ -63,7 +63,7 @@ describe('Clone Agent', () => {
     beforeEach(() => {
         mockServer = createMockLettaServer();
         mockApi = mockServer.api;
-        
+
         // Clear all mocks
         vi.clearAllMocks();
         mockFormDataInstance.append.mockClear();
@@ -84,24 +84,24 @@ describe('Clone Agent', () => {
                     properties: {
                         source_agent_id: {
                             type: 'string',
-                            description: expect.any(String)
+                            description: expect.any(String),
                         },
                         new_agent_name: {
                             type: 'string',
-                            description: expect.any(String)
+                            description: expect.any(String),
                         },
                         override_existing_tools: {
                             type: 'boolean',
                             description: expect.any(String),
-                            default: true
+                            default: true,
                         },
                         project_id: {
                             type: 'string',
-                            description: expect.any(String)
-                        }
+                            description: expect.any(String),
+                        },
                     },
-                    required: ['source_agent_id', 'new_agent_name']
-                }
+                    required: ['source_agent_id', 'new_agent_name'],
+                },
             });
         });
     });
@@ -110,29 +110,29 @@ describe('Clone Agent', () => {
         it('should clone agent successfully', async () => {
             const sourceAgentId = 'agent-123';
             const newAgentName = 'Cloned Agent';
-            
+
             // Mock export response
             const exportedConfig = {
                 name: 'Original Agent',
                 system: 'You are a helpful assistant',
                 llm_config: { model: 'gpt-4' },
-                tools: ['tool1', 'tool2']
+                tools: ['tool1', 'tool2'],
             };
-            
+
             mockApi.get.mockImplementationOnce((url) => {
                 if (url === `/agents/${sourceAgentId}/export`) {
                     return Promise.resolve({ status: 200, data: exportedConfig });
                 }
             });
-            
+
             // Mock import response
             const importedAgent = {
                 id: 'new-agent-456',
                 name: newAgentName,
                 system: 'You are a helpful assistant',
-                llm_config: { model: 'gpt-4' }
+                llm_config: { model: 'gpt-4' },
             };
-            
+
             mockApi.post.mockImplementationOnce((url, data, config) => {
                 if (url === '/agents/import') {
                     // Verify FormData was used
@@ -142,32 +142,32 @@ describe('Clone Agent', () => {
                     return Promise.resolve({ status: 200, data: importedAgent });
                 }
             });
-            
+
             const result = await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
-                new_agent_name: newAgentName
+                new_agent_name: newAgentName,
             });
-            
+
             const parsedResult = expectValidToolResponse(result);
             expect(parsedResult.new_agent).toMatchObject({
                 id: 'new-agent-456',
-                name: newAgentName
+                name: newAgentName,
             });
-            
+
             // Verify file operations
             expect(fs.writeFile).toHaveBeenCalled();
             expect(fs.readFile).toHaveBeenCalled();
             expect(fs.unlink).toHaveBeenCalledTimes(1); // Cleanup called once
-            
+
             // Verify API calls
             expect(mockApi.get).toHaveBeenCalledWith(
                 `/agents/${sourceAgentId}/export`,
-                expect.any(Object)
+                expect.any(Object),
             );
             expect(mockApi.post).toHaveBeenCalledWith(
                 '/agents/import',
                 mockFormDataInstance,
-                expect.any(Object)
+                expect.any(Object),
             );
         });
 
@@ -175,22 +175,22 @@ describe('Clone Agent', () => {
             const sourceAgentId = 'agent-123';
             const newAgentName = 'Cloned Agent';
             const projectId = 'proj-456';
-            
+
             // Mock export response
             const exportedConfig = {
                 name: 'Original Agent',
-                system: 'You are a helpful assistant'
+                system: 'You are a helpful assistant',
             };
-            
+
             mockApi.get.mockResolvedValueOnce({ status: 200, data: exportedConfig });
-            
+
             // Mock import response
             const importedAgent = {
                 id: 'new-agent-789',
                 name: newAgentName,
-                project_id: projectId
+                project_id: projectId,
             };
-            
+
             mockApi.post.mockImplementationOnce((url, data, config) => {
                 if (url === '/agents/import') {
                     // Verify project_id was passed
@@ -198,13 +198,13 @@ describe('Clone Agent', () => {
                     return Promise.resolve({ status: 200, data: importedAgent });
                 }
             });
-            
+
             const result = await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
                 new_agent_name: newAgentName,
-                project_id: projectId
+                project_id: projectId,
             });
-            
+
             const parsedResult = expectValidToolResponse(result);
             expect(parsedResult.new_agent.project_id).toBe(projectId);
         });
@@ -212,27 +212,27 @@ describe('Clone Agent', () => {
         it('should clone agent with override_existing_tools=false', async () => {
             const sourceAgentId = 'agent-123';
             const newAgentName = 'Cloned Agent';
-            
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { name: 'Original' } 
+
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: { name: 'Original' },
             });
-            
+
             mockApi.post.mockImplementationOnce((url, data, config) => {
                 if (url === '/agents/import') {
                     // Verify override_existing_tools was set to false
                     expect(config.params.override_existing_tools).toBe(false);
-                    return Promise.resolve({ 
-                        status: 200, 
-                        data: { id: 'new-agent', name: newAgentName } 
+                    return Promise.resolve({
+                        status: 200,
+                        data: { id: 'new-agent', name: newAgentName },
                     });
                 }
             });
-            
+
             await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
                 new_agent_name: newAgentName,
-                override_existing_tools: false
+                override_existing_tools: false,
             });
         });
 
@@ -240,59 +240,59 @@ describe('Clone Agent', () => {
             const sourceAgentId = 'agent with spaces & symbols';
             const encodedId = encodeURIComponent(sourceAgentId);
             const newAgentName = 'Cloned Agent';
-            
+
             mockApi.get.mockImplementationOnce((url) => {
                 if (url === `/agents/${encodedId}/export`) {
-                    return Promise.resolve({ 
-                        status: 200, 
-                        data: { name: 'Original' } 
+                    return Promise.resolve({
+                        status: 200,
+                        data: { name: 'Original' },
                     });
                 }
             });
-            
-            mockApi.post.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { id: 'new-agent', name: newAgentName } 
+
+            mockApi.post.mockResolvedValueOnce({
+                status: 200,
+                data: { id: 'new-agent', name: newAgentName },
             });
-            
+
             await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
-                new_agent_name: newAgentName
+                new_agent_name: newAgentName,
             });
-            
+
             // Verify URL was properly encoded
             expect(mockApi.get).toHaveBeenCalledWith(
                 `/agents/${encodedId}/export`,
-                expect.any(Object)
+                expect.any(Object),
             );
         });
 
         it('should handle temporary file with timestamp', async () => {
             const sourceAgentId = 'agent-123';
             const newAgentName = 'Cloned Agent';
-            
+
             // Mock Date.now to verify timestamp in filename
             const mockTimestamp = 1234567890;
             vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
-            
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { name: 'Original' } 
+
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: { name: 'Original' },
             });
-            
-            mockApi.post.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { id: 'new-agent', name: newAgentName } 
+
+            mockApi.post.mockResolvedValueOnce({
+                status: 200,
+                data: { id: 'new-agent', name: newAgentName },
             });
-            
+
             await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
-                new_agent_name: newAgentName
+                new_agent_name: newAgentName,
             });
-            
+
             // Get the actual path used
             const actualPath = fs.writeFile.mock.calls[0][0];
-            
+
             // Verify it contains the timestamp
             expect(actualPath).toContain(`agent_clone_temp_${mockTimestamp}.json`);
             expect(fs.unlink).toHaveBeenCalledWith(actualPath);
@@ -303,174 +303,179 @@ describe('Clone Agent', () => {
             const newAgentName = 'Cloned Agent';
             const exportedConfig = {
                 name: 'Original Agent',
-                system: 'Test system'
+                system: 'Test system',
             };
-            
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: exportedConfig 
+
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: exportedConfig,
             });
-            
-            mockApi.post.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { id: 'new-agent', name: newAgentName } 
+
+            mockApi.post.mockResolvedValueOnce({
+                status: 200,
+                data: { id: 'new-agent', name: newAgentName },
             });
-            
+
             await handleCloneAgent(mockServer, {
                 source_agent_id: sourceAgentId,
-                new_agent_name: newAgentName
+                new_agent_name: newAgentName,
             });
-            
+
             // Verify JSON was formatted with 2-space indentation
-            const expectedJson = JSON.stringify(
-                { ...exportedConfig, name: newAgentName }, 
-                null, 
-                2
-            );
-            expect(fs.writeFile).toHaveBeenCalledWith(
-                expect.any(String),
-                expectedJson
-            );
+            const expectedJson = JSON.stringify({ ...exportedConfig, name: newAgentName }, null, 2);
+            expect(fs.writeFile).toHaveBeenCalledWith(expect.any(String), expectedJson);
         });
     });
 
     describe('Error Handling', () => {
         it('should throw error for missing source_agent_id', async () => {
-            await expect(handleCloneAgent(mockServer, { new_agent_name: 'Test' }))
-                .rejects.toThrow('Missing required argument: source_agent_id');
-            
-            await expect(handleCloneAgent(mockServer, { 
-                source_agent_id: '', 
-                new_agent_name: 'Test' 
-            }))
-                .rejects.toThrow('Missing required argument: source_agent_id');
+            await expect(handleCloneAgent(mockServer, { new_agent_name: 'Test' })).rejects.toThrow(
+                'Missing required argument: source_agent_id',
+            );
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: '',
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow('Missing required argument: source_agent_id');
         });
 
         it('should throw error for missing new_agent_name', async () => {
-            await expect(handleCloneAgent(mockServer, { source_agent_id: 'agent-123' }))
-                .rejects.toThrow('Missing required argument: new_agent_name');
-            
-            await expect(handleCloneAgent(mockServer, { 
-                source_agent_id: 'agent-123',
-                new_agent_name: '' 
-            }))
-                .rejects.toThrow('Missing required argument: new_agent_name');
+            await expect(
+                handleCloneAgent(mockServer, { source_agent_id: 'agent-123' }),
+            ).rejects.toThrow('Missing required argument: new_agent_name');
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: 'agent-123',
+                    new_agent_name: '',
+                }),
+            ).rejects.toThrow('Missing required argument: new_agent_name');
         });
 
         it('should handle 404 error on export', async () => {
             const sourceAgentId = 'non-existent';
-            
+
             mockApi.get.mockRejectedValueOnce({
                 response: {
                     status: 404,
-                    data: { error: 'Agent not found' }
+                    data: { error: 'Agent not found' },
                 },
-                config: { url: '/agents/non-existent/export' }
+                config: { url: '/agents/non-existent/export' },
             });
-            
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow(`Source agent not found: ${sourceAgentId}`);
-            
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow(`Source agent not found: ${sourceAgentId}`);
+
             // No cleanup needed - temp file was never created
             expect(fs.unlink).not.toHaveBeenCalled();
         });
 
         it('should handle validation error on import', async () => {
             const sourceAgentId = 'agent-123';
-            
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { name: 'Original' } 
+
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: { name: 'Original' },
             });
-            
-            const validationError = { 
+
+            const validationError = {
                 error: 'Invalid agent configuration',
-                details: ['missing required field']
+                details: ['missing required field'],
             };
-            
+
             mockApi.post.mockRejectedValueOnce({
                 response: {
                     status: 422,
-                    data: validationError
+                    data: validationError,
                 },
-                config: { url: '/agents/import' }
+                config: { url: '/agents/import' },
             });
-            
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow(`Validation error importing cloned agent: ${JSON.stringify(validationError)}`);
-            
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow(
+                `Validation error importing cloned agent: ${JSON.stringify(validationError)}`,
+            );
+
             // Verify cleanup was called
             expect(fs.unlink).toHaveBeenCalled();
         });
 
         it('should handle invalid export data', async () => {
             const sourceAgentId = 'agent-123';
-            
+
             // Mock export returning invalid data
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: null // Invalid response
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: null, // Invalid response
             });
-            
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow('Received invalid data from agent export endpoint.');
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow('Received invalid data from agent export endpoint.');
         });
 
         it('should handle file write errors', async () => {
             const sourceAgentId = 'agent-123';
-            
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { name: 'Original' } 
+
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: { name: 'Original' },
             });
-            
+
             // Mock file write failure
             fs.writeFile.mockRejectedValueOnce(new Error('Disk full'));
-            
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow('Failed to clone agent agent-123: Disk full');
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow('Failed to clone agent agent-123: Disk full');
         });
 
         it('should handle cleanup errors gracefully', async () => {
             const sourceAgentId = 'agent-123';
-            
+
             mockApi.get.mockRejectedValueOnce(new Error('Export failed'));
-            
+
             // Mock cleanup failure
             fs.unlink.mockRejectedValueOnce(new Error('File not found'));
-            
+
             // Should still throw the original error, not the cleanup error
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow('Failed to clone agent agent-123: Export failed');
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow('Failed to clone agent agent-123: Export failed');
         });
 
         it('should handle network errors', async () => {
             const sourceAgentId = 'agent-123';
-            
+
             mockApi.get.mockRejectedValueOnce(new Error('Network timeout'));
-            
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow('Failed to clone agent agent-123: Network timeout');
-            
-            // No cleanup needed - temp file was never created  
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow('Failed to clone agent agent-123: Network timeout');
+
+            // No cleanup needed - temp file was never created
             expect(fs.unlink).not.toHaveBeenCalled();
         });
 
@@ -478,21 +483,22 @@ describe('Clone Agent', () => {
             const sourceAgentId = 'agent-123';
             const mockTimestamp = 1234567890;
             vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
-            
-            mockApi.get.mockResolvedValueOnce({ 
-                status: 200, 
-                data: { name: 'Original' } 
+
+            mockApi.get.mockResolvedValueOnce({
+                status: 200,
+                data: { name: 'Original' },
             });
-            
+
             // Mock import failure
             mockApi.post.mockRejectedValueOnce(new Error('Import failed'));
-            
-            await expect(handleCloneAgent(mockServer, {
-                source_agent_id: sourceAgentId,
-                new_agent_name: 'Test'
-            }))
-                .rejects.toThrow('Failed to clone agent agent-123: Import failed');
-            
+
+            await expect(
+                handleCloneAgent(mockServer, {
+                    source_agent_id: sourceAgentId,
+                    new_agent_name: 'Test',
+                }),
+            ).rejects.toThrow('Failed to clone agent agent-123: Import failed');
+
             // Verify cleanup was called
             const actualPath = fs.unlink.mock.calls[0][0];
             expect(actualPath).toContain(`agent_clone_temp_${mockTimestamp}.json`);
