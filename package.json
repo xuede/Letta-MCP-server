@@ -18,15 +18,15 @@
     "format:check": "prettier --check 'src/**/*.js'"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.10.0",
-    "axios": "^1.8.4",
+    "@modelcontextprotocol/sdk": "1.16.0",
+    "axios": "^1.10.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
-    "form-data": "^4.0.0",
+    "form-data": "^4.0.4",
     "winston": "^3.17.0",
-    "zod": "^3.24.2",
-    "zod-to-json-schema": "^3.24.4"
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",
