@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 
 /**
  * Creates a mock LettaServer instance for testing
@@ -13,7 +12,7 @@ export function createMockLettaServer(overrides = {}) {
         delete: vi.fn(),
         request: vi.fn(),
     };
-    
+
     const mockServer = {
         api: mockApi,
         server: createMockMCPServer(),
@@ -23,8 +22,8 @@ export function createMockLettaServer(overrides = {}) {
             'Content-Type': 'application/json',
         }),
         createErrorResponse: vi.fn((errorOrMessage, context) => {
-            let message = typeof errorOrMessage === 'string' 
-                ? errorOrMessage 
+            let message = typeof errorOrMessage === 'string'
+                ? errorOrMessage
                 : errorOrMessage.message || 'Unknown error';
             if (context) {
                 message = `${context}: ${message}`;
@@ -33,7 +32,7 @@ export function createMockLettaServer(overrides = {}) {
         }),
         ...overrides,
     };
-    
+
     return mockServer;
 }
 
@@ -48,12 +47,12 @@ export function createMockMCPServer() {
         close: vi.fn(),
         _handlers: new Map(),
     };
-    
+
     // Mock the setRequestHandler to store handlers
     mockMCPServer.setRequestHandler.mockImplementation((type, handler) => {
         mockMCPServer._handlers.set(type, handler);
     });
-    
+
     // Helper to trigger a handler
     mockMCPServer.triggerHandler = async (type, args) => {
         const handler = mockMCPServer._handlers.get(type);
@@ -62,7 +61,7 @@ export function createMockMCPServer() {
         }
         return await handler(args);
     };
-    
+
     return mockMCPServer;
 }
 

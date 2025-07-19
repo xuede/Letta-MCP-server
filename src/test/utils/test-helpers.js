@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, expect } from 'vitest';
 
 /**
  * Helper function to test error handling in tool handlers
@@ -53,11 +53,11 @@ export function expectValidToolResponse(response) {
     expect(response.content).toBeDefined();
     expect(Array.isArray(response.content)).toBe(true);
     expect(response.content.length).toBeGreaterThan(0);
-    
+
     const content = response.content[0];
     expect(content.type).toBe('text');
     expect(content.text).toBeDefined();
-    
+
     return JSON.parse(content.text);
 }
 
@@ -74,14 +74,14 @@ export function createMockHttpContext() {
         writeHead: vi.fn().mockReturnThis(),
         finished: false,
     };
-    
+
     const req = {
         body: {},
         headers: {},
         method: 'POST',
         url: '/',
     };
-    
+
     return { req, res };
 }
 
@@ -92,7 +92,7 @@ export function waitFor(condition, timeout = 5000) {
     return new Promise((resolve, reject) => {
         const interval = 100;
         let elapsed = 0;
-        
+
         const check = () => {
             if (condition()) {
                 resolve();
@@ -103,7 +103,7 @@ export function waitFor(condition, timeout = 5000) {
                 setTimeout(check, interval);
             }
         };
-        
+
         check();
     });
 }
@@ -112,20 +112,21 @@ export function waitFor(condition, timeout = 5000) {
  * Helper to capture console output during tests
  */
 export function captureConsole() {
+    /* eslint-disable no-console */
     const originalLog = console.log;
     const originalError = console.error;
     const originalWarn = console.warn;
-    
+
     const captured = {
         log: [],
         error: [],
         warn: [],
     };
-    
+
     console.log = (...args) => captured.log.push(args.join(' '));
     console.error = (...args) => captured.error.push(args.join(' '));
     console.warn = (...args) => captured.warn.push(args.join(' '));
-    
+
     return {
         captured,
         restore: () => {
@@ -134,4 +135,5 @@ export function captureConsole() {
             console.warn = originalWarn;
         },
     };
+    /* eslint-enable no-console */
 }

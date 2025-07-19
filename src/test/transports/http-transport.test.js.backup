@@ -266,12 +266,8 @@ describe('HTTP Transport Integration', () => {
         });
         
         it('should handle session termination', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
             // Initialize session
-            const initResponse = await request(`http://localhost:${port}`)
+            const initResponse = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .send({
                     jsonrpc: '2.0',
@@ -283,13 +279,13 @@ describe('HTTP Transport Integration', () => {
             const sessionId = initResponse.headers['mcp-session-id'];
             
             // Terminate session
-            await request(`http://localhost:${port}`)
+            await request(`http://localhost:${TEST_PORT}`)
                 .delete('/mcp')
                 .set('mcp-session-id', sessionId)
                 .expect(200);
             
             // Subsequent requests should fail
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .set('mcp-session-id', sessionId)
                 .send({
@@ -305,12 +301,8 @@ describe('HTTP Transport Integration', () => {
     
     describe('SSE Streaming', () => {
         it('should handle GET requests for SSE streaming', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
             // Initialize session first
-            const initResponse = await request(`http://localhost:${port}`)
+            const initResponse = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .send({
                     jsonrpc: '2.0',
@@ -322,7 +314,7 @@ describe('HTTP Transport Integration', () => {
             const sessionId = initResponse.headers['mcp-session-id'];
             
             // Request SSE stream
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .get('/mcp')
                 .set('mcp-session-id', sessionId)
                 .set('Accept', 'text/event-stream')
@@ -332,11 +324,7 @@ describe('HTTP Transport Integration', () => {
         });
         
         it('should reject SSE requests without session ID', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .get('/mcp')
                 .set('Accept', 'text/event-stream')
                 .expect(400);
@@ -347,11 +335,7 @@ describe('HTTP Transport Integration', () => {
     
     describe('Error Handling', () => {
         it('should handle malformed JSON requests', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .set('Content-Type', 'application/json')
                 .send('{"invalid json}')
@@ -361,31 +345,23 @@ describe('HTTP Transport Integration', () => {
         });
         
         it('should handle large requests within limits', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
             const largeData = 'x'.repeat(1000000); // 1MB
-            const testRequest = {
+            const request = {
                 jsonrpc: '2.0',
                 method: 'test',
                 params: { data: largeData },
                 id: 1
             };
             
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
-                .send(testRequest)
+                .send(request)
                 .expect(400); // Will fail due to no session, but shouldn't fail due to size
             
             expect(response.body.error.message).not.toContain('too large');
         });
         
         it('should handle transport errors gracefully', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
             // Mock transport error
             const initRequest = {
                 jsonrpc: '2.0',
@@ -397,7 +373,7 @@ describe('HTTP Transport Integration', () => {
             // Force an error by manipulating the mock
             mockServer.server.connect.mockRejectedValueOnce(new Error('Connection failed'));
             
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .send(initRequest)
                 .expect(500);
@@ -409,12 +385,8 @@ describe('HTTP Transport Integration', () => {
     
     describe('Recovery and Event Store', () => {
         it('should support event recovery with lastEventId', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
             // Initialize session
-            const initResponse = await request(`http://localhost:${port}`)
+            const initResponse = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .send({
                     jsonrpc: '2.0',
@@ -427,7 +399,7 @@ describe('HTTP Transport Integration', () => {
             
             // Make several requests to build event history
             for (let i = 2; i <= 5; i++) {
-                await request(`http://localhost:${port}`)
+                await request(`http://localhost:${TEST_PORT}`)
                     .post('/mcp')
                     .set('mcp-session-id', sessionId)
                     .send({
@@ -438,7 +410,7 @@ describe('HTTP Transport Integration', () => {
             }
             
             // Simulate recovery request with lastEventId
-            const recoveryResponse = await request(`http://localhost:${port}`)
+            const recoveryResponse = await request(`http://localhost:${TEST_PORT}`)
                 .get('/mcp')
                 .set('mcp-session-id', sessionId)
                 .set('mcp-last-event-id', 'test-event-id')
@@ -450,11 +422,7 @@ describe('HTTP Transport Integration', () => {
     
     describe('Security Features', () => {
         it('should prevent DNS rebinding attacks', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
-            const response = await request(`http://localhost:${port}`)
+            const response = await request(`http://localhost:${TEST_PORT}`)
                 .post('/mcp')
                 .set('Host', 'evil.com')
                 .set('Origin', 'http://evil.com')
@@ -469,13 +437,9 @@ describe('HTTP Transport Integration', () => {
         });
         
         it('should log requests with IP addresses', async () => {
-            const port = getNextPort();
-            const result = await startServer(port);
-            server = result.server;
-            
             const logSpy = vi.spyOn(console, 'info');
             
-            await request(`http://localhost:${port}`)
+            await request(`http://localhost:${TEST_PORT}`)
                 .get('/health')
                 .set('X-Forwarded-For', '192.168.1.100');
             

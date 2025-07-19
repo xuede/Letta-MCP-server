@@ -24,7 +24,7 @@ global.testUtils = {
         headers: {},
         config: {},
     }),
-    
+
     // Create a mock error
     createMockError: (message, code = 'UNKNOWN_ERROR', status = 500) => {
         const error = new Error(message);
@@ -35,7 +35,7 @@ global.testUtils = {
         };
         return error;
     },
-    
+
     // Wait for promises to resolve
     flushPromises: () => new Promise(resolve => setImmediate(resolve)),
 };

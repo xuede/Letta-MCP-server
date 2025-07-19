@@ -1,0 +1,39 @@
+# CODEOWNERS file for automatic review assignment
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @oculairmedia/engineering
+
+# Core server components require additional review
+/src/core/ @oculairmedia/backend @oculairmedia/engineering
+/src/transports/ @oculairmedia/backend @oculairmedia/engineering
+
+# Tool implementations
+/src/tools/agents/ @oculairmedia/ai-team @oculairmedia/engineering
+/src/tools/memory/ @oculairmedia/ai-team @oculairmedia/engineering
+/src/tools/mcp/ @oculairmedia/backend @oculairmedia/engineering
+
+# CI/CD and infrastructure
+/.github/ @oculairmedia/devops @oculairmedia/engineering
+/Dockerfile @oculairmedia/devops
+/docker-compose.yml @oculairmedia/devops
+/.dockerignore @oculairmedia/devops
+
+# Documentation
+/README.md @oculairmedia/docs @oculairmedia/engineering
+/CLAUDE.md @oculairmedia/ai-team @oculairmedia/engineering
+/docs/ @oculairmedia/docs
+
+# Security-sensitive files
+/.env* @oculairmedia/security @oculairmedia/engineering
+/src/tools/agents/export-agent.js @oculairmedia/security @oculairmedia/engineering
+
+# Dependencies and configuration
+/package.json @oculairmedia/backend @oculairmedia/engineering
+/package-lock.json @oculairmedia/backend @oculairmedia/engineering
+/.eslintrc.json @oculairmedia/backend
+/.prettierrc @oculairmedia/backend
+
+# Test files
+/src/test/ @oculairmedia/qa @oculairmedia/engineering
+/vitest.config.js @oculairmedia/qa @oculairmedia/engineering

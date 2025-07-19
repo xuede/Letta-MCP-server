@@ -10,7 +10,40 @@ global.EventSource = EventSource;
 describe('SSE Transport Integration', () => {
     let mockServer;
     let server;
-    const TEST_PORT = 9545;
+    let currentPort = 9645; // Start from a different range
+    
+    // Helper to get next available port
+    const getNextPort = () => {
+        return currentPort++;
+    };
+    
+    // Helper to start server with retry logic
+    const startServer = async (port) => {
+        const originalPort = process.env.PORT;
+        process.env.PORT = port;
+        
+        try {
+            // Create a promise to wait for server to start
+            const serverStarted = new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error('Server start timeout')), 5000);
+                
+                vi.spyOn(console, 'log').mockImplementation((msg) => {
+                    if (msg.includes('SSE server running on')) {
+                        clearTimeout(timeout);
+                        resolve();
+                    }
+                });
+            });
+            
+            // Start server
+            const app = runSSE(mockServer);
+            await serverStarted;
+            
+            return { server: app, port };
+        } finally {
+            process.env.PORT = originalPort;
+        }
+    };
     
     beforeEach(async () => {
         mockServer = createMockLettaServer();
@@ -20,39 +53,33 @@ describe('SSE Transport Integration', () => {
         
         // Mock server handlers
         mockServer.server.setRequestHandler = vi.fn();
-        
-        // Start the SSE transport
-        const originalPort = process.env.PORT;
-        process.env.PORT = TEST_PORT;
-        
-        // Create a promise to wait for server to start
-        const serverStarted = new Promise((resolve) => {
-            vi.spyOn(console, 'log').mockImplementation((msg) => {
-                if (msg.includes(`SSE server running on http://localhost:${TEST_PORT}`)) {
-                    resolve();
-                }
-            });
-        });
-        
-        // Start server
-        runSSE(mockServer);
-        await serverStarted;
-        
-        // Restore original port
-        process.env.PORT = originalPort;
-    });
+    }, 15000);
     
     afterEach(async () => {
         vi.restoreAllMocks();
         if (server) {
-            await new Promise((resolve) => {
-                server.close(() => resolve());
-            });
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    // Force close if graceful close fails
+                    resolve();
+                }, 5000);
+                
+                if (server.close) {
+                    server.close((err) => {
+                        clearTimeout(timeout);
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                } else {
+                    clearTimeout(timeout);
+                    resolve();
+                }
+            }).catch(() => {}); // Ignore close errors
             server = null;
         }
         // Give time for port to be released
-        await new Promise(resolve => setTimeout(resolve, 100));
-    });
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }, 15000);
     
     describe('Server Initialization', () => {
         it('should start SSE server on specified port', async () => {

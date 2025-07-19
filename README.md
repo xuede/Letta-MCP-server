@@ -1,4 +1,9 @@
 [![MseeP.ai Security Assessment Badge](https://mseep.net/mseep-audited.png)](https://mseep.ai/app/oculairmedia-letta-mcp-server)
+[![CI/CD](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml)
+[![Docker Build](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml)
+[![CodeQL](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/codeql.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/codeql.yml)
+[![Coverage Status](https://codecov.io/gh/oculairmedia/letta-MCP-server/branch/main/graph/badge.svg)](https://codecov.io/gh/oculairmedia/letta-MCP-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Letta MCP Server
 
@@ -226,6 +231,10 @@ Response:
   "uptime": 12345.678
 }
 ```
+
+## Security
+
+For security vulnerabilities, please see our [Security Policy](SECURITY.md).
 
 ## License
 

@@ -45,7 +45,7 @@ export const fixtures = {
             created_at: '2024-01-01T00:00:00Z',
         },
     },
-    
+
     // Tool fixtures
     tool: {
         basic: {
@@ -71,7 +71,7 @@ export const fixtures = {
             },
         },
     },
-    
+
     // Memory fixtures
     memory: {
         block: {
@@ -97,7 +97,7 @@ export const fixtures = {
             },
         ],
     },
-    
+
     // Passage fixtures
     passage: {
         basic: {
@@ -117,7 +117,7 @@ export const fixtures = {
             },
         },
     },
-    
+
     // Model fixtures
     models: {
         llm: [
@@ -140,7 +140,7 @@ export const fixtures = {
             },
         ],
     },
-    
+
     // MCP Server fixtures
     mcpServers: {
         'test-mcp-server': {
@@ -154,7 +154,7 @@ export const fixtures = {
             transport: 'sse',
         },
     },
-    
+
     // Error responses
     errors: {
         notFound: {
