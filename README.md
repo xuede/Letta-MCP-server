@@ -7,15 +7,18 @@
 
 # Letta MCP Server
 
-A Model Context Protocol (MCP) server that provides comprehensive tools for agent management, memory operations, and integration with the Letta system. Supports multiple transport protocols including HTTP (recommended), SSE, and stdio.
+A Model Context Protocol (MCP) server that provides comprehensive tools for agent management, memory operations, and integration with the Letta system. This server implements the full MCP specification including tools, prompts, and resources, with enhanced descriptions, output schemas, and behavioral annotations.
 
 ## Features
 
 - 🤖 **Agent Management** - Create, modify, clone, and manage Letta agents
 - 🧠 **Memory Operations** - Handle memory blocks and passages
-- 🔧 **Tool Integration** - Attach and manage tools for agents
+- 🔧 **Tool Integration** - Attach and manage tools for agents with full MCP support
+- 💬 **Prompts** - Interactive wizards and assistants for common workflows
+- 📚 **Resources** - Access system information, documentation, and agent data
 - 🌐 **Multiple Transports** - HTTP, SSE, and stdio support
 - 🔗 **MCP Server Integration** - Integrate with other MCP servers
+- 📊 **Enhanced Metadata** - Output schemas and behavioral annotations for all tools
 - 📦 **Docker Support** - Easy deployment with Docker
 
 ## Environment Configuration
@@ -62,10 +65,104 @@ docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp 
 docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp ghcr.io/oculairmedia/letta-mcp-server:latest
 ```
 
+### Option 3: Run with stdio for local MCP
+
+```bash
+# Create startup script
+chmod +x /opt/stacks/letta-MCP-server/start-mcp.sh
+
+# Add to Claude
+claude mcp add --transport stdio letta-tools "/opt/stacks/letta-MCP-server/start-mcp.sh"
+```
+
+## MCP Protocol Support
+
+This server implements the full MCP specification with all three capabilities:
+
+### 🔧 Tools
+All tools include:
+- **Enhanced Descriptions**: Detailed explanations with use cases and best practices
+- **Output Schemas**: Structured response definitions for predictable outputs
+- **Behavioral Annotations**: Hints about tool behavior (readOnly, costLevel, executionTime, etc.)
+
+### 💬 Prompts
+Interactive prompts for common workflows:
+- `letta_agent_wizard` - Guided agent creation with memory and tool setup
+- `letta_memory_optimizer` - Analyze and optimize agent memory usage
+- `letta_debug_assistant` - Troubleshoot agent issues
+- `letta_tool_config` - Discover, attach, create, or audit tools
+- `letta_migration` - Export, import, upgrade, or clone agents
+
+### 📚 Resources
+Access system information and documentation:
+- `letta://system/status` - System health and version info
+- `letta://system/models` - Available LLM and embedding models
+- `letta://agents/list` - Overview of all agents
+- `letta://tools/all/docs` - Complete tool documentation with examples
+- `letta://docs/mcp-integration` - Integration guide
+- `letta://docs/api-reference` - API quick reference
+
+Resource templates for dynamic content:
+- `letta://agents/{agent_id}/config` - Agent configuration
+- `letta://agents/{agent_id}/memory/{block_id}` - Memory block content
+- `letta://tools/{tool_name}/docs` - Individual tool documentation
+
+## Available Tools
+
+### Agent Management
+
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `create_agent` | Create a new Letta agent | 💰 Medium cost, ⚡ Fast |
+| `list_agents` | List all available agents | 👁️ Read-only, 💰 Low cost |
+| `prompt_agent` | Send a message to an agent | 💰 High cost, ⏱️ Variable time, 🔒 Rate limited |
+| `retrieve_agent` | Get agent details by ID | 👁️ Read-only, ⚡ Fast |
+| `get_agent_summary` | Get agent summary information | 👁️ Read-only, ⚡ Fast |
+| `modify_agent` | Update an existing agent | ✏️ Modifies state, ⚡ Fast |
+| `delete_agent` | Delete an agent | ⚠️ Dangerous, 🗑️ Permanent |
+| `clone_agent` | Clone an existing agent | 💰 Medium cost, ⏱️ Medium time |
+| `bulk_delete_agents` | Delete multiple agents | ⚠️ Dangerous, 📦 Bulk operation |
+
+### Memory Management
+
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `list_memory_blocks` | List all memory blocks | 👁️ Read-only, ⚡ Fast |
+| `create_memory_block` | Create a new memory block | ✏️ Creates state, ⚡ Fast |
+| `read_memory_block` | Read a memory block | 👁️ Read-only, ⚡ Fast |
+| `update_memory_block` | Update a memory block | ✏️ Modifies state, ⚡ Fast |
+| `attach_memory_block` | Attach memory to an agent | ✏️ Links resources, ⚡ Fast |
+
+### Passage Management
+
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `list_passages` | Search archival memory | 👁️ Read-only, ⚡ Fast |
+| `create_passage` | Create archival memory | 💰 Medium cost (embeddings), ⚡ Fast |
+| `modify_passage` | Update archival memory | 💰 Medium cost (re-embedding), ⚡ Fast |
+| `delete_passage` | Delete archival memory | 🗑️ Permanent, ⚡ Fast |
+
+### Tool Management
+
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `list_agent_tools` | List tools for an agent | 👁️ Read-only, ⚡ Fast |
+| `attach_tool` | Attach tools to an agent | ✏️ Modifies capabilities, ⚡ Fast |
+| `upload_tool` | Upload a custom tool | 🔒 Security: Executes code, ⚡ Fast |
+| `bulk_attach_tool_to_agents` | Attach tool to multiple agents | 📦 Bulk operation, ⏱️ Slow |
+
+### Additional Tools
+
+- **Model Management**: `list_llm_models`, `list_embedding_models`
+- **MCP Server Management**: `list_mcp_servers`, `list_mcp_tools_by_server`, `add_mcp_tool_to_letta`
+- **Import/Export**: `export_agent`, `import_agent`
+
 ## Directory Structure
 
 - `src/index.js` - Main entry point
 - `src/core/` - Core server functionality
+- `src/handlers/` - Prompt and resource handlers
+- `src/examples/` - Example prompts and resources
 - `src/tools/` - Tool implementations organized by category:
   - `agents/` - Agent management tools
   - `memory/` - Memory block tools
@@ -73,7 +170,10 @@ docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp 
   - `tools/` - Tool attachment and management
   - `mcp/` - MCP server integration tools
   - `models/` - Model listing tools
-- `src/transports/` - Server transport implementations (stdio, SSE, HTTP)
+  - `enhanced-descriptions.js` - Detailed tool descriptions
+  - `output-schemas.js` - Structured output definitions
+  - `annotations.js` - Behavioral hints
+- `src/transports/` - Server transport implementations
 
 ## Transport Protocols
 
@@ -90,65 +190,7 @@ The server supports three transport protocols:
 
 3. **stdio** - Standard input/output
    - Direct process communication
-   - Best for local development and testing
-
-## Available Tools
-
-### Agent Management
-
-| Tool | Description | Required Parameters | Optional Parameters |
-|------|-------------|---------------------|---------------------|
-| `create_agent` | Create a new Letta agent | name, description | model, embedding |
-| `list_agents` | List all available agents | - | filter |
-| `prompt_agent` | Send a message to an agent | agent_id, message | - |
-| `retrieve_agent` | Get agent details by ID | agent_id | - |
-| `get_agent_summary` | Get agent summary information | agent_id | - |
-| `modify_agent` | Update an existing agent | agent_id, update_data | - |
-| `delete_agent` | Delete an agent | agent_id | - |
-| `clone_agent` | Clone an existing agent | source_agent_id, new_agent_name | override_existing_tools, project_id |
-| `bulk_delete_agents` | Delete multiple agents | - | agent_ids, agent_name_filter, agent_tag_filter |
-
-### Memory Management
-
-| Tool | Description | Required Parameters | Optional Parameters |
-|------|-------------|---------------------|---------------------|
-| `list_memory_blocks` | List all memory blocks | - | filter, agent_id, page, pageSize, label |
-| `create_memory_block` | Create a new memory block | name, label, value | agent_id, metadata |
-| `read_memory_block` | Read a memory block | block_id | agent_id |
-| `update_memory_block` | Update a memory block | block_id | value, metadata, agent_id |
-| `attach_memory_block` | Attach memory to an agent | block_id, agent_id | label |
-
-### Tool Management
-
-| Tool | Description | Required Parameters | Optional Parameters |
-|------|-------------|---------------------|---------------------|
-| `list_agent_tools` | List tools for a specific agent | agent_id | - |
-| `attach_tool` | Attach tools to an agent | agent_id | tool_id, tool_ids, tool_names |
-| `upload_tool` | Upload a new tool | name, description, source_code | category, agent_id |
-| `bulk_attach_tool_to_agents` | Attach a tool to multiple agents | tool_id | agent_name_filter, agent_tag_filter |
-
-### Additional Tools
-
-- **Model Management**: `list_llm_models`, `list_embedding_models`
-- **Archive Management**: `list_passages`, `create_passage`, `modify_passage`, `delete_passage`
-- **MCP Server Management**: `list_mcp_servers`, `list_mcp_tools_by_server`, `add_mcp_tool_to_letta`
-- **Import/Export**: `export_agent`, `import_agent`
-
-## Docker Operations
-
-```bash
-# View container logs
-docker logs -f letta-mcp
-
-# Stop the container
-docker stop letta-mcp
-
-# Update to latest version
-docker pull ghcr.io/oculairmedia/letta-mcp-server:latest
-docker stop letta-mcp
-docker rm letta-mcp
-docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp ghcr.io/oculairmedia/letta-mcp-server:latest
-```
+   - Best for local development and Claude integration
 
 ## Configuration with MCP Settings
 
@@ -194,6 +236,22 @@ For remote instances with HTTP transport (recommended):
 }
 ```
 
+## Docker Operations
+
+```bash
+# View container logs
+docker logs -f letta-mcp
+
+# Stop the container
+docker stop letta-mcp
+
+# Update to latest version
+docker pull ghcr.io/oculairmedia/letta-mcp-server:latest
+docker stop letta-mcp
+docker rm letta-mcp
+docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp ghcr.io/oculairmedia/letta-mcp-server:latest
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -231,6 +289,29 @@ Response:
   "uptime": 12345.678
 }
 ```
+
+## Development
+
+### Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run linter
+npm run lint
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Security
 

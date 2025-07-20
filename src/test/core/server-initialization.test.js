@@ -115,7 +115,16 @@ describe('LettaServer Initialization (LMP-82)', () => {
                 },
                 {
                     capabilities: {
-                        tools: {},
+                        tools: {
+                            listChanged: true,
+                        },
+                        prompts: {
+                            listChanged: true,
+                        },
+                        resources: {
+                            subscribe: true,
+                            listChanged: true,
+                        },
                     },
                 },
             );

@@ -65,51 +65,65 @@ import {
     handleListEmbeddingModels,
     listEmbeddingModelsDefinition,
 } from './models/list-embedding-models.js';
+
+// Prompt-related imports
+import { handleListPrompts, listPromptsToolDefinition } from './prompts/list-prompts.js';
+import { handleUsePrompt, usePromptToolDefinition } from './prompts/use-prompt.js';
+
 import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
     McpError,
     ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
+import { enhanceAllTools } from './enhance-tools.js';
 
 /**
  * Register all tool handlers with the server
  * @param {Object} server - The LettaServer instance (should likely be typed more specifically if possible)
  */
 export function registerToolHandlers(server) {
+    // Collect all tool definitions
+    const allTools = [
+        listAgentsToolDefinition,
+        promptAgentToolDefinition,
+        listAgentToolsDefinition,
+        createAgentToolDefinition,
+        attachToolToolDefinition,
+        listMemoryBlocksToolDefinition,
+        readMemoryBlockToolDefinition,
+        updateMemoryBlockToolDefinition,
+        attachMemoryBlockToolDefinition,
+        createMemoryBlockToolDefinition,
+        uploadToolToolDefinition,
+        listMcpToolsByServerDefinition,
+        listMcpServersDefinition,
+        retrieveAgentDefinition,
+        modifyAgentDefinition,
+        deleteAgentDefinition,
+        listLlmModelsDefinition,
+        listEmbeddingModelsDefinition,
+        listPassagesDefinition,
+        createPassageDefinition,
+        modifyPassageDefinition,
+        deletePassageDefinition,
+        exportAgentDefinition,
+        importAgentDefinition,
+        cloneAgentDefinition,
+        bulkAttachToolDefinition,
+        getAgentSummaryDefinition,
+        bulkDeleteAgentsDefinition,
+        addMcpToolToLettaDefinition,
+        listPromptsToolDefinition,
+        usePromptToolDefinition,
+    ];
+
+    // Enhance all tools with output schemas and improved descriptions
+    const enhancedTools = enhanceAllTools(allTools);
+
     // Register tool definitions
     server.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-        tools: [
-            listAgentsToolDefinition,
-            promptAgentToolDefinition,
-            listAgentToolsDefinition,
-            createAgentToolDefinition,
-            attachToolToolDefinition,
-            listMemoryBlocksToolDefinition,
-            readMemoryBlockToolDefinition,
-            updateMemoryBlockToolDefinition,
-            attachMemoryBlockToolDefinition,
-            createMemoryBlockToolDefinition,
-            uploadToolToolDefinition,
-            listMcpToolsByServerDefinition,
-            listMcpServersDefinition,
-            retrieveAgentDefinition,
-            modifyAgentDefinition,
-            deleteAgentDefinition,
-            listLlmModelsDefinition,
-            listEmbeddingModelsDefinition,
-            listPassagesDefinition,
-            createPassageDefinition,
-            modifyPassageDefinition,
-            deletePassageDefinition,
-            exportAgentDefinition,
-            importAgentDefinition,
-            cloneAgentDefinition,
-            bulkAttachToolDefinition,
-            getAgentSummaryDefinition,
-            bulkDeleteAgentsDefinition,
-            addMcpToolToLettaDefinition,
-        ],
+        tools: enhancedTools,
     }));
 
     // Register tool call handler
@@ -173,6 +187,10 @@ export function registerToolHandlers(server) {
                 return handleBulkDeleteAgents(server, request.params.arguments);
             case 'add_mcp_tool_to_letta':
                 return handleAddMcpToolToLetta(server, request.params.arguments);
+            case 'list_prompts':
+                return handleListPrompts(server, request.params.arguments);
+            case 'use_prompt':
+                return handleUsePrompt(server, request.params.arguments);
             default:
                 throw new McpError(
                     ErrorCode.MethodNotFound,
@@ -182,8 +200,8 @@ export function registerToolHandlers(server) {
     });
 }
 
-// Export all tool definitions
-export const toolDefinitions = [
+// Export all tool definitions (enhanced)
+export const toolDefinitions = enhanceAllTools([
     listAgentsToolDefinition,
     promptAgentToolDefinition,
     listAgentToolsDefinition,
@@ -213,7 +231,9 @@ export const toolDefinitions = [
     getAgentSummaryDefinition,
     bulkDeleteAgentsDefinition,
     addMcpToolToLettaDefinition,
-];
+    listPromptsToolDefinition,
+    usePromptToolDefinition,
+]);
 
 // Export all tool handlers
 export const toolHandlers = {

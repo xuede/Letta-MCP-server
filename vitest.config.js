@@ -21,6 +21,7 @@ export default defineConfig({
                 'vitest.config.js',
                 '.eslintrc.json',
                 'src/tools/lettaopenapi.json',
+                'src/examples/**',
             ],
             thresholds: {
                 lines: 10, // Will increase as we add more tests
@@ -41,6 +42,14 @@ export default defineConfig({
         
         // Hook timeout
         hookTimeout: 10000,
+        
+        // Specific timeout for integration tests
+        pool: 'forks',
+        poolOptions: {
+            forks: {
+                singleFork: true
+            }
+        },
         
         // Reporters
         reporters: ['verbose'],

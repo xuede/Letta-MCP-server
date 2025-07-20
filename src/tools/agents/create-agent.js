@@ -16,6 +16,23 @@ export async function handleCreateAgent(server, args) {
         const model = args.model ?? 'openai/gpt-4';
         const embedding = args.embedding ?? 'openai/text-embedding-ada-002';
 
+        // Determine model configuration based on the model handle
+        let modelEndpointType = 'openai';
+        let modelEndpoint = 'https://api.openai.com/v1';
+        let modelName = model;
+
+        // Handle special cases like letta-free
+        if (model === 'letta/letta-free') {
+            modelEndpointType = 'openai';
+            modelEndpoint = 'https://inference.letta.com';
+            modelName = 'letta-free';
+        } else if (model.includes('/')) {
+            // For other models with provider prefix
+            const parts = model.split('/');
+            modelEndpointType = parts[0];
+            modelName = parts.slice(1).join('/');
+        }
+
         // Agent configuration
         const agentConfig = {
             name: args.name,
@@ -23,8 +40,9 @@ export async function handleCreateAgent(server, args) {
             agent_type: 'memgpt_agent',
             model: model,
             llm_config: {
-                model: model.split('/')[1],
-                model_endpoint_type: model.split('/')[0],
+                model: modelName,
+                model_endpoint_type: modelEndpointType,
+                model_endpoint: modelEndpoint,
                 context_window: 16000,
                 max_tokens: 1000,
                 temperature: 0.7,
@@ -70,6 +88,10 @@ export async function handleCreateAgent(server, args) {
                     }),
                 },
             ],
+            structuredContent: {
+                agent_id: agentId,
+                capabilities,
+            },
         };
     } catch (error) {
         server.createErrorResponse(error);
@@ -106,5 +128,20 @@ export const createAgentToolDefinition = {
             },
         },
         required: ['name', 'description'],
+    },
+    outputSchema: {
+        type: 'object',
+        properties: {
+            agent_id: {
+                type: 'string',
+                description: 'Unique identifier of the created agent',
+            },
+            capabilities: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'List of tool names attached to the agent',
+            },
+        },
+        required: ['agent_id'],
     },
 };

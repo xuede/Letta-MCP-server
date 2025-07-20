@@ -238,6 +238,7 @@ describe('Create Agent', () => {
                     llm_config: {
                         model: 'gpt-4-turbo',
                         model_endpoint_type: 'openai',
+                        model_endpoint: 'https://api.openai.com/v1',
                         context_window: 16000,
                         max_tokens: 1000,
                         temperature: 0.7,
@@ -258,6 +259,54 @@ describe('Create Agent', () => {
                 }),
                 expect.any(Object),
             );
+        });
+
+        it('should handle letta-free model correctly', async () => {
+            const createdAgent = { ...fixtures.agent.basic, id: 'letta-free-agent' };
+            const agentWithTools = {
+                ...createdAgent,
+                tools: [{ name: 'tool1' }, { name: 'tool2' }],
+            };
+
+            // Mock successful agent creation
+            mockServer.api.post.mockResolvedValueOnce({ data: createdAgent });
+            mockServer.api.get.mockResolvedValueOnce({ data: agentWithTools });
+
+            const result = await handleCreateAgent(mockServer, {
+                name: 'Letta Free Agent',
+                description: 'Testing letta free model',
+                model: 'letta/letta-free',
+                embedding: 'letta/letta-free',
+            });
+
+            expect(mockServer.api.post).toHaveBeenCalledWith(
+                '/agents/',
+                expect.objectContaining({
+                    model: 'letta/letta-free',
+                    llm_config: expect.objectContaining({
+                        model: 'letta-free',
+                        model_endpoint_type: 'openai',
+                        model_endpoint: 'https://inference.letta.com',
+                    }),
+                }),
+                expect.any(Object),
+            );
+
+            expect(result).toEqual({
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({
+                            agent_id: 'letta-free-agent',
+                            capabilities: ['tool1', 'tool2'],
+                        }),
+                    },
+                ],
+                structuredContent: {
+                    agent_id: 'letta-free-agent',
+                    capabilities: ['tool1', 'tool2'],
+                },
+            });
         });
     });
 });

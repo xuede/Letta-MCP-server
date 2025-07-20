@@ -23,13 +23,25 @@ export class LettaServer {
             },
             {
                 capabilities: {
-                    tools: {},
+                    tools: {
+                        listChanged: true,
+                    },
+                    prompts: {
+                        listChanged: true,
+                    },
+                    resources: {
+                        subscribe: true,
+                        listChanged: true,
+                    },
                 },
             },
         );
 
         // Set up error handler
         this.server.onerror = (error) => this.logger.error('MCP Error', { error });
+
+        // Flag to track if handlers have been registered
+        this.handlersRegistered = false;
 
         // Validate environment variables
         this.apiBase = process.env.LETTA_BASE_URL ?? '';

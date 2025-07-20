@@ -2,6 +2,9 @@
 import dotenv from 'dotenv';
 import { LettaServer } from './core/server.js';
 import { registerToolHandlers } from './tools/index.js';
+import { registerPromptHandlers } from './handlers/prompts.js';
+import { registerResourceHandlers } from './handlers/resources.js';
+import { initializeExamples } from './examples/index.js';
 import { runStdio, runSSE, runHTTP } from './transports/index.js';
 import { createLogger } from './core/logger.js';
 
@@ -19,8 +22,16 @@ async function main() {
         // Create server instance
         const server = new LettaServer();
 
-        // Register all tool handlers
+        // Register all handlers before connecting to transport
         registerToolHandlers(server);
+        registerPromptHandlers(server);
+        registerResourceHandlers(server);
+
+        // Initialize example prompts and resources
+        initializeExamples(server);
+
+        // Mark handlers as registered
+        server.handlersRegistered = true;
 
         // Determine transport mode from command line arguments
         const useSSE = process.argv.includes('--sse');
