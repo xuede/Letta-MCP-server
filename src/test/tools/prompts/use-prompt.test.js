@@ -8,7 +8,7 @@ describe('Use Prompt Tool', () => {
     beforeEach(() => {
         // Clear registry before each test
         promptRegistry.clear();
-        
+
         // Mock server
         mockServer = {
             createErrorResponse: vi.fn((error, context) => {
@@ -66,7 +66,7 @@ describe('Use Prompt Tool', () => {
 
             expect(result).toHaveProperty('content');
             expect(result.content[0].type).toBe('text');
-            
+
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent).toHaveProperty('prompt_name', 'simple_prompt');
             expect(parsedContent).toHaveProperty('description', 'A simple test prompt');
@@ -111,7 +111,7 @@ describe('Use Prompt Tool', () => {
 
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent.messages).toBe(1);
-            
+
             // Verify handler was called with correct arguments
             expect(promptRegistry.get('agent_prompt').handler).toHaveBeenCalledWith(args);
         });
@@ -148,7 +148,7 @@ describe('Use Prompt Tool', () => {
 
         it('should include structuredContent in response', async () => {
             const messages = [{ role: 'user', content: { type: 'text', text: 'Test' } }];
-            
+
             promptRegistry.set('test', {
                 name: 'test',
                 description: 'Test prompt',
@@ -170,7 +170,7 @@ describe('Use Prompt Tool', () => {
                 role: 'user',
                 content: { type: 'text', text: longText },
             }];
-            
+
             promptRegistry.set('long_prompt', {
                 name: 'long_prompt',
                 description: 'Long prompt',
@@ -179,7 +179,7 @@ describe('Use Prompt Tool', () => {
 
             const result = await handleUsePrompt(mockServer, { prompt_name: 'long_prompt' });
             const parsedContent = JSON.parse(result.content[0].text);
-            
+
             expect(parsedContent.preview.endsWith('...')).toBe(true);
             expect(parsedContent.preview.length).toBeLessThan(210);
         });
@@ -235,7 +235,7 @@ describe('Use Prompt Tool', () => {
             });
 
             const result = await handleUsePrompt(mockServer, { prompt_name: 'no_desc' });
-            
+
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent.description).toBeUndefined();
         });
@@ -269,14 +269,14 @@ describe('Use Prompt Tool', () => {
 
         it('should handle undefined arguments as empty object', async () => {
             const mockHandler = vi.fn().mockResolvedValue([]);
-            
+
             promptRegistry.set('test', {
                 name: 'test',
                 handler: mockHandler,
             });
 
             await handleUsePrompt(mockServer, { prompt_name: 'test' });
-            
+
             expect(mockHandler).toHaveBeenCalledWith({});
         });
     });
@@ -292,7 +292,7 @@ describe('Use Prompt Tool', () => {
             });
 
             const result = await handleUsePrompt(mockServer, { prompt_name: 'format_test' });
-            
+
             // Check for pretty printing
             expect(result.content[0].text).toContain('\n  ');
             expect(result.content[0].text).toContain('"prompt_name": "format_test"');
@@ -331,7 +331,7 @@ describe('Use Prompt Tool', () => {
             });
 
             const result = await handleUsePrompt(mockServer, { prompt_name: 'complex' });
-            
+
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent.messages).toBe(2);
         });
@@ -344,7 +344,7 @@ describe('Use Prompt Tool', () => {
             });
 
             const result = await handleUsePrompt(mockServer, { prompt_name: 'empty' });
-            
+
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent.messages).toBe(0);
             expect(parsedContent.preview).toBe('undefined...');

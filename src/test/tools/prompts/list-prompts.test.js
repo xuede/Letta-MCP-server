@@ -8,7 +8,7 @@ describe('List Prompts Tool', () => {
     beforeEach(() => {
         // Clear registry before each test
         promptRegistry.clear();
-        
+
         // Mock server
         mockServer = {
             createErrorResponse: vi.fn((error, context) => {
@@ -44,7 +44,7 @@ describe('List Prompts Tool', () => {
 
             expect(result).toHaveProperty('content');
             expect(result.content[0].type).toBe('text');
-            
+
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent).toEqual({
                 total_prompts: 0,
@@ -86,11 +86,11 @@ describe('List Prompts Tool', () => {
 
             expect(result).toHaveProperty('content');
             expect(result.content[0].type).toBe('text');
-            
+
             const parsedContent = JSON.parse(result.content[0].text);
             expect(parsedContent.total_prompts).toBe(2);
             expect(parsedContent.prompts).toHaveLength(2);
-            
+
             // Check first prompt
             expect(parsedContent.prompts[0]).toEqual({
                 name: 'test_prompt_1',
@@ -125,7 +125,7 @@ describe('List Prompts Tool', () => {
 
             const result = await handleListPrompts(mockServer);
             const parsedContent = JSON.parse(result.content[0].text);
-            
+
             expect(parsedContent.prompts[0].arguments).toEqual([]);
         });
 
@@ -140,7 +140,7 @@ describe('List Prompts Tool', () => {
 
             const result = await handleListPrompts(mockServer);
             const text = result.content[0].text;
-            
+
             // Check for indentation (pretty printed)
             expect(text).toContain('\n  ');
             expect(text).toContain('"total_prompts": 1');
@@ -228,7 +228,7 @@ describe('List Prompts Tool', () => {
             });
 
             const result = await handleListPrompts(mockServer);
-            
+
             // Handler should not be in output
             expect(result.content[0].text).not.toContain('handler');
             expect(result.structuredContent.prompts[0]).not.toHaveProperty('handler');
