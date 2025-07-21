@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import axios from 'axios';
 import { spawn } from 'child_process';
-import { randomBytes } from 'node:crypto';
+import { randomBytes } from 'crypto';
 
 describe('MCP Protocol Integration Tests', () => {
     let serverProcess;
