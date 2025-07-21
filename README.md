@@ -181,6 +181,10 @@ chmod +x /opt/stacks/letta-MCP-server/start-mcp.sh
 claude mcp add --transport stdio letta-tools "/opt/stacks/letta-MCP-server/start-mcp.sh"
 ```
 
+## Architecture
+
+See the [Architecture Documentation](docs/ARCHITECTURE.md) for detailed system diagrams and component relationships.
+
 ## MCP Protocol Support
 
 This server implements the full MCP specification with all three capabilities:
