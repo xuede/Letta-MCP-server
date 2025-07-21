@@ -41,21 +41,29 @@ export function registerExampleResources(server) {
                 });
 
                 return {
-                    text: JSON.stringify({
-                        status: 'healthy',
-                        timestamp: new Date().toISOString(),
-                        version: '1.1.0',
-                        api_health: response.data,
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            status: 'healthy',
+                            timestamp: new Date().toISOString(),
+                            version: '1.1.0',
+                            api_health: response.data,
+                        },
+                        null,
+                        2,
+                    ),
                 };
             } catch (error) {
                 logger.error('Error fetching system status', { error: error.message });
                 return {
-                    text: JSON.stringify({
-                        status: 'error',
-                        timestamp: new Date().toISOString(),
-                        error: error.message,
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            status: 'error',
+                            timestamp: new Date().toISOString(),
+                            error: error.message,
+                        },
+                        null,
+                        2,
+                    ),
                 };
             }
         },
@@ -80,19 +88,27 @@ export function registerExampleResources(server) {
                 ]);
 
                 return {
-                    text: JSON.stringify({
-                        llm_models: llmResponse.data,
-                        embedding_models: embeddingResponse.data,
-                        timestamp: new Date().toISOString(),
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            llm_models: llmResponse.data,
+                            embedding_models: embeddingResponse.data,
+                            timestamp: new Date().toISOString(),
+                        },
+                        null,
+                        2,
+                    ),
                 };
             } catch (error) {
                 logger.error('Error fetching models', { error: error.message });
                 return {
-                    text: JSON.stringify({
-                        error: error.message,
-                        timestamp: new Date().toISOString(),
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            error: error.message,
+                            timestamp: new Date().toISOString(),
+                        },
+                        null,
+                        2,
+                    ),
                 };
             }
         },
@@ -112,18 +128,26 @@ export function registerExampleResources(server) {
                 });
 
                 return {
-                    text: JSON.stringify({
-                        servers: response.data,
-                        timestamp: new Date().toISOString(),
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            servers: response.data,
+                            timestamp: new Date().toISOString(),
+                        },
+                        null,
+                        2,
+                    ),
                 };
             } catch (error) {
                 logger.error('Error fetching MCP servers', { error: error.message });
                 return {
-                    text: JSON.stringify({
-                        error: error.message,
-                        timestamp: new Date().toISOString(),
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            error: error.message,
+                            timestamp: new Date().toISOString(),
+                        },
+                        null,
+                        2,
+                    ),
                 };
             }
         },
@@ -143,7 +167,7 @@ export function registerExampleResources(server) {
                 });
 
                 const agents = response.data || [];
-                const summary = agents.map(agent => ({
+                const summary = agents.map((agent) => ({
                     id: agent.id,
                     name: agent.name,
                     description: agent.description,
@@ -153,19 +177,27 @@ export function registerExampleResources(server) {
                 }));
 
                 return {
-                    text: JSON.stringify({
-                        total_agents: agents.length,
-                        agents: summary,
-                        timestamp: new Date().toISOString(),
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            total_agents: agents.length,
+                            agents: summary,
+                            timestamp: new Date().toISOString(),
+                        },
+                        null,
+                        2,
+                    ),
                 };
             } catch (error) {
                 logger.error('Error fetching agents', { error: error.message });
                 return {
-                    text: JSON.stringify({
-                        error: error.message,
-                        timestamp: new Date().toISOString(),
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            error: error.message,
+                            timestamp: new Date().toISOString(),
+                        },
+                        null,
+                        2,
+                    ),
                 };
             }
         },
@@ -193,13 +225,13 @@ export function registerExampleResources(server) {
             allDocs += '## Table of Contents\n\n';
 
             // Generate TOC
-            toolDefinitions.forEach(tool => {
+            toolDefinitions.forEach((tool) => {
                 allDocs += `- [${tool.name}](#${tool.name.replace(/_/g, '-')})\n`;
             });
             allDocs += '\n---\n\n';
 
             // Generate documentation for each tool
-            toolDefinitions.forEach(tool => {
+            toolDefinitions.forEach((tool) => {
                 allDocs += generateToolDocumentation(tool.name);
                 allDocs += '\n---\n\n';
             });

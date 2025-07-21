@@ -5,7 +5,8 @@
 export const enhancedDescriptions = {
     // Agent Management Tools
     create_agent: {
-        description: 'Create a new Letta agent with specified configuration. After creation, use attach_tool to add capabilities, attach_memory_block to configure memory, or prompt_agent to start conversations.',
+        description:
+            'Create a new Letta agent with specified configuration. After creation, use attach_tool to add capabilities, attach_memory_block to configure memory, or prompt_agent to start conversations.',
         longDescription: `Creates a new Letta agent with customizable LLM and embedding models. 
         
 Best practices:
@@ -38,7 +39,8 @@ Common workflows:
     },
 
     prompt_agent: {
-        description: 'Send a message to an agent and get a response. Ensure the agent has necessary tools attached (see attach_tool) first. Use list_agents to find agent IDs.',
+        description:
+            'Send a message to an agent and get a response. Ensure the agent has necessary tools attached (see attach_tool) first. Use list_agents to find agent IDs.',
         longDescription: `Sends a message to a Letta agent and retrieves its response. The agent will use its attached tools and memory to provide contextual responses.
 
 Prerequisites:
@@ -62,14 +64,16 @@ Response includes:
                 scenario: 'Task-oriented prompt',
                 params: {
                     agent_id: 'research-agent-456',
-                    message: 'Please research the latest developments in quantum computing and summarize the key findings.',
+                    message:
+                        'Please research the latest developments in quantum computing and summarize the key findings.',
                 },
             },
         ],
     },
 
     attach_tool: {
-        description: 'Attach one or more tools (by ID or name) to an agent. If a name corresponds to an MCP tool not yet in Letta, it will be registered first. Find tools with list_mcp_tools_by_server or create custom ones with upload_tool. Use list_agent_tools to verify attachment.',
+        description:
+            'Attach one or more tools (by ID or name) to an agent. If a name corresponds to an MCP tool not yet in Letta, it will be registered first. Find tools with list_mcp_tools_by_server or create custom ones with upload_tool. Use list_agent_tools to verify attachment.',
         longDescription: `Attaches tools to an agent, expanding its capabilities. Supports both existing Letta tools and MCP tools that can be auto-registered.
 
 Tool attachment strategies:
@@ -101,7 +105,8 @@ After attachment:
 
     // Memory Management Tools
     create_memory_block: {
-        description: 'Create a new memory block in the Letta system. Common labels: "persona", "human", "system". Use attach_memory_block to link to agents, or update_memory_block to modify later.',
+        description:
+            'Create a new memory block in the Letta system. Common labels: "persona", "human", "system". Use attach_memory_block to link to agents, or update_memory_block to modify later.',
         longDescription: `Creates a memory block that can be attached to agents for persistent context.
 
 Memory block types:
@@ -136,7 +141,8 @@ Best practices:
     },
 
     list_passages: {
-        description: 'Retrieve the memories in an agent\'s archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.',
+        description:
+            "Retrieve the memories in an agent's archival memory store (paginated query). Use create_passage to add new memories, modify_passage to edit, or delete_passage to remove them.",
         longDescription: `Retrieves archival memories (passages) for an agent with pagination and search capabilities.
 
 Use cases:
@@ -170,7 +176,8 @@ Search tips:
 
     // Tool Management
     list_mcp_tools_by_server: {
-        description: 'List all available tools for a specific MCP server. Use list_mcp_servers first to see available servers, then add_mcp_tool_to_letta to import tools into Letta.',
+        description:
+            'List all available tools for a specific MCP server. Use list_mcp_servers first to see available servers, then add_mcp_tool_to_letta to import tools into Letta.',
         longDescription: `Discovers available tools from a connected MCP server for potential integration with Letta agents.
 
 Workflow:
@@ -201,7 +208,8 @@ Filter options help find specific tool types or capabilities.`,
 
     // Bulk Operations
     bulk_attach_tool_to_agents: {
-        description: 'Attaches a specified tool to multiple agents based on filter criteria (name or tags). Use list_agents to find agents and list_mcp_tools_by_server or upload_tool to get tool IDs.',
+        description:
+            'Attaches a specified tool to multiple agents based on filter criteria (name or tags). Use list_agents to find agents and list_mcp_tools_by_server or upload_tool to get tool IDs.',
         longDescription: `Efficiently attaches a tool to multiple agents matching specified criteria.
 
 Use cases:
@@ -233,7 +241,8 @@ Filtering options:
 
     // Import/Export
     export_agent: {
-        description: 'Export an agent\'s configuration to a JSON file and optionally upload it. Use import_agent to recreate the agent later, or clone_agent for a quick copy. Use list_agents to find agent IDs.',
+        description:
+            "Export an agent's configuration to a JSON file and optionally upload it. Use import_agent to recreate the agent later, or clone_agent for a quick copy. Use list_agents to find agent IDs.",
         longDescription: `Exports complete agent configuration including tools, memory, and settings for backup or migration.
 
 Export includes:
@@ -267,7 +276,8 @@ Options:
 
     // Debugging
     get_agent_summary: {
-        description: 'Provides a concise summary of an agent\'s configuration, including core memory snippets and attached tool/source names. Use list_agents to find agent IDs. Follow up with modify_agent to change settings or attach_tool to add capabilities.',
+        description:
+            "Provides a concise summary of an agent's configuration, including core memory snippets and attached tool/source names. Use list_agents to find agent IDs. Follow up with modify_agent to change settings or attach_tool to add capabilities.",
         longDescription: `Retrieves a comprehensive summary of an agent's current state for quick assessment.
 
 Summary includes:
@@ -299,11 +309,13 @@ Use for:
  * @returns {Object} Enhanced description object
  */
 export function getEnhancedDescription(toolName) {
-    return enhancedDescriptions[toolName] || {
-        description: `Tool ${toolName} - No enhanced description available`,
-        longDescription: 'Please refer to the basic tool description.',
-        examples: [],
-    };
+    return (
+        enhancedDescriptions[toolName] || {
+            description: `Tool ${toolName} - No enhanced description available`,
+            longDescription: 'Please refer to the basic tool description.',
+            examples: [],
+        }
+    );
 }
 
 /**

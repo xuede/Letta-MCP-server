@@ -39,7 +39,7 @@ describe('MCP Protocol Integration Tests', () => {
                 try {
                     const response = await axios.get(`${baseURL}/health`, {
                         timeout: 1000,
-                        validateStatus: () => true
+                        validateStatus: () => true,
                     });
                     if (response.status === 200) {
                         clearTimeout(timeout);
@@ -79,7 +79,11 @@ describe('MCP Protocol Integration Tests', () => {
                 clearTimeout(timeout);
                 clearInterval(pollInterval);
                 if (code !== 0) {
-                    reject(new Error(`Server exited with code ${code}. Output: ${output}\nError: ${errorOutput}`));
+                    reject(
+                        new Error(
+                            `Server exited with code ${code}. Output: ${output}\nError: ${errorOutput}`,
+                        ),
+                    );
                 }
             });
         });
@@ -88,7 +92,7 @@ describe('MCP Protocol Integration Tests', () => {
     afterAll(async () => {
         if (serverProcess) {
             serverProcess.kill();
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
         }
     });
 
@@ -99,19 +103,23 @@ describe('MCP Protocol Integration Tests', () => {
     const makeRequest = async (method, params = {}) => {
         const headers = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json, text/event-stream',
+            Accept: 'application/json, text/event-stream',
         };
 
         if (sessionId) {
             headers['mcp-session-id'] = sessionId;
         }
 
-        const response = await axios.post(`${baseURL}/mcp`, {
-            jsonrpc: '2.0',
-            method,
-            params,
-            id: randomBytes(4).toString('hex'),
-        }, { headers });
+        const response = await axios.post(
+            `${baseURL}/mcp`,
+            {
+                jsonrpc: '2.0',
+                method,
+                params,
+                id: randomBytes(4).toString('hex'),
+            },
+            { headers },
+        );
 
         // Parse SSE response
         if (response.headers['content-type']?.includes('text/event-stream')) {
@@ -359,16 +367,17 @@ describe('MCP Protocol Integration Tests', () => {
         });
 
         it('should handle malformed JSON-RPC requests', async () => {
-            const response = await axios.post(`${baseURL}/mcp`,
+            const response = await axios.post(
+                `${baseURL}/mcp`,
                 { invalid: 'request' },
                 {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json, text/event-stream',
+                        Accept: 'application/json, text/event-stream',
                         'mcp-session-id': sessionId,
                     },
                     validateStatus: () => true,
-                }
+                },
             );
 
             expect(response.status).toBe(400);

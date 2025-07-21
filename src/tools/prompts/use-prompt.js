@@ -16,7 +16,9 @@ export async function handleUsePrompt(server, args) {
         if (!prompt) {
             // List available prompts for helpful error
             const availablePrompts = Array.from(promptRegistry.keys());
-            throw new Error(`Prompt not found: ${prompt_name}. Available prompts: ${availablePrompts.join(', ')}`);
+            throw new Error(
+                `Prompt not found: ${prompt_name}. Available prompts: ${availablePrompts.join(', ')}`,
+            );
         }
 
         // Execute the prompt handler
@@ -26,12 +28,16 @@ export async function handleUsePrompt(server, args) {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify({
-                        prompt_name,
-                        description: prompt.description,
-                        messages: messages.length,
-                        preview: messages[0]?.content?.text?.substring(0, 200) + '...'
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            prompt_name,
+                            description: prompt.description,
+                            messages: messages.length,
+                            preview: messages[0]?.content?.text?.substring(0, 200) + '...',
+                        },
+                        null,
+                        2,
+                    ),
                 },
             ],
             structuredContent: {
@@ -50,13 +56,15 @@ export async function handleUsePrompt(server, args) {
  */
 export const usePromptToolDefinition = {
     name: 'use_prompt',
-    description: 'Execute a registered prompt template. Use this to run wizards, workflows, and guided interactions.',
+    description:
+        'Execute a registered prompt template. Use this to run wizards, workflows, and guided interactions.',
     inputSchema: {
         type: 'object',
         properties: {
             prompt_name: {
                 type: 'string',
-                description: 'Name of the prompt to execute (e.g., letta_agent_wizard, letta_memory_optimizer)',
+                description:
+                    'Name of the prompt to execute (e.g., letta_agent_wizard, letta_memory_optimizer)',
             },
             arguments: {
                 type: 'object',

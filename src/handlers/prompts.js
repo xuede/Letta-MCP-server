@@ -35,7 +35,7 @@ export function registerPromptHandlers(server) {
             const hasMore = startIndex + pageSize < prompts.length;
 
             return {
-                prompts: paginatedPrompts.map(p => ({
+                prompts: paginatedPrompts.map((p) => ({
                     name: p.name,
                     title: p.title,
                     description: p.description,

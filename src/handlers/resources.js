@@ -39,7 +39,7 @@ export function registerResourceHandlers(server) {
             const hasMore = startIndex + pageSize < resources.length;
 
             return {
-                resources: paginatedResources.map(r => ({
+                resources: paginatedResources.map((r) => ({
                     uri: r.uri,
                     name: r.name,
                     title: r.title,
@@ -76,14 +76,16 @@ export function registerResourceHandlers(server) {
             const content = await resource.handler();
 
             return {
-                contents: [{
-                    uri: resource.uri,
-                    name: resource.name,
-                    title: resource.title,
-                    mimeType: resource.mimeType,
-                    ...content, // text or blob
-                    ...(resource.annotations && { annotations: resource.annotations }),
-                }],
+                contents: [
+                    {
+                        uri: resource.uri,
+                        name: resource.name,
+                        title: resource.title,
+                        mimeType: resource.mimeType,
+                        ...content, // text or blob
+                        ...(resource.annotations && { annotations: resource.annotations }),
+                    },
+                ],
             };
         } catch (error) {
             logger.error('Error reading resource', { uri, error: error.message });
@@ -123,7 +125,7 @@ export function registerResourceHandlers(server) {
             const templates = Array.from(resourceTemplates.values());
 
             return {
-                resourceTemplates: templates.map(t => ({
+                resourceTemplates: templates.map((t) => ({
                     uriTemplate: t.uriTemplate,
                     name: t.name,
                     title: t.title,

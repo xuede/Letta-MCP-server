@@ -292,10 +292,19 @@ export function getToolAnnotations(toolName) {
     }
 
     // Add custom annotations as extensions
-    const customFields = ['requiresAuth', 'costLevel', 'executionTime', 'sideEffects',
-                         'dangerous', 'rateLimit', 'securityNote', 'dataSize', 'bulkOperation'];
+    const customFields = [
+        'requiresAuth',
+        'costLevel',
+        'executionTime',
+        'sideEffects',
+        'dangerous',
+        'rateLimit',
+        'securityNote',
+        'dataSize',
+        'bulkOperation',
+    ];
 
-    customFields.forEach(field => {
+    customFields.forEach((field) => {
         if (annotations[field] !== undefined) {
             mcpAnnotations[`x-${field}`] = annotations[field];
         }

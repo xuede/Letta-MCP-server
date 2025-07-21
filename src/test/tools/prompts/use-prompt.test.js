@@ -166,10 +166,12 @@ describe('Use Prompt Tool', () => {
 
         it('should handle preview of long messages', async () => {
             const longText = 'A'.repeat(300);
-            const messages = [{
-                role: 'user',
-                content: { type: 'text', text: longText },
-            }];
+            const messages = [
+                {
+                    role: 'user',
+                    content: { type: 'text', text: longText },
+                },
+            ];
 
             promptRegistry.set('long_prompt', {
                 name: 'long_prompt',
@@ -187,21 +189,24 @@ describe('Use Prompt Tool', () => {
 
     describe('Error Handling', () => {
         it('should throw error when prompt_name is missing', async () => {
-            await expect(handleUsePrompt(mockServer, {}))
-                .rejects.toThrow('Failed to execute prompt: Missing required parameter: prompt_name');
+            await expect(handleUsePrompt(mockServer, {})).rejects.toThrow(
+                'Failed to execute prompt: Missing required parameter: prompt_name',
+            );
         });
 
         it('should throw error when prompt not found', async () => {
-            await expect(handleUsePrompt(mockServer, { prompt_name: 'non_existent' }))
-                .rejects.toThrow('Failed to execute prompt: Prompt not found: non_existent');
+            await expect(
+                handleUsePrompt(mockServer, { prompt_name: 'non_existent' }),
+            ).rejects.toThrow('Failed to execute prompt: Prompt not found: non_existent');
         });
 
         it('should include available prompts in error message', async () => {
             promptRegistry.set('prompt1', { name: 'prompt1', handler: async () => [] });
             promptRegistry.set('prompt2', { name: 'prompt2', handler: async () => [] });
 
-            await expect(handleUsePrompt(mockServer, { prompt_name: 'non_existent' }))
-                .rejects.toThrow('Available prompts: prompt1, prompt2');
+            await expect(
+                handleUsePrompt(mockServer, { prompt_name: 'non_existent' }),
+            ).rejects.toThrow('Available prompts: prompt1, prompt2');
         });
 
         it('should handle prompt handler errors', async () => {
@@ -211,8 +216,9 @@ describe('Use Prompt Tool', () => {
                 handler: vi.fn().mockRejectedValue(new Error('Handler failed')),
             });
 
-            await expect(handleUsePrompt(mockServer, { prompt_name: 'error_prompt' }))
-                .rejects.toThrow('Failed to execute prompt: Handler failed');
+            await expect(
+                handleUsePrompt(mockServer, { prompt_name: 'error_prompt' }),
+            ).rejects.toThrow('Failed to execute prompt: Handler failed');
         });
 
         it('should handle invalid prompt return value', async () => {
@@ -223,8 +229,9 @@ describe('Use Prompt Tool', () => {
             });
 
             // Should throw error due to null.length
-            await expect(handleUsePrompt(mockServer, { prompt_name: 'invalid_prompt' }))
-                .rejects.toThrow('Failed to execute prompt: Cannot read properties of null');
+            await expect(
+                handleUsePrompt(mockServer, { prompt_name: 'invalid_prompt' }),
+            ).rejects.toThrow('Failed to execute prompt: Cannot read properties of null');
         });
 
         it('should handle prompt without description', async () => {
@@ -243,9 +250,9 @@ describe('Use Prompt Tool', () => {
 
     describe('MCP Protocol Integration', () => {
         it('should call handler through MCP protocol', async () => {
-            const mockHandler = vi.fn().mockResolvedValue([
-                { role: 'user', content: { type: 'text', text: 'Test' } },
-            ]);
+            const mockHandler = vi
+                .fn()
+                .mockResolvedValue([{ role: 'user', content: { type: 'text', text: 'Test' } }]);
 
             promptRegistry.set('mcp_test', {
                 name: 'mcp_test',
@@ -286,9 +293,9 @@ describe('Use Prompt Tool', () => {
             promptRegistry.set('format_test', {
                 name: 'format_test',
                 description: 'Format test',
-                handler: vi.fn().mockResolvedValue([
-                    { role: 'user', content: { type: 'text', text: 'Test' } },
-                ]),
+                handler: vi
+                    .fn()
+                    .mockResolvedValue([{ role: 'user', content: { type: 'text', text: 'Test' } }]),
             });
 
             const result = await handleUsePrompt(mockServer, { prompt_name: 'format_test' });

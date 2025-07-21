@@ -4,7 +4,7 @@ import {
     ListResourcesRequestSchema,
     ReadResourceRequestSchema,
     SubscribeRequestSchema,
-    ListResourceTemplatesRequestSchema
+    ListResourceTemplatesRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
 describe('Resource Handlers', () => {
@@ -32,7 +32,7 @@ describe('Resource Handlers', () => {
                 get: vi.fn(),
             },
             getApiHeaders: vi.fn().mockReturnValue({
-                'Authorization': 'Bearer test-token',
+                Authorization: 'Bearer test-token',
                 'Content-Type': 'application/json',
             }),
             createErrorResponse: vi.fn((error) => {
@@ -48,19 +48,19 @@ describe('Resource Handlers', () => {
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledTimes(4);
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledWith(
                 ListResourcesRequestSchema,
-                expect.any(Function)
+                expect.any(Function),
             );
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledWith(
                 ReadResourceRequestSchema,
-                expect.any(Function)
+                expect.any(Function),
             );
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledWith(
                 SubscribeRequestSchema,
-                expect.any(Function)
+                expect.any(Function),
             );
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledWith(
                 ListResourceTemplatesRequestSchema,
-                expect.any(Function)
+                expect.any(Function),
             );
         });
 
@@ -108,17 +108,17 @@ describe('Resource Handlers', () => {
         it('should validate URI parameter', async () => {
             const readHandler = handlers.get('resources/read');
 
-            await expect(
-                readHandler({ params: {} })
-            ).rejects.toThrow('Missing required parameter: uri');
+            await expect(readHandler({ params: {} })).rejects.toThrow(
+                'Missing required parameter: uri',
+            );
         });
 
         it('should handle non-existent resources', async () => {
             const readHandler = handlers.get('resources/read');
 
-            await expect(
-                readHandler({ params: { uri: 'letta://non/existent' } })
-            ).rejects.toThrow('Resource not found');
+            await expect(readHandler({ params: { uri: 'letta://non/existent' } })).rejects.toThrow(
+                'Resource not found',
+            );
         });
     });
 
@@ -130,9 +130,9 @@ describe('Resource Handlers', () => {
         it('should validate URI parameter', async () => {
             const subscribeHandler = handlers.get('resources/subscribe');
 
-            await expect(
-                subscribeHandler({ params: {} })
-            ).rejects.toThrow('Missing required parameter: uri');
+            await expect(subscribeHandler({ params: {} })).rejects.toThrow(
+                'Missing required parameter: uri',
+            );
         });
 
         it('should validate subscription ID', async () => {
@@ -141,8 +141,8 @@ describe('Resource Handlers', () => {
             await expect(
                 subscribeHandler({
                     params: { uri: 'letta://test' },
-                    meta: {}
-                })
+                    meta: {},
+                }),
             ).rejects.toThrow('Resource not found');
         });
     });

@@ -5,7 +5,7 @@ import { promptRegistry } from '../../handlers/prompts.js';
  */
 export async function handleListPrompts(server) {
     try {
-        const prompts = Array.from(promptRegistry.values()).map(p => ({
+        const prompts = Array.from(promptRegistry.values()).map((p) => ({
             name: p.name,
             title: p.title || p.name,
             description: p.description,
@@ -16,10 +16,14 @@ export async function handleListPrompts(server) {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify({
-                        total_prompts: prompts.length,
-                        prompts,
-                    }, null, 2),
+                    text: JSON.stringify(
+                        {
+                            total_prompts: prompts.length,
+                            prompts,
+                        },
+                        null,
+                        2,
+                    ),
                 },
             ],
             structuredContent: {

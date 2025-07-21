@@ -8,7 +8,8 @@ export function registerExamplePrompts() {
     registerPrompt({
         name: 'letta_agent_wizard',
         title: 'Letta Agent Creation Wizard',
-        description: 'Interactive wizard to help create a properly configured Letta agent with memory and tools',
+        description:
+            'Interactive wizard to help create a properly configured Letta agent with memory and tools',
         arguments: [
             {
                 name: 'purpose',
@@ -257,7 +258,9 @@ Provide:
                     role: 'user',
                     content: {
                         type: 'text',
-                        text: migrationPrompts[migrationType] || `Help me with ${migrationType} migration for Letta agents.`,
+                        text:
+                            migrationPrompts[migrationType] ||
+                            `Help me with ${migrationType} migration for Letta agents.`,
                     },
                 },
             ];

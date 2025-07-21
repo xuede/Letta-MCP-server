@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { handleListPrompts, listPromptsToolDefinition } from '../../../tools/prompts/list-prompts.js';
+import {
+    handleListPrompts,
+    listPromptsToolDefinition,
+} from '../../../tools/prompts/list-prompts.js';
 import { promptRegistry } from '../../../handlers/prompts.js';
 
 describe('List Prompts Tool', () => {
@@ -155,12 +158,13 @@ describe('List Prompts Tool', () => {
                 throw new Error('Map iteration failed');
             });
 
-            await expect(handleListPrompts(mockServer))
-                .rejects.toThrow('Failed to list prompts: Map iteration failed');
+            await expect(handleListPrompts(mockServer)).rejects.toThrow(
+                'Failed to list prompts: Map iteration failed',
+            );
 
             expect(mockServer.createErrorResponse).toHaveBeenCalledWith(
                 expect.objectContaining({ message: 'Map iteration failed' }),
-                'Failed to list prompts'
+                'Failed to list prompts',
             );
 
             // Restore
@@ -180,8 +184,7 @@ describe('List Prompts Tool', () => {
                 handler: async () => [],
             });
 
-            await expect(handleListPrompts(mockServer))
-                .rejects.toThrow('Failed to list prompts');
+            await expect(handleListPrompts(mockServer)).rejects.toThrow('Failed to list prompts');
 
             // Restore
             JSON.stringify = originalStringify;
@@ -208,12 +211,14 @@ describe('List Prompts Tool', () => {
             // Check structuredContent
             expect(result.structuredContent).toEqual({
                 total_prompts: 1,
-                prompts: [{
-                    name: 'test',
-                    title: 'Test',
-                    description: 'Test prompt',
-                    arguments: [],
-                }],
+                prompts: [
+                    {
+                        name: 'test',
+                        title: 'Test',
+                        description: 'Test prompt',
+                        arguments: [],
+                    },
+                ],
             });
         });
 

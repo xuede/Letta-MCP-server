@@ -42,5 +42,5 @@ export function enhanceToolDefinition(toolDefinition) {
  * @returns {Array} Array of enhanced tool definitions
  */
 export function enhanceAllTools(toolDefinitions) {
-    return toolDefinitions.map(tool => enhanceToolDefinition(tool));
+    return toolDefinitions.map((tool) => enhanceToolDefinition(tool));
 }

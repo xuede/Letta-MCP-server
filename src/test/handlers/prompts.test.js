@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { registerPromptHandlers, promptRegistry } from '../../handlers/prompts.js';
-import { ListPromptsRequestSchema, GetPromptRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import {
+    ListPromptsRequestSchema,
+    GetPromptRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 
 describe('Prompt Handlers', () => {
     let mockServer;
@@ -32,11 +35,11 @@ describe('Prompt Handlers', () => {
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledTimes(2);
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledWith(
                 ListPromptsRequestSchema,
-                expect.any(Function)
+                expect.any(Function),
             );
             expect(mockServer.server.setRequestHandler).toHaveBeenCalledWith(
                 GetPromptRequestSchema,
-                expect.any(Function)
+                expect.any(Function),
             );
         });
     });
@@ -129,15 +132,17 @@ describe('Prompt Handlers', () => {
         it('should throw error when prompt name is missing', async () => {
             const getHandler = handlers.get('prompts/get');
 
-            await expect(getHandler({ params: {} })).rejects.toThrow('Missing required parameter: name');
+            await expect(getHandler({ params: {} })).rejects.toThrow(
+                'Missing required parameter: name',
+            );
         });
 
         it('should throw error when prompt is not found', async () => {
             const getHandler = handlers.get('prompts/get');
 
-            await expect(
-                getHandler({ params: { name: 'non_existent' } })
-            ).rejects.toThrow('Unknown prompt: non_existent');
+            await expect(getHandler({ params: { name: 'non_existent' } })).rejects.toThrow(
+                'Unknown prompt: non_existent',
+            );
         });
 
         it('should return prompt result from handler', async () => {
@@ -173,7 +178,9 @@ describe('Prompt Handlers', () => {
             });
 
             // Verify handler was called with correct arguments
-            expect(promptRegistry.get('test_prompt').handler).toHaveBeenCalledWith({ test: 'value' });
+            expect(promptRegistry.get('test_prompt').handler).toHaveBeenCalledWith({
+                test: 'value',
+            });
         });
 
         it('should handle prompts with no arguments provided', async () => {
@@ -210,9 +217,9 @@ describe('Prompt Handlers', () => {
 
             const getHandler = handlers.get('prompts/get');
 
-            await expect(
-                getHandler({ params: { name: 'error_prompt' } })
-            ).rejects.toThrow('Handler error');
+            await expect(getHandler({ params: { name: 'error_prompt' } })).rejects.toThrow(
+                'Handler error',
+            );
         });
     });
 
