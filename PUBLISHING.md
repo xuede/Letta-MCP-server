@@ -121,11 +121,61 @@ npm deprecate letta-mcp-server@1.1.0 "Critical bug, please upgrade"
 
 ## CI/CD Publishing
 
-For automated publishing, you can add npm token to GitHub Secrets:
+### Automated Publishing Setup
 
-1. Generate npm token: https://www.npmjs.com/settings/[username]/tokens
-2. Add as `NPM_TOKEN` in GitHub repository secrets
-3. Add publish workflow (see .github/workflows/publish.yml)
+The repository includes GitHub Actions workflows for automated publishing:
+
+1. **Main Release Workflow** (`.github/workflows/publish.yml`)
+   - Triggers on GitHub release creation
+   - Manual trigger with version selection (patch/minor/major)
+   - Runs tests and quality checks before publishing
+   - Creates GitHub release automatically
+
+2. **Pre-release Workflow** (`.github/workflows/publish-prerelease.yml`)
+   - Triggers on push to develop/beta/alpha branches
+   - Publishes with appropriate npm tags (alpha, beta, rc)
+   - Includes timestamp in version for uniqueness
+
+### Setup Requirements
+
+1. **Add npm token to GitHub Secrets**:
+   - Generate token at: https://www.npmjs.com/settings/[username]/tokens
+   - Use "Automation" token type
+   - Add to repository secrets as `NPM_TOKEN`
+
+2. **Optional Secrets**:
+   - `LETTA_BASE_URL`: For running integration tests
+   - `LETTA_PASSWORD`: For running integration tests
+
+### Publishing via GitHub Actions
+
+#### Regular Release
+```bash
+# Option 1: Manual trigger from Actions tab
+# Go to Actions → Publish to npm → Run workflow
+# Select version type (patch/minor/major)
+
+# Option 2: Create a GitHub release
+# Go to Releases → Create new release
+# Tag version as v1.2.0 (workflow will publish)
+```
+
+#### Pre-release
+```bash
+# Automatic: Push to develop/beta/alpha branch
+git push origin develop
+
+# Manual: Run pre-release workflow
+# Go to Actions → Publish Pre-release → Run workflow
+# Select tag (alpha/beta/rc)
+```
+
+### Version Tags
+
+- **Latest**: Default install (`npm install letta-mcp-server`)
+- **Beta**: Beta testing (`npm install letta-mcp-server@beta`)
+- **Alpha**: Early testing (`npm install letta-mcp-server@alpha`)
+- **RC**: Release candidate (`npm install letta-mcp-server@rc`)
 
 ## Post-publish
 
