@@ -1,6 +1,6 @@
 services:
   letta-mcp:
-    image: ghcr.io/oculairmedia/letta-mcp-server:da9ac4d68a21b7f79586b63fbf95dfe4245f4424
+    image: ghcr.io/oculairmedia/letta-mcp-server:latest
     ports:
       - "${PORT:-3001}:3001"
     restart: unless-stopped

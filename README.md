@@ -421,7 +421,7 @@ npm run lint
 
 ## Security
 
-For security vulnerabilities, please see our [Security Policy](SECURITY.md).
+For security vulnerabilities, please see our [Security Policy](docs/SECURITY.md).
 
 ## License
 

@@ -16,8 +16,9 @@ coverage/
 .env.local
 .env.*.local
 
-# Documentation source files
+# Documentation files
 docs/
+CLAUDE.md
 
 # Docker files
 Dockerfile
