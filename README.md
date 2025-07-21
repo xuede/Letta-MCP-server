@@ -232,6 +232,8 @@ Resource templates for dynamic content:
 | `delete_agent` | Delete an agent | ⚠️ Dangerous, 🗑️ Permanent |
 | `clone_agent` | Clone an existing agent | 💰 Medium cost, ⏱️ Medium time |
 | `bulk_delete_agents` | Delete multiple agents | ⚠️ Dangerous, 📦 Bulk operation |
+| `export_agent` | Export agent configuration and memory | 👁️ Read-only, ⚡ Fast, 📦 Full backup |
+| `import_agent` | Import agent from backup | 💰 High cost, ⏱️ Slow, ✏️ Creates state |
 
 ### Memory Management
 
@@ -261,11 +263,27 @@ Resource templates for dynamic content:
 | `upload_tool` | Upload a custom tool | 🔒 Security: Executes code, ⚡ Fast |
 | `bulk_attach_tool_to_agents` | Attach tool to multiple agents | 📦 Bulk operation, ⏱️ Slow |
 
-### Additional Tools
+### Model Management
 
-- **Model Management**: `list_llm_models`, `list_embedding_models`
-- **MCP Server Management**: `list_mcp_servers`, `list_mcp_tools_by_server`, `add_mcp_tool_to_letta`
-- **Import/Export**: `export_agent`, `import_agent`
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `list_llm_models` | List available LLM models | 👁️ Read-only, ⚡ Fast |
+| `list_embedding_models` | List available embedding models | 👁️ Read-only, ⚡ Fast |
+
+### MCP Integration
+
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `list_mcp_servers` | List configured MCP servers | 👁️ Read-only, ⚡ Fast |
+| `list_mcp_tools_by_server` | List tools from an MCP server | 👁️ Read-only, ⚡ Fast |
+| `add_mcp_tool_to_letta` | Import MCP tool to Letta | ✏️ Creates tool, ⚡ Fast |
+
+### Prompt Tools
+
+| Tool | Description | Annotations |
+|------|-------------|-------------|
+| `list_prompts` | List available prompt templates | 👁️ Read-only, ⚡ Fast |
+| `use_prompt` | Execute a prompt template | 💰 Variable cost, ⏱️ Variable time |
 
 ## Directory Structure
 
