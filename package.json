@@ -1,7 +1,23 @@
 {
   "name": "letta-mcp-server",
   "version": "1.1.0",
+  "description": "Model Context Protocol (MCP) server for Letta - provides tools for managing agents, memory, and passages",
+  "keywords": ["mcp", "letta", "ai", "agents", "memory", "model-context-protocol"],
+  "homepage": "https://github.com/oculairmedia/Letta-MCP-server#readme",
+  "bugs": {
+    "url": "https://github.com/oculairmedia/Letta-MCP-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oculairmedia/Letta-MCP-server.git"
+  },
+  "license": "MIT",
+  "author": "Oculair Media",
+  "main": "src/index.js",
   "type": "module",
+  "bin": {
+    "letta-mcp": "./src/index.js"
+  },
   "scripts": {
     "start": "node src/index.js",
     "start:sse": "node src/index.js --sse",
@@ -17,7 +33,11 @@
     "test:unit": "vitest run --exclude='**/mcp-integration.test.js'",
     "lint": "eslint src/",
     "format": "prettier --write 'src/**/*.js'",
-    "format:check": "prettier --check 'src/**/*.js'"
+    "format:check": "prettier --check 'src/**/*.js'",
+    "prepublishOnly": "npm run lint && npm run test && npm run format:check",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.16.0",

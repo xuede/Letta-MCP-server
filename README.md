@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/letta-mcp-server.svg)](https://badge.fury.io/js/letta-mcp-server)
+[![npm downloads](https://img.shields.io/npm/dm/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
 [![MseeP.ai Security Assessment Badge](https://mseep.net/mseep-audited.png)](https://mseep.ai/app/oculairmedia-letta-mcp-server)
 [![CI/CD](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml)
 [![Docker Build](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml)
@@ -35,11 +37,46 @@ PORT=3001
 NODE_ENV=production
 ```
 
-## Quick Setup
+## Installation
 
-### Option 1: Run with Node.js
+### Install from npm
 
 ```bash
+# Global installation (recommended for CLI usage)
+npm install -g letta-mcp-server
+
+# Or local installation
+npm install letta-mcp-server
+```
+
+### Use with Claude Desktop
+
+After installing globally, add to your Claude Desktop configuration:
+
+```json
+{
+  "mcpServers": {
+    "letta": {
+      "command": "letta-mcp",
+      "args": [],
+      "env": {
+        "LETTA_BASE_URL": "https://your-letta-instance.com/v1",
+        "LETTA_PASSWORD": "your-secure-password"
+      }
+    }
+  }
+}
+```
+
+## Quick Setup
+
+### Option 1: Run from source
+
+```bash
+# Clone the repository
+git clone https://github.com/oculairmedia/letta-MCP-server.git
+cd letta-MCP-server
+
 # Install dependencies
 npm install
 
