@@ -28,6 +28,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          ref: ${{ github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,11 +56,17 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
+      - name: Get package version
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
       - name: Bump version (manual trigger only)
         if: github.event_name == 'workflow_dispatch'
         run: |
           npm version ${{ github.event.inputs.version }} -m "chore: release %s [skip ci]"
-          git push origin main --follow-tags
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          git push origin master --follow-tags
+        id: new-version
 
       - name: Build package
         run: npm pack
@@ -75,29 +82,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.package-version.outputs.version }}
-          release_name: Release v${{ steps.package-version.outputs.version }}
+          tag_name: v${{ steps.new-version.outputs.version || steps.package-version.outputs.version }}
+          release_name: Release v${{ steps.new-version.outputs.version || steps.package-version.outputs.version }}
           body: |
             ## Changes in this release
             
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
             
             ## Installation
             
             ```bash
-            npm install -g letta-mcp-server@${{ steps.package-version.outputs.version }}
+            npm install -g letta-mcp-server@${{ steps.new-version.outputs.version || steps.package-version.outputs.version }}
             ```
           draft: false
           prerelease: false
 
-      - name: Get package version
-        id: package-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
       - name: Notify success
         if: success()
         run: |
-          echo "✅ Successfully published letta-mcp-server@${{ steps.package-version.outputs.version }} to npm!"
+          echo "✅ Successfully published letta-mcp-server@${{ steps.new-version.outputs.version || steps.package-version.outputs.version }} to npm!"
           echo "View at: https://www.npmjs.com/package/letta-mcp-server"
 
       - name: Notify failure
