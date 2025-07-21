@@ -1,5 +1,6 @@
-[![npm version](https://badge.fury.io/js/letta-mcp-server.svg)](https://badge.fury.io/js/letta-mcp-server)
+[![npm version](https://img.shields.io/npm/v/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
 [![npm downloads](https://img.shields.io/npm/dm/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
+[![npm downloads total](https://img.shields.io/npm/dt/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
 [![MseeP.ai Security Assessment Badge](https://mseep.net/mseep-audited.png)](https://mseep.ai/app/oculairmedia-letta-mcp-server)
 [![CI/CD](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml)
 [![Docker Build](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml)
@@ -10,6 +11,8 @@
 # Letta MCP Server
 
 A Model Context Protocol (MCP) server that provides comprehensive tools for agent management, memory operations, and integration with the Letta system. This server implements the full MCP specification including tools, prompts, and resources, with enhanced descriptions, output schemas, and behavioral annotations.
+
+**[View on npm](https://www.npmjs.com/package/letta-mcp-server)** | **[View on GitHub](https://github.com/oculairmedia/Letta-MCP-server)**
 
 ## Features
 
@@ -66,6 +69,22 @@ After installing globally, add to your Claude Desktop configuration:
     }
   }
 }
+```
+
+### Quick Start with npm
+
+```bash
+# Install globally
+npm install -g letta-mcp-server
+
+# Set environment variables
+export LETTA_BASE_URL=https://your-letta-instance.com/v1
+export LETTA_PASSWORD=your-secure-password
+
+# Run the server
+letta-mcp              # stdio (for Claude Desktop)
+letta-mcp --http       # HTTP transport
+letta-mcp --sse        # SSE transport
 ```
 
 ## Quick Setup
