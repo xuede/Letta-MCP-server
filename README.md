@@ -1,6 +1,7 @@
 [![npm version](https://img.shields.io/npm/v/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
 [![npm downloads](https://img.shields.io/npm/dm/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
 [![npm downloads total](https://img.shields.io/npm/dt/letta-mcp-server.svg)](https://www.npmjs.com/package/letta-mcp-server)
+[![Docker Image](https://img.shields.io/badge/Docker-ghcr.io-blue)](https://github.com/oculairmedia/Letta-MCP-server/pkgs/container/letta-mcp-server)
 [![MseeP.ai Security Assessment Badge](https://mseep.net/mseep-audited.png)](https://mseep.ai/app/oculairmedia-letta-mcp-server)
 [![CI/CD](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/test.yml)
 [![Docker Build](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml/badge.svg)](https://github.com/oculairmedia/letta-MCP-server/actions/workflows/docker-build.yml)
@@ -112,13 +113,62 @@ npm run start:http  # HTTP transport (recommended)
 
 ### Option 2: Run with Docker
 
-```bash
-# Build and run locally
-docker build -t letta-mcp-server .
-docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp letta-mcp-server
+#### Using the prebuilt image from GitHub Container Registry
 
-# Or use the public image
-docker run -d -p 3001:3001 -e PORT=3001 -e NODE_ENV=production --name letta-mcp ghcr.io/oculairmedia/letta-mcp-server:latest
+Available tags:
+- `latest` - Latest stable release
+- `2.0.1`, `2.0`, `2` - Specific version tags
+- `master` - Latest master branch build
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/oculairmedia/letta-mcp-server:latest
+
+# Run with environment variables
+docker run -d \
+  -p 3001:3001 \
+  -e LETTA_BASE_URL=https://your-letta-instance.com/v1 \
+  -e LETTA_PASSWORD=your-secure-password \
+  -e PORT=3001 \
+  -e NODE_ENV=production \
+  --name letta-mcp \
+  ghcr.io/oculairmedia/letta-mcp-server:latest
+
+# Or use a specific version
+docker run -d \
+  -p 3001:3001 \
+  -e LETTA_BASE_URL=https://your-letta-instance.com/v1 \
+  -e LETTA_PASSWORD=your-secure-password \
+  --name letta-mcp \
+  ghcr.io/oculairmedia/letta-mcp-server:2.0.1
+```
+
+#### Using Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  letta-mcp:
+    image: ghcr.io/oculairmedia/letta-mcp-server:latest
+    container_name: letta-mcp
+    ports:
+      - "3001:3001"
+    environment:
+      - LETTA_BASE_URL=https://your-letta-instance.com/v1
+      - LETTA_PASSWORD=your-secure-password
+      - PORT=3001
+      - NODE_ENV=production
+    restart: unless-stopped
+```
+
+#### Building from source
+
+```bash
+# Clone and build locally
+git clone https://github.com/oculairmedia/letta-MCP-server.git
+cd letta-MCP-server
+docker build -t letta-mcp-server .
+docker run -d -p 3001:3001 --env-file .env --name letta-mcp letta-mcp-server
 ```
 
 ### Option 3: Run with stdio for local MCP
