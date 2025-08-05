@@ -1,12 +1,33 @@
+version: "3.8"
 services:
-  letta-mcp:
-    image: ghcr.io/oculairmedia/letta-mcp-server:latest
+  tailscale:
+    image: tailscale/tailscale:latest
+    hostname: ${TS_HOSTNAME:-letta-mcp}
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     ports:
       - "${PORT:-3001}:3001"
     restart: unless-stopped
+
+  letta-mcp:
+    image: ghcr.io/oculairmedia/letta-mcp-server:latest
+    depends_on:
+      - tailscale
+    network_mode: "service:tailscale"
     env_file:
       - .env
     environment:
       - LETTA_BASE_URL=${LETTA_BASE_URL}
       - LETTA_PASSWORD=${LETTA_PASSWORD}
       - NODE_ENV=${NODE_ENV:-production}
+    restart: unless-stopped
+
+volumes:
+  tailscale-state:
+
