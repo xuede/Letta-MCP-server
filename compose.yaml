@@ -1,6 +1,6 @@
 services:
   letta-mcp:
-    image: ghcr.io/oculairmedia/letta-mcp-server:latest
+    build: .
     ports:
       - "${PORT:-3001}:3001"
     restart: unless-stopped
@@ -10,3 +10,10 @@ services:
       - LETTA_BASE_URL=${LETTA_BASE_URL}
       - LETTA_PASSWORD=${LETTA_PASSWORD}
       - NODE_ENV=${NODE_ENV:-production}
+      - TAILSCALE_AUTHKEY=${TAILSCALE_AUTHKEY}
+      - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-letta-mcp}
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun

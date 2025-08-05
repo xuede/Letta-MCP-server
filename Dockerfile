@@ -3,41 +3,35 @@ FROM docker.io/node:24-slim
 # Set working directory
 WORKDIR /app
 
-# Add metadata labels
+# Metadata
 LABEL maintainer="Letta Team"
-LABEL description="Letta MCP Server with multiple transport support (SSE, HTTP, stdio)"
-LABEL version="1.1.0"
+LABEL description="Letta MCP Server with HTTP transport and built-in Tailscale"
+LABEL version="1.2.0"
 
-# Install curl for healthcheck
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install curl and Tailscale
+RUN apt-get update && apt-get install -y curl iptables && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL https://tailscale.com/install.sh | sh
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
-RUN npm install dotenv
+RUN npm install && npm install dotenv
 
 # Copy source code
 COPY src ./src
 
-# Create a non-root user and switch to it
-RUN groupadd -r letta && useradd -r -g letta letta
-RUN chown -R letta:letta /app
-USER letta
+# Copy entrypoint script
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Expose the port
+# Expose HTTP port
 EXPOSE 3001
 
-# Default environment variables (can be overridden at build or runtime)
-ARG PORT=3001
-ARG NODE_ENV=production
-ARG TRANSPORT=http
-ENV PORT=${PORT}
-ENV NODE_ENV=${NODE_ENV}
-ENV TRANSPORT=${TRANSPORT}
+# Default environment variables
+ENV PORT=3001 \
+    NODE_ENV=production
 
-# Add healthcheck
+# Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run the server with configurable transport
-CMD ["sh", "-c", "node ./src/index.js --${TRANSPORT}"]
+ENTRYPOINT ["/entrypoint.sh"]
